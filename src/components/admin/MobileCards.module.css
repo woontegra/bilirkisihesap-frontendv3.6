@@ -1,0 +1,60 @@
+﻿.list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.55rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.9rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  font: inherit;
+  cursor: default;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+  transition: transform var(--dur), box-shadow var(--dur);
+}
+
+button.card {
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+@media (min-width: 768px) {
+  .list {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

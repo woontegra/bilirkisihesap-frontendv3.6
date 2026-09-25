@@ -1,0 +1,106 @@
+﻿.page {
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.tablePanel {
+  animation-delay: 110ms;
+}
+
+.desktopOnly {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cardMeta {
+  margin: 0.35rem 0 0.55rem;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.protocolBox {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  background: var(--surface-muted);
+}
+
+.protocolTitle {
+  margin: 0 0 0.35rem;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.protocolInfo {
+  margin: 0.5rem 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+}
+
+.protocolMissing {
+  margin: 0.35rem 0;
+  font-size: var(--fs-xs);
+  color: var(--warning);
+}
+
+.pageSelect {
+  min-height: 2rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+}
+
+@media (min-width: 640px) {
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .desktopOnly {
+    display: block;
+  }
+
+  .tablePanel :global([class*="MobileCards"]) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

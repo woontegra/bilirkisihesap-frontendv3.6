@@ -1,0 +1,40 @@
+.field {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  font-size: var(--fs-sm);
+}
+
+.label {
+  font-size: var(--fs-xs);
+  font-weight: 550;
+  color: var(--muted);
+}
+
+.hint {
+  font-size: var(--fs-xs);
+  color: var(--muted-soft);
+}
+
+.field :is(input, select, textarea) {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-strong);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.field textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.field :is(input, select, textarea):focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--surface);
+}

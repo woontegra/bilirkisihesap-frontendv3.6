@@ -1,0 +1,434 @@
+﻿.page {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.errorBanner {
+  padding: 0.75rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  opacity: 0;
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.attentionList {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attentionItem {
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.helperText {
+  margin: 0 0 0.85rem;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.filterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0.75rem;
+}
+
+.filterChip,
+.filterChipActive {
+  min-height: 2rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.filterChipActive {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.rowLink {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.rowLink:hover {
+  text-decoration: underline;
+}
+
+.demoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.mobileRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: var(--fs-sm);
+}
+
+.mobileLabel {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 550;
+}
+
+.mobileValue {
+  color: var(--text-strong);
+  font-weight: 500;
+}
+
+.mobileEmail {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+
+.mobileTenant {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.usageSummary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.usageColumns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+.rankList {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rankItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+  font-size: var(--fs-sm);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.rankItem:nth-child(1) {
+  animation-delay: 100ms;
+}
+.rankItem:nth-child(2) {
+  animation-delay: 140ms;
+}
+.rankItem:nth-child(3) {
+  animation-delay: 180ms;
+}
+.rankItem:nth-child(4) {
+  animation-delay: 220ms;
+}
+.rankItem:nth-child(5) {
+  animation-delay: 260ms;
+}
+
+.rankName {
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.rankCount {
+  flex-shrink: 0;
+  font-weight: 650;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.healthBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  opacity: 0;
+  animation: fade-up var(--dur-slow) var(--ease-out) 60ms both;
+}
+
+.healthBannerOk {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 25%, var(--border));
+}
+
+.healthBannerWarn {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 25%, var(--border));
+}
+
+.healthBannerIcon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.healthBannerOk .healthBannerIcon {
+  color: var(--success);
+}
+
+.healthBannerWarn .healthBannerIcon {
+  color: var(--danger);
+}
+
+.healthBannerTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.healthBannerOk .healthBannerTitle {
+  color: var(--success);
+}
+
+.healthBannerWarn .healthBannerTitle {
+  color: var(--danger);
+}
+
+.healthBannerDesc {
+  margin: 0.2rem 0 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.healthCard {
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.healthCardLabel {
+  margin: 0;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.healthCardValue {
+  margin: 0.35rem 0 0;
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.healthCardValueOk {
+  color: var(--success);
+}
+
+.healthCardValueWarn {
+  color: var(--danger);
+}
+
+.maintenanceToggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
+}
+
+.maintenanceToggleCopy {
+  min-width: 0;
+}
+
+.maintenanceToggleTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.maintenanceToggleHint {
+  margin: 0.2rem 0 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: var(--border);
+  cursor: pointer;
+  transition: background var(--dur-fast);
+  flex-shrink: 0;
+}
+
+.switchOn {
+  background: var(--accent);
+}
+
+.switchKnob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.switchOn .switchKnob {
+  transform: translateX(1.25rem);
+}
+
+.maintenanceForm {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.emptyText {
+  margin: 0;
+  padding: 1.5rem 0.75rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 480px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .usageSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .healthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .usageColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .healthGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .healthGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .errorBanner,
+  .rankItem,
+  .healthBanner,
+  .healthCard {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .spin {
+    animation: none;
+  }
+
+  .switchKnob {
+    transition: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

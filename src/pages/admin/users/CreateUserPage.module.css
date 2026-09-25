@@ -1,0 +1,261 @@
+﻿.page {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.backRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  color: var(--muted);
+  text-decoration: none;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.backLink:hover {
+  background: var(--surface-muted);
+  color: var(--accent);
+}
+
+.formCard {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fade-up var(--dur-slow) var(--ease-out) 60ms both;
+}
+
+.formHead {
+  padding: 1rem 1.05rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.formTitle {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.formDesc {
+  margin: 0.25rem 0 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.formBody {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1rem 1.05rem 1.1rem;
+}
+
+.section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.tenantRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.tenantPicker {
+  position: relative;
+  flex: 1;
+  min-width: 12rem;
+}
+
+.pickerBtn {
+  width: 100%;
+  min-height: 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.pickerBtn:hover,
+.pickerBtn:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.pickerMenu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: fade-up var(--dur) var(--ease-out) both;
+}
+
+.pickerSearch {
+  padding: 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.pickerList {
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: 0.35rem;
+}
+
+.pickerItem {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+
+.pickerItem:hover {
+  background: var(--surface-muted);
+}
+
+.pickerItemName {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.pickerItemEmail {
+  margin: 0.1rem 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.errorText {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--danger);
+}
+
+.formFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(14, 23, 38, 0.45);
+  animation: fade-in var(--dur) var(--ease-out) both;
+}
+
+.modal {
+  width: min(100%, 26rem);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  padding: 1.1rem;
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.modalTitle {
+  margin: 0 0 0.85rem;
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formCard,
+  .pickerMenu,
+  .modal,
+  .modalOverlay {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

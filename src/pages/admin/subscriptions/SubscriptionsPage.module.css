@@ -1,0 +1,150 @@
+﻿.page {
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.expiringPanel {
+  animation-delay: 60ms;
+}
+
+.tablePanel {
+  animation-delay: 100ms;
+}
+
+.desktopOnly {
+  display: none;
+}
+
+.expiringList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.expiringItem {
+  display: grid;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--warning) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--warning-soft) 55%, var(--surface));
+  opacity: 0;
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.expiringCopy {
+  min-width: 0;
+}
+
+.expiringName {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.expiringEmail {
+  margin: 0.2rem 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expiringMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.editLink {
+  justify-self: start;
+}
+
+.userName {
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  color: var(--text-strong);
+}
+
+.userEmail {
+  margin-top: 0.15rem;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.soonHint,
+.expiredHint {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: var(--fs-xs);
+}
+
+.soonHint {
+  color: var(--warning);
+}
+
+.expiredHint {
+  color: var(--danger);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.cardMeta {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.pageSelect {
+  min-height: 2rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+}
+
+@media (min-width: 640px) {
+  .expiringItem {
+    grid-template-columns: 1fr auto auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .desktopOnly {
+    display: block;
+  }
+
+  .tablePanel :global([class*="MobileCards"]) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .expiringItem {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

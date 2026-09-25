@@ -1,0 +1,110 @@
+﻿.charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.chartBox {
+  min-height: 18rem;
+}
+
+.badgeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.linkBtn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent-hover);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 0.45);
+  animation: fade-in var(--dur) var(--ease-out) both;
+}
+
+.modal {
+  width: min(100%, 24rem);
+  max-height: min(90vh, 28rem);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.modalHead {
+  padding: 1rem 1.05rem 0.5rem;
+}
+
+.modalBody {
+  overflow: auto;
+  padding: 0.5rem 1.05rem;
+  border-block: 1px solid var(--border-subtle);
+}
+
+.modalFoot {
+  padding: 0.75rem 1.05rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.distRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+}
+
+.distRow:last-child {
+  border-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modal {
+    animation: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

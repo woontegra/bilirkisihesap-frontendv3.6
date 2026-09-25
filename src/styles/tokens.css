@@ -1,0 +1,157 @@
+:root {
+  color-scheme: light;
+  /* Surfaces */
+  --page: #eef1f6;
+  --page-accent: #e4e9f1;
+  --surface: #ffffff;
+  --surface-muted: #f6f8fb;
+  --surface-elevated: #fbfcfe;
+
+  /* Ink */
+  --ink: #0e1726;
+  --ink-soft: #1a2740;
+  /* Sidebar — light theme */
+  --sidebar: #ffffff;
+  --sidebar-elevated: #f7f9fc;
+  --sidebar-border: #e6ebf3;
+
+
+  /* Text */
+  --text: #2c3648;
+  --text-strong: #0e1726;
+  --muted: #6b7689;
+  --muted-soft: #8b95a8;
+
+  /* Borders & elevation */
+  --border: #d5dce8;
+  --border-subtle: #e6ebf3;
+  --shadow-sm: 0 1px 2px rgba(14, 23, 38, 0.04);
+  --shadow-md: 0 4px 16px rgba(14, 23, 38, 0.06);
+  --shadow-lg: 0 12px 32px rgba(14, 23, 38, 0.1);
+  --shadow-hover: 0 8px 24px rgba(14, 23, 38, 0.1);
+
+  /* Brand accent — steel teal, muted */
+  --accent: #1a6f7c;
+  --accent-hover: #155a65;
+  --accent-soft: #e5f3f5;
+  --accent-ring: rgba(26, 111, 124, 0.28);
+  --accent-contrast: #ffffff;
+
+  /* Semantic */
+  --success: #2a6b52;
+  --success-soft: #e8f5ef;
+  --warning: #9a6b2a;
+  --warning-soft: #f8f0e4;
+  --danger: #9b3d3d;
+  --danger-soft: #f8eaea;
+  --info: #2f5f8a;
+  --info-soft: #e8f0f7;
+
+  /* Chart palette */
+  --chart-1: #1a6f7c;
+  --chart-2: #3d7ea6;
+  --chart-3: #5b8a6a;
+  --chart-4: #b08a4a;
+  --chart-5: #8a5e7a;
+  --chart-6: #5c6b8a;
+  --chart-7: #6a8a9a;
+
+  /* Layout */
+  --sidebar-width: 16.5rem;
+  --sidebar-collapsed: 4.25rem;
+  --topbar-height: 3.75rem;
+  /* Sidebar sürüm şeridi + hesaplama sayfası sticky bar (desktop hizası) */
+  --shell-footer-pad-y: 0.55rem;
+  --shell-footer-action-height: 2rem; /* Button size="sm" */
+  --shell-footer-height: calc(
+    1px + (var(--shell-footer-pad-y) * 2) + var(--shell-footer-action-height)
+  );
+  --shell-footer-title-size: 0.75rem;
+  --shell-footer-sub-size: 0.625rem;
+  --shell-footer-sub-gap: 0.05rem;
+  --shell-footer-line: 1.25;
+  --content-max: 90rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  /* Stacking — AppShell / sidebar / drawer / modal / sticky bars */
+  --z-sticky: 20;
+  --z-sidebar: 25;
+  --z-topbar: 30;
+  --z-drawer-backdrop: 40;
+  --z-drawer: 50;
+  --z-modal: 60;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+  --dur-fast: 150ms;
+  --dur: 220ms;
+  --dur-slow: 360ms;
+
+  /* Typography */
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, serif;
+  --fs-xs: 0.6875rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.875rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+  --fs-3xl: 1.875rem;
+}
+
+html.dark {
+  color-scheme: dark;
+  --page: #0b1219;
+  --page-accent: #0f1726;
+  --surface: #141c28;
+  --surface-muted: #1a2433;
+  --surface-elevated: #1e2938;
+  --ink: #eef2f7;
+  --ink-soft: #d8dee8;
+  --sidebar: #111827;
+  --sidebar-elevated: #1a2332;
+  --sidebar-border: #2a3544;
+  --text: #c8d0dc;
+  --text-strong: #eef2f7;
+  --muted: #8895a8;
+  --muted-soft: #6b7789;
+  --border: #2e3a4a;
+  --border-subtle: #243040;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --accent: #3a9aa8;
+  --accent-hover: #4cb0be;
+  --accent-soft: rgba(26, 111, 124, 0.22);
+  --accent-ring: rgba(58, 154, 168, 0.35);
+  --accent-contrast: #ffffff;
+  --success: #5ecf9a;
+  --success-soft: rgba(42, 107, 82, 0.22);
+  --warning: #e5b86a;
+  --warning-soft: rgba(154, 107, 42, 0.22);
+  --danger: #f08080;
+  --danger-soft: rgba(155, 61, 61, 0.22);
+  --info: #7eb8f0;
+  --info-soft: rgba(47, 95, 138, 0.22);
+  --chart-1: #4cb0be;
+  --chart-2: #6aafd4;
+  --chart-3: #7bc49a;
+  --chart-4: #d4b06a;
+  --chart-5: #c492b0;
+  --chart-6: #8a9ec4;
+  --chart-7: #8ab8c8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}

@@ -1,0 +1,54 @@
+﻿.stack {
+  position: fixed;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  z-index: 100;
+  display: grid;
+  gap: 0.45rem;
+  width: min(20rem, calc(100vw - 1.5rem));
+  pointer-events: none;
+}
+
+.toast {
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  color: var(--text-strong);
+  animation: fade-up var(--dur) var(--ease-out);
+}
+
+.success {
+  border-color: color-mix(in srgb, var(--success) 25%, var(--border-subtle));
+  background: linear-gradient(180deg, var(--success-soft), var(--surface));
+}
+
+.error {
+  border-color: color-mix(in srgb, var(--danger) 25%, var(--border-subtle));
+  background: linear-gradient(180deg, var(--danger-soft), var(--surface));
+}
+
+.info {
+  border-color: color-mix(in srgb, var(--info) 25%, var(--border-subtle));
+  background: linear-gradient(180deg, var(--info-soft), var(--surface));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,56 @@
+.emailCell {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.emailMain {
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  color: var(--text-strong);
+}
+
+.emailMeta {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.actionSelect {
+  min-height: 2rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: var(--fs-xs);
+  color: var(--text);
+}
+
+.remainingDanger {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.remainingWarn {
+  color: var(--warning, #d97706);
+  font-weight: 600;
+}
+
+.remainingOk {
+  color: var(--success, #059669);
+  font-weight: 600;
+}
+
+.drawerError {
+  margin: 0 0 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  font-size: var(--fs-xs);
+}

@@ -1,0 +1,18 @@
+/**
+ * Basın İş Kanunu — bu varyanta özgü stil dosyası.
+ * Ortak düzen/animasyon `lib/IhbarPageView.module.css` içindedir; burada yalnızca
+ * bu varyanta özgü bilgilendirme şeridi (kıdem/örnek hesap notu) tanımlanır.
+ */
+.wrap {
+  display: contents;
+}
+
+.infoBanner {
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in srgb, #d97706 35%, transparent);
+  background: color-mix(in srgb, #d97706 10%, #fff);
+  color: #92400e;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}

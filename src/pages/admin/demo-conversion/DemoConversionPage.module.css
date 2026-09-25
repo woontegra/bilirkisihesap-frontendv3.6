@@ -1,0 +1,9 @@
+.fastRow {
+  background: color-mix(in srgb, var(--success-soft, #ecfdf5) 55%, transparent);
+}
+
+.badgeWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}

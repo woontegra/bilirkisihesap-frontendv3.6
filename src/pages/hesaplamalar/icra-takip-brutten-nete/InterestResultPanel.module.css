@@ -1,0 +1,179 @@
+.panel {
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  margin: 0 0 0.55rem;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.formula {
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.formula strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.mono {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.95em;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+@media (min-width: 720px) {
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  background: var(--surface);
+}
+
+.summaryRow:nth-child(odd) {
+  background: var(--surface-muted);
+}
+
+@media (min-width: 720px) {
+  .summaryRow:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+.summaryRow:last-child {
+  border-bottom: 0;
+}
+
+.summaryLabel {
+  color: var(--muted);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--text-strong);
+  text-align: right;
+}
+
+.summaryValueDeduction {
+  color: var(--danger);
+}
+
+.summaryValueEmphasis {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.periodsTitle {
+  margin: 0.85rem 0 0.45rem;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.table th {
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  font-weight: 650;
+  color: var(--text-strong);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table th.num,
+.table td.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text);
+}
+
+.table tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--surface-muted) 55%, var(--surface));
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.emptyCell {
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.totals {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--surface-muted) 70%, var(--surface));
+  display: grid;
+  gap: 0.45rem;
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: var(--fs-sm);
+}
+
+.totalInterest {
+  font-weight: 650;
+  color: var(--info);
+}
+
+.totalGrand {
+  font-weight: 700;
+  color: var(--success);
+  font-size: var(--fs-md);
+}

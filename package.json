@@ -1,0 +1,46 @@
+{
+  "name": "aktuerya-frontend-v3.5",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint src",
+    "test:pool": "vite-node --config vite.config.ts src/lib/sharedLeaveExclusionPool.test.ts",
+    "test:demo-days": "npx vite-node --config vite.config.ts src/utils/subscription.demoDays.selftest.ts",
+    "test:puantaj-detect": "npx vite-node --config vite.config.ts src/pages/puantaj-fazla-mesai/detect.test.ts",
+    "test:guided-tour": "npx vite-node --config vite.config.ts src/components/guided-tour/guidedTour.selftest.ts",
+    "test:yandex-metrica": "npx vite-node --config vite.config.ts src/analytics/yandexMetrica.selftest.ts",
+    "test:license-gate": "npx vite-node --config vite.config.ts src/license/licenseGate.selftest.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.26.0",
+    "papaparse": "^5.5.4",
+    "pdfjs-dist": "^5.6.205",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.10.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.71.0",
+    "playwright": "^1.62.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1"
+  }
+}

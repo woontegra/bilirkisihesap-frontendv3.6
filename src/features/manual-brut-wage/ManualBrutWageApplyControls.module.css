@@ -1,0 +1,127 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--surface-muted) 85%, var(--accent-soft) 15%);
+}
+
+@media (min-width: 640px) {
+  .bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 50);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(14, 23, 38, 0.45);
+}
+
+.modal {
+  width: min(28rem, 100%);
+  max-height: min(80vh, 36rem);
+  overflow: auto;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.modalTitle {
+  margin: 0 0 0.5rem;
+  font-size: var(--fs-md);
+  font-weight: 680;
+}
+
+.modalText {
+  margin: 0 0 0.75rem;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.empty,
+.muted {
+  margin: 0 0 0.75rem;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.select {
+  width: 100%;
+  height: 2.35rem;
+  margin-bottom: 0.75rem;
+  padding: 0 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+}
+
+.previewTableWrap {
+  max-height: 12rem;
+  overflow: auto;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.previewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+}
+
+.previewTable th,
+.previewTable td {
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.previewTable th {
+  font-weight: 650;
+  color: var(--muted);
+  background: var(--surface-muted);
+}
+
+.previewTable td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}

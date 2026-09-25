@@ -1,0 +1,8 @@
+/**
+ * Mevsimlik İşçi — bu varyanta özgü stil dosyası.
+ * Ortak düzen/animasyon `lib/IhbarPageView.module.css` içindedir; bu dosya kasıtlı olarak
+ * yalnızca bir geçiş (passthrough) katmanıdır (fazladan kutu oluşturmaz).
+ */
+.wrap {
+  display: contents;
+}

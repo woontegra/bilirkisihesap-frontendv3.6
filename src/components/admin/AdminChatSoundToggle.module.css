@@ -1,0 +1,45 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.68rem;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toggle:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.toggle:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.label {
+  display: none;
+}
+
+.iconOn {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: #16a34a;
+}
+
+.iconOff {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--muted);
+}
+
+@media (min-width: 768px) {
+  .label {
+    display: inline;
+  }
+}

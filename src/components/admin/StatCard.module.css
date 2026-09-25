@@ -1,0 +1,96 @@
+﻿.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 0.95rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.65rem;
+  flex-shrink: 0;
+}
+
+.body {
+  min-width: 0;
+}
+
+.label {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.value {
+  margin-top: 0.15rem;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  font-weight: 650;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin-top: 0.15rem;
+  font-size: var(--fs-xs);
+  color: var(--muted-soft);
+}
+
+.teal .icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.blue .icon {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.green .icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.amber .icon {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.danger .icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

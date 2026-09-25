@@ -1,0 +1,14 @@
+.banner {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, #d97706 45%, var(--border-subtle));
+  background: color-mix(in srgb, #fef3c7 70%, var(--surface-muted));
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: color-mix(in srgb, #92400e 85%, var(--text-strong));
+}
+
+.date {
+  font-variant-numeric: tabular-nums;
+}

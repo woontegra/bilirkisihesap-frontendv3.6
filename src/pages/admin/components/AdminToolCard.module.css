@@ -1,0 +1,296 @@
+.card {
+  --card-accent: var(--accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 8.75rem;
+  padding: 1rem 1.05rem 0.95rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: admin-card-in var(--dur-slow) var(--ease-out) both;
+  transition:
+    transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+  touch-action: manipulation;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.soon:focus-visible {
+  outline: 2px solid var(--muted-soft);
+  outline-offset: 2px;
+}
+
+.sheen {
+  pointer-events: none;
+  position: absolute;
+  inset: -40% -30%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    color-mix(in srgb, var(--card-accent) 10%, transparent) 50%,
+    transparent 65%
+  );
+  opacity: 0;
+  transform: translateX(-18%) rotate(8deg);
+  transition: opacity var(--dur) var(--ease-out), transform 0.55s var(--ease-out);
+}
+
+.card:hover .sheen,
+.card:focus-visible .sheen {
+  opacity: 1;
+  transform: translateX(12%) rotate(8deg);
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: color-mix(in srgb, var(--card-accent) 28%, var(--border));
+}
+
+.link:active {
+  transform: translateY(-1px) scale(0.985);
+  transition-duration: 80ms;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.iconWrap {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.7rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition: transform var(--dur) var(--ease-spring), background var(--dur);
+}
+
+.card:hover .iconWrap,
+.card:focus-visible .iconWrap {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.operations {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.support {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.analytics {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.system {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.operationsCard {
+  --card-accent: var(--accent);
+}
+
+.supportCard {
+  --card-accent: var(--info);
+}
+
+.analyticsCard {
+  --card-accent: var(--success);
+}
+
+.systemCard {
+  --card-accent: var(--warning);
+}
+
+.icon {
+  display: block;
+}
+
+.arrow {
+  color: var(--muted-soft);
+  transition: transform var(--dur) var(--ease-out), color var(--dur);
+}
+
+.card:hover .arrow,
+.card:focus-visible .arrow {
+  color: var(--card-accent);
+  transform: translate(3px, -2px);
+}
+
+.soonBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--warning);
+  background: var(--warning-soft);
+  animation: soon-pulse 2.2s ease-in-out infinite;
+}
+
+.title {
+  margin: 0.15rem 0 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.desc {
+  margin: 0;
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.status {
+  font-size: var(--fs-xs);
+  font-weight: 550;
+  color: var(--muted);
+}
+
+.link .status {
+  color: var(--accent);
+}
+
+.arrowInline {
+  color: var(--accent);
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.card:hover .arrowInline,
+.card:focus-visible .arrowInline {
+  transform: translateX(4px);
+}
+
+.previewMuted {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.previewList {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem 0 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.previewList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.previewList strong {
+  color: var(--text-strong);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.soon {
+  cursor: default;
+}
+
+.soon .status {
+  color: var(--warning);
+}
+
+@keyframes admin-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--warning) 0%, transparent);
+  }
+  50% {
+    opacity: 0.78;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 12%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .card:hover,
+  .card:focus-visible,
+  .link:active {
+    transform: none;
+  }
+
+  .sheen,
+  .iconWrap,
+  .arrow,
+  .arrowInline,
+  .soonBadge {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .card:hover .sheen,
+  .card:focus-visible .sheen {
+    opacity: 0;
+  }
+}

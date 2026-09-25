@@ -1,0 +1,77 @@
+// general-holidays.ts
+// 2005–2025 Genel Tatiller (1 Ocak, 1 Mayıs, 15 Temmuz)
+
+export const generalHolidays = [
+  // ---------- 1 Ocak ----------
+  { date: "2005-01-01", day: "Cumartesi", name: "Yılbaşı", type: "general" },
+  { date: "2006-01-01", day: "Pazar", name: "Yılbaşı", type: "general" },
+  { date: "2007-01-01", day: "Pazartesi", name: "Yılbaşı", type: "general" },
+  { date: "2008-01-01", day: "Salı", name: "Yılbaşı", type: "general" },
+  { date: "2009-01-01", day: "Perşembe", name: "Yılbaşı", type: "general" },
+  { date: "2010-01-01", day: "Cuma", name: "Yılbaşı", type: "general" },
+  { date: "2011-01-01", day: "Cumartesi", name: "Yılbaşı", type: "general" },
+  { date: "2012-01-01", day: "Pazar", name: "Yılbaşı", type: "general" },
+  { date: "2013-01-01", day: "Salı", name: "Yılbaşı", type: "general" },
+  { date: "2014-01-01", day: "Çarşamba", name: "Yılbaşı", type: "general" },
+  { date: "2015-01-01", day: "Perşembe", name: "Yılbaşı", type: "general" },
+  { date: "2016-01-01", day: "Cuma", name: "Yılbaşı", type: "general" },
+  { date: "2017-01-01", day: "Pazar", name: "Yılbaşı", type: "general" },
+  { date: "2018-01-01", day: "Pazartesi", name: "Yılbaşı", type: "general" },
+  { date: "2019-01-01", day: "Salı", name: "Yılbaşı", type: "general" },
+  { date: "2020-01-01", day: "Çarşamba", name: "Yılbaşı", type: "general" },
+  { date: "2021-01-01", day: "Cuma", name: "Yılbaşı", type: "general" },
+  { date: "2022-01-01", day: "Cumartesi", name: "Yılbaşı", type: "general" },
+  { date: "2023-01-01", day: "Pazar", name: "Yılbaşı", type: "general" },
+  { date: "2024-01-01", day: "Pazartesi", name: "Yılbaşı", type: "general" },
+  { date: "2025-01-01", day: "Çarşamba", name: "Yılbaşı", type: "general" },
+
+  // ---------- 1 Mayıs ----------
+  { date: "2005-05-01", day: "Pazar", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2006-05-01", day: "Pazartesi", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2007-05-01", day: "Salı", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2008-05-01", day: "Perşembe", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2009-05-01", day: "Cuma", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2010-05-01", day: "Cumartesi", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2011-05-01", day: "Pazar", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2012-05-01", day: "Salı", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2013-05-01", day: "Çarşamba", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2014-05-01", day: "Perşembe", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2015-05-01", day: "Cuma", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2016-05-01", day: "Pazar", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2017-05-01", day: "Pazartesi", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2018-05-01", day: "Salı", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2019-05-01", day: "Çarşamba", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2020-05-01", day: "Cuma", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2021-05-01", day: "Cumartesi", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2022-05-01", day: "Pazar", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2023-05-01", day: "Pazartesi", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2024-05-01", day: "Çarşamba", name: "Emek ve Dayanışma Günü", type: "general" },
+  { date: "2025-05-01", day: "Perşembe", name: "Emek ve Dayanışma Günü", type: "general" },
+
+  // ---------- 15 Temmuz ----------
+  { date: "2005-07-15", day: "Cuma", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2006-07-15", day: "Cumartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2007-07-15", day: "Pazar", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2008-07-15", day: "Salı", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2009-07-15", day: "Çarşamba", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2010-07-15", day: "Perşembe", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2011-07-15", day: "Cuma", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2012-07-15", day: "Pazar", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2013-07-15", day: "Pazartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2014-07-15", day: "Salı", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2015-07-15", day: "Çarşamba", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+
+  // Resmi olarak tatil ilan edildiği yıl → 2016 sonrası
+  { date: "2016-07-15", day: "Cuma", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2017-07-15", day: "Cumartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2018-07-15", day: "Pazar", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2019-07-15", day: "Pazartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2020-07-15", day: "Çarşamba", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2021-07-15", day: "Perşembe", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2022-07-15", day: "Cuma", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2023-07-15", day: "Cumartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2024-07-15", day: "Pazartesi", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+  { date: "2025-07-15", day: "Salı", name: "Demokrasi ve Milli Birlik Günü", type: "general" },
+];
+
+

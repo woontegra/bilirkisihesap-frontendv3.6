@@ -1,0 +1,64 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.35rem 1.4rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.iconWrap {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+.copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.desc {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  max-width: 36rem;
+  line-height: 1.45;
+}
+
+.danger {
+  border-color: color-mix(in srgb, var(--danger) 22%, var(--border-subtle));
+  background: linear-gradient(180deg, var(--danger-soft), var(--surface));
+}
+
+.danger .iconWrap {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.warning {
+  border-color: color-mix(in srgb, var(--warning) 22%, var(--border-subtle));
+  background: linear-gradient(180deg, var(--warning-soft), var(--surface));
+}
+
+.warning .iconWrap {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.neutral .iconWrap {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
