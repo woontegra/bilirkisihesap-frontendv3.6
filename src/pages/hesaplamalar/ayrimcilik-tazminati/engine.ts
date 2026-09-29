@@ -11,6 +11,7 @@
  *     net = round2(amount - gelirVergisi - damgaVergisi)
  */
 
+import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
 import { getAsgariUcretByDate } from "./asgariUcret";
 import { calculateIncomeTaxWithBrackets } from "./incomeTax";
 import type { AyrimcilikForm, AyrimcilikResult, CoefRow, WorkPeriod } from "./model";
@@ -29,7 +30,7 @@ export function round2(n: number): number {
 export function resolveExitYear(exitDateISO: string): number {
   if (exitDateISO) {
     const y = new Date(exitDateISO).getFullYear();
-    if (Number.isFinite(y) && y >= 2010 && y <= 2030) return y;
+    if (Number.isFinite(y) && y >= 1996 && y <= 2030) return y;
   }
   return new Date().getFullYear();
 }
@@ -143,9 +144,13 @@ export function computeAyrimcilik(form: AyrimcilikForm): AyrimcilikResult {
   const amount = Number.isFinite(brutForNetConversion) ? brutForNetConversion : 0;
 
   const selectedYear = resolveExitYear(form.endDate);
-  const gv = calculateIncomeTaxWithBrackets(selectedYear, amount);
+  const rates = ratesForAccrual(form.endDate || selectedYear);
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, amount, (year, income) => {
+    const modern = calculateIncomeTaxWithBrackets(year, income);
+    return { tax: modern.tax, summary: modern.summary };
+  });
   const gelirVergisi = amount > 0 ? gv.tax : 0;
-  const damgaVergisi = amount > 0 ? round2(amount * DAMGA_ORAN) : 0;
+  const damgaVergisi = amount > 0 ? round2(amount * rates.damgaOran) : 0;
   const netTazminat = amount > 0 ? round2(amount - gelirVergisi - damgaVergisi) : 0;
 
   let workPeriod: WorkPeriod | null = null;
@@ -170,6 +175,7 @@ export function computeAyrimcilik(form: AyrimcilikForm): AyrimcilikResult {
     gelirVergisi: Number.isFinite(gelirVergisi) ? gelirVergisi : 0,
     gelirVergisiDilimleri: gv.summary || "",
     damgaVergisi: Number.isFinite(damgaVergisi) ? damgaVergisi : 0,
+    damgaOran: rates.damgaOran,
     netTazminat: Number.isFinite(netTazminat) ? netTazminat : 0,
     workPeriod,
     asgariUcretHatasi,

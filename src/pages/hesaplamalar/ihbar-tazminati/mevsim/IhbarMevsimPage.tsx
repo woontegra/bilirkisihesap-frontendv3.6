@@ -1,3 +1,4 @@
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { Sun } from "lucide-react";
 import type { PreviewSection } from "@/components/calculation-preview";
@@ -188,7 +189,7 @@ export default function IhbarMevsimPage() {
       rows: [
         ["Brüt İhbar Tazminatı", `${formatMoney(result.brut)} ₺`],
         ["Gelir Vergisi", `-${formatMoney(result.gelirVergisi)} ₺`],
-        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
+        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
         ["Net İhbar Tazminatı", `${formatMoney(result.net)} ₺`],
       ],
       lastRowTone: "green",
@@ -233,6 +234,7 @@ export default function IhbarMevsimPage() {
         gelirVergisi={result.gelirVergisi}
         gelirVergisiDilimleri={result.gelirVergisiDilimleri}
         damgaVergisi={result.damgaVergisi}
+        damgaOran={result.damgaOran}
         net={result.net}
         notes={NOTE_BLOCKS}
         activeName={activeName}

@@ -123,8 +123,12 @@ function summaryHtml(result: PuantajFmResult): string {
     <tr><td>OFF gün karşılığı</td><td>${esc(s.offGunKarsiligi)}</td></tr>
     <tr><td>Toplam OFF mahsubu</td><td>${esc(s.toplamOffMahsup)}</td></tr>
     <tr><td>Mahsup sonrası fazla mesai</td><td>${esc(s.mahsupSonrasiFm)}</td></tr>
-    <tr><td>Hakkaniyet indirimi</td><td>${esc(s.hakkaniyetIndirimi)}</td></tr>
-    <tr class="grand"><td>Nihai sonuç</td><td>${esc(s.nihaiSonuc)}</td></tr>
+    <tr><td>Toplam Brüt Alacak</td><td>${esc(s.toplamBrut)}</td></tr>
+    <tr><td>1/3 Hakkaniyet İndirimi</td><td>${esc(s.hakkaniyetIndirimi)}</td></tr>
+    <tr><td>Mahsuplaşma Tutarı</td><td>${esc(s.mahsupTutari)}</td></tr>
+    <tr><td>Son Brüt Alacak</td><td>${esc(s.sonBrut)}</td></tr>
+    <tr><td>Kesinti</td><td>Bu sayfada SGK, işsizlik, gelir vergisi ve damga vergisi uygulanmaz.</td></tr>
+    <tr class="grand"><td>Hakkaniyet İndirimi ve Mahsuplaşma Sonrası Net Alacak</td><td>${esc(s.sonNet)}</td></tr>
   </table>`;
 }
 

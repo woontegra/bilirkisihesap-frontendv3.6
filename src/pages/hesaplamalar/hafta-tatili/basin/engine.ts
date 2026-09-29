@@ -9,7 +9,7 @@ import {
   generateHaftaTatiliPeriods,
   getHaftaTatiliDaysForPeriod,
 } from "../lib/calculations";
-import { calcHakkaniyet, calcMahsupSonuc, calculateNetFromBrut, resolveTaxYear } from "../lib/net";
+import { calcHakkaniyet, calcMahsupSonuc, calculateNetFromBrut, resolveTaxAccrualIso, resolveTaxYear } from "../lib/net";
 import { formatMoney, newLocalId, parseNum, round2 } from "../lib/money";
 import type { TableRow } from "../lib/types";
 import type { BasinForm, BasinResult } from "./model";
@@ -78,11 +78,13 @@ export function computeBasinHaftaTatili(form: BasinForm): BasinResult {
   const rows = resolveDisplayRows(form);
   const totalBrut = round2(rows.reduce((s, r) => s + (r.haftaTatiliTotal ?? 0), 0));
   const year = resolveTaxYear(form.dateRanges);
-  const net = calculateNetFromBrut(totalBrut, year);
+  const accrualIso = resolveTaxAccrualIso(form.dateRanges) || undefined;
+  const net = calculateNetFromBrut(totalBrut, accrualIso || year);
   return {
     rows,
     totalBrut,
     year,
+    accrualIso,
     net,
     hakkaniyet: calcHakkaniyet(totalBrut),
     mahsupSonuc: calcMahsupSonuc(totalBrut, form.settleAmount),

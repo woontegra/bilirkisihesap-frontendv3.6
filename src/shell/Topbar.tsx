@@ -32,7 +32,7 @@ import {
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { fetchNotifications, markNotificationsRead } from "@/api/notifications";
 
@@ -53,6 +53,8 @@ import { resolveUserDisplayName } from "@/utils/userDisplay";
 import { applyTheme, getStoredTheme, type Theme } from "@/theme/theme";
 
 import AdminHeaderChatActions from "@/components/admin/AdminHeaderChatActions";
+
+import { CalculationVideoButton } from "@/components/calculation-video";
 
 import styles from "./Topbar.module.css";
 
@@ -125,6 +127,8 @@ export function Topbar({
 }: Props) {
 
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const sessionUser = readCurrentUser();
 
@@ -373,7 +377,7 @@ export function Topbar({
 
         </a>
 
-
+        {paidAccessAllowed ? <CalculationVideoButton pathname={location.pathname} /> : null}
 
         <div className={styles.titleBlock}>
 

@@ -1,3 +1,4 @@
+import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
 import { calculateDaysBetween, formatTotalWorkDays } from "./gemiCore";
 import { formatDateTR } from "./dates";
@@ -120,9 +121,9 @@ export function buildGemiYillikPreviewSections(opts: {
       rows: [
         ["Brüt Yıllık İzin Alacağı", `${formatMoney(result.brutIzin)} ₺`],
         ["SGK İşçi Primi (%14)", `-${formatMoney(result.sgk)} ₺`],
-        ["İşsizlik Sigortası Primi (%1)", `-${formatMoney(result.issizlik)} ₺`],
+        [issizlikLabelForRate(result.issizlikOran, "İşsizlik Sigortası Primi (%1)"), `-${formatMoney(result.issizlik)} ₺`],
         [gvLabel, `-${formatMoney(result.gelirVergisi)} ₺`],
-        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
+        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
         ["Net Yıllık İzin Alacağı", `${formatMoney(result.netIzin)} ₺`],
       ],
       lastRowTone: "green",

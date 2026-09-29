@@ -1172,6 +1172,10 @@
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
+.cellInputEra {
+  width: 9.2rem;
+}
+
 .moneyCell {
   font-weight: 650;
   font-variant-numeric: tabular-nums;

@@ -31,6 +31,7 @@ export type KotuNiyetResult = {
   ihbarTutari: number;
   brutAmount: number;
   damgaVergisi: number;
+  damgaOran?: number;
   netAmount: number;
 };
 

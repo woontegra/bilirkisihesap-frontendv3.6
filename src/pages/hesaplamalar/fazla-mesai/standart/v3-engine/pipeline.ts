@@ -8,13 +8,14 @@ import {
   segmentOvertimeResult,
   computeDisplayRows,
   calculateOvertimeWith270AndLimitation,
-  getAsgariUcretByDate,
   calculateWeeksBetweenDates,
   DAMGA_VERGISI_ORANI,
   FAZLA_MESAI_DENOMINATOR,
   FAZLA_MESAI_KATSAYI,
   type FazlaMesaiRowBase,
 } from "./lib/fazlaMesaiShared";
+import { getAsgariUcretRowByDate } from "./lib/asgariUcretler";
+import { scaleTableBrut } from "../trlScale";
 import {
   applyResolvedManualBrutToRows,
   applyStoredManualBrutOverridesToRows,
@@ -151,12 +152,15 @@ export function runStandartFmV3Pipeline(input: StandartPipelineInput): StandartP
         seg.end,
         calculateWeeksBetweenDates(seg.start, seg.end) || 1,
       );
-      const brut = getAsgariUcretByDate(seg.start) || 0;
+      const wageRow = getAsgariUcretRowByDate(seg.start);
+      const scaled = scaleTableBrut(seg.start, wageRow ? wageRow.brut : 0);
+      const brut = scaled.normalizedGross;
       const kats = katSayi || 1;
       const hoursEffective = weeks * weeklyFMSaat;
       const fm = Number(
         (((brut * kats * hoursEffective) / FAZLA_MESAI_DENOMINATOR) * FAZLA_MESAI_KATSAYI).toFixed(2),
       );
+      // approximateRowNet: brüt FM × (1 − binde 7,59 − %15). Resmi brütten nete bunu kullanmaz.
       const net = Number((fm * (1 - DAMGA_VERGISI_ORANI - 0.15)).toFixed(2));
 
       tableRows.push({
@@ -167,6 +171,9 @@ export function runStandartFmV3Pipeline(input: StandartPipelineInput): StandartP
         weeks,
         originalWeekCount: weeks,
         brut,
+        historicalBrut: scaled.historicalGross,
+        currencyEra: scaled.currencyEra,
+        conversionDivisor: scaled.conversionDivisor,
         katsayi: kats,
         fmHours: weeklyFMSaat,
         dailyNet: dailyNetHours,
@@ -246,6 +253,7 @@ export function runStandartFmV3Pipeline(input: StandartPipelineInput): StandartP
 
   const tableDisplayRows = displayRows.filter(isTableRowVisible);
   const totalBrut = tableDisplayRows.reduce((a, r) => a + (r.fm ?? 0), 0);
+  // approximateTotalNet: satır yaklaşık netlerinin toplamı. Resmi netYillik bunu okumaz.
   const totalNet = tableDisplayRows.reduce((a, r) => a + (r.net ?? 0), 0);
 
   return {

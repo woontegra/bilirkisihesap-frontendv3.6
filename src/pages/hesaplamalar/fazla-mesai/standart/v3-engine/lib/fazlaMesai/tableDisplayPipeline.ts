@@ -13,6 +13,7 @@ function isDebugPipeline(): boolean {
 import { applyAnnualLeaveExclusions, type RowWithExclusionFields } from "./applyAnnualLeaveExclusions";
 import type { ExcludedDay } from "../../types/exclusionStorage";
 import { calculateWeeksBetweenDates } from "../dateUtils";
+import { manualWageClashes } from "../../../trlScale";
 
 // Sabitler (270 saat kuralı dosyasına dokunulmaz; sadece kullanım yerinde manuel satır koruması uygulanır)
 export const FAZLA_MESAI_DENOMINATOR = 225;
@@ -48,6 +49,10 @@ export interface FazlaMesaiRowBase {
   weekCount?: number;
   originalWeekCount?: number;
   brut: number;
+  historicalBrut?: number;
+  currencyEra?: "TRL" | "TRY";
+  conversionDivisor?: 1 | 1000000;
+  scaleMismatch?: boolean;
   wage?: number;
   fmHours: number;
   katsayi?: number;
@@ -226,6 +231,7 @@ function calcFmNet(
   const displayFmHours = resolveRowFmHours(row);
   const weeks = Math.max(0, Number(row.weeks) || 0);
   const fm = Number((((weeks * displayFmHours) * b * k / FAZLA_MESAI_DENOMINATOR) * FAZLA_MESAI_KATSAYI).toFixed(2));
+  // approximateRowNet: brüt FM × (1 − binde 7,59 − %15). Resmi brütten nete bunu kullanmaz.
   const net = Number((fm * (1 - DAMGA_VERGISI_ORANI - GELIR_VERGISI_ORANI)).toFixed(2));
   return { fm, net, displayFmHours };
 }
@@ -292,7 +298,8 @@ export function computeDisplayRows<T extends FazlaMesaiRowBase>(
         weeksFromDates !== undefined
       ) {
         const weeks = effectiveWeeks;
-        const brut = override.brut ?? row.brut;
+        const clash = manualWageClashes(override, startISO);
+        const brut = clash ? row.brut : (override.brut ?? row.brut);
         const fmHours = override.fmHours ?? row.fmHours;
         (merged as FazlaMesaiRowBase).weeks = weeks;
         (merged as FazlaMesaiRowBase).originalWeekCount = override.originalWeekCount ?? weeks;
@@ -313,6 +320,12 @@ export function computeDisplayRows<T extends FazlaMesaiRowBase>(
         (merged as FazlaMesaiRowBase).fm = fm;
         (merged as FazlaMesaiRowBase).net = net;
         (merged as FazlaMesaiRowBase).overtimeAmount = fm;
+        if (clash) {
+          (merged as FazlaMesaiRowBase).historicalBrut = row.historicalBrut;
+          (merged as FazlaMesaiRowBase).currencyEra = row.currencyEra;
+          (merged as FazlaMesaiRowBase).conversionDivisor = row.conversionDivisor;
+          (merged as FazlaMesaiRowBase).scaleMismatch = true;
+        }
       }
       return merged;
     });
@@ -325,7 +338,8 @@ export function computeDisplayRows<T extends FazlaMesaiRowBase>(
     const weeksFromDates = startISO && endISO ? calculateWeeksBetweenDates(startISO, endISO) : undefined;
     let weeks = merged.weeks ?? weeksFromDates ?? 0;
     if (weeks <= 0 && (weeksFromDates ?? row.weeks ?? 0) > 0) weeks = weeksFromDates ?? row.weeks ?? weeks;
-    const brut = merged.brut ?? 0;
+    const clash = manualWageClashes(override, startISO);
+    const brut = clash ? (row.brut ?? 0) : (merged.brut ?? 0);
     const fmHours = merged.fmHours ?? weeklyFMSaat;
     (merged as FazlaMesaiRowBase).weeks = weeks;
     (merged as FazlaMesaiRowBase).originalWeekCount = merged.originalWeekCount ?? weeks;
@@ -340,6 +354,13 @@ export function computeDisplayRows<T extends FazlaMesaiRowBase>(
     (merged as FazlaMesaiRowBase).fm = fm;
     (merged as FazlaMesaiRowBase).net = net;
     (merged as FazlaMesaiRowBase).overtimeAmount = fm;
+    if (clash) {
+      (merged as FazlaMesaiRowBase).brut = row.brut ?? 0;
+      (merged as FazlaMesaiRowBase).historicalBrut = row.historicalBrut;
+      (merged as FazlaMesaiRowBase).currencyEra = row.currencyEra;
+      (merged as FazlaMesaiRowBase).conversionDivisor = row.conversionDivisor;
+      (merged as FazlaMesaiRowBase).scaleMismatch = true;
+    }
     return merged;
   });
 

@@ -45,6 +45,9 @@ export type RowOverride = {
   endISO?: string;
   hidden?: boolean;
   brutManual?: boolean;
+  historicalBrut?: number;
+  currencyEra?: "TRL" | "TRY";
+  conversionDivisor?: 1 | 1000000;
   katsayi?: number;
 };
 

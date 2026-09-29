@@ -60,6 +60,9 @@ export type RowOverride = {
   hidden?: boolean;
   /** Manuel brüt şablonundan / hücreden uygulandı. */
   brutManual?: boolean;
+  historicalBrut?: number;
+  currencyEra?: "TRL" | "TRY";
+  conversionDivisor?: 1 | 1000000;
 };
 
 export type PeriodRow = {

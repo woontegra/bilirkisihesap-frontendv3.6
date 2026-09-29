@@ -1,3 +1,4 @@
+import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Gemi Adamı — Günlük Çalışan Fazla Mesai (V3.5; V3 işlev/metin paritesi, lokal motor).
  */
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
+import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
@@ -60,11 +62,14 @@ import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import {
   computeGemiGunlukResult,
   createManualPeriodRow,
+  fmTaxYear,
   formatMoney,
+  netFromGrossFm,
   parseKatsayi,
   sanitizeMoneyTyping,
   validateDateRange,
 } from "./engine";
+import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyForm,
   createEmptyWitness,
@@ -228,6 +233,15 @@ export default function GemiGunlukFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeGemiGunlukResult);
+  const equityNet = useMemo(
+    () => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+    [result.sonNet, form.istenCikis],
+  );
+  const kesintiEtiket = useMemo(
+    () => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+    [result.rows, form.istenCikis],
+  );
+
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum > 0 && katSayiNum !== 1;
 
@@ -465,7 +479,13 @@ export default function GemiGunlukFmPage() {
       const saved = await saveGemiGunlukFmCase(
         name,
         form,
-        { toplamFm: result.toplamFm, sonNet: result.sonNet, rowCount: result.rows.length },
+        {
+          toplamFm: result.toplamFm,
+          sonNet: result.sonNet,
+          rowCount: result.rows.length,
+          sonBrutAlacak: result.sonNet,
+          sonNetAlacak: equityNet.net,
+        },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -541,9 +561,9 @@ export default function GemiGunlukFmPage() {
         title: "Fazla Mesai Cetveli (Gemi)",
         headers: ["Dönem", "Hafta", "Ücret", "Kat", "FM Saat", "240", "1,25", "FM"],
         rows: result.rows.map((r) => [
-          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.yillikIzinAciklama || r.note ? ` ${r.yillikIzinAciklama || r.note}` : ""}`,
+          formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.yillikIzinAciklama || r.note),
           String(r.weeks),
-          money(r.brut),
+          (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
           String(r.katsayi),
           r.fmHours.toFixed(2),
           "240",
@@ -559,7 +579,7 @@ export default function GemiGunlukFmPage() {
         rows: [
           ["Brüt Fazla Mesai", money(result.toplamFm)],
           ["SGK (%14)", `-${money(result.sgk)}`],
-          ["İşsizlik (%1)", `-${money(result.issizlik)}`],
+          [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`, `-${money(result.gelirVergisi)}`],
           ["Damga Vergisi", `-${money(result.damgaVergisi)}`],
           ["Net Fazla Mesai", money(result.netYillik)],
@@ -571,19 +591,24 @@ export default function GemiGunlukFmPage() {
         title: "Mahsuplaşma",
         headers: ["Kalem", "Tutar"],
         rows: [
-          ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
+          ["Toplam Brüt Alacak", money(result.toplamFm)],
           ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetIndirimi)}`],
-          ...(result.mahsupTutari > 0
-            ? [["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`] as [string, string]]
-            : []),
-          ["Son Net Alacak", money(result.sonNet)],
+          ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
+          ["Son Brüt Alacak", money(result.sonNet)],
+          ...equityNetPreviewRows({
+            format: money,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: kesintiEtiket.issizlik,
+            damgaLabel: "Damga",
+          }),
         ],
         lastRowTone: "green",
       },
       ],
       form.exclusions,
     );
-  }, [form, result]);
+  }, [form, result, equityNet]);
 
   return (
     <div className={styles.page} data-page="fazla-mesai-gemi-adami-gunluk">
@@ -931,7 +956,7 @@ export default function GemiGunlukFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.sgk)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>İşsizlik (%1)</span>
+              <span>{kesintiEtiket.issizlik}</span>
               <span className={styles.deduction}>-{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div className={styles.line}>
@@ -987,9 +1012,19 @@ export default function GemiGunlukFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.mahsupTutari)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son net</span>
+              <span>Son Brüt Alacak</span>
               <span>{formatMoney(result.sonNet)} ₺</span>
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel={kesintiEtiket.issizlik}
+              damgaLabel="Damga"
+            />
           </div>
         </article>
 

@@ -1,3 +1,4 @@
+import { damgaLabelForRate, issizlikLabelForRate } from "../shared/historical/laborNet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -567,9 +568,9 @@ export default function BostaGecenSureUcretiPage() {
         rows: [
           ["Brüt Boşta Geçen Süre Ücreti", `${formatMoney(result.brutAmount)} ₺`],
           ["SGK Primi (%14)", `−${formatMoney(result.sgk)} ₺`],
-          ["İşsizlik Primi (%1)", `−${formatMoney(result.issizlik)} ₺`],
+          [issizlikLabelForRate(result.issizlikOran, "İşsizlik Primi (%1)"), `−${formatMoney(result.issizlik)} ₺`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`.trim(), `−${formatMoney(result.gelirVergisi)} ₺`],
-          ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.damgaVergisi)} ₺`],
+          [damgaLabelForRate(result.damgaOran, "binde"), `−${formatMoney(result.damgaVergisi)} ₺`],
           ["Net Boşta Geçen Süre Ücreti", `${formatMoney(result.netAmount)} ₺`],
         ],
         lastRowTone: "green",
@@ -819,7 +820,7 @@ export default function BostaGecenSureUcretiPage() {
                 <strong className={styles.deduction}>-{formatMoney(result.sgk)} ₺</strong>
               </div>
               <div className={styles.line}>
-                <span>İşsizlik (%1)</span>
+                <span>{issizlikLabelForRate(result.issizlikOran, "İşsizlik (%1)")}</span>
                 <strong className={styles.deduction}>-{formatMoney(result.issizlik)} ₺</strong>
               </div>
               <div className={styles.line}>

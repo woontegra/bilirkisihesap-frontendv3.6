@@ -1,3 +1,4 @@
+import { engineAsgariBrut, engineAsgariPeriodsInRange } from "../../shared/historical/asgariUcret";
 /**
  * Yeraltı İşçisi Fazla Mesai — asgari ücret tablosu (1996–2026, brüt).
  * Bu dosya yalnızca bu klasör altında kullanılır; başka bir hesaplama
@@ -61,6 +62,11 @@ export const ASGARI_UCRET_TABLE: readonly AsgariUcretPeriod[] = [
 
 /** "YYYY-MM-DD" karşılaştırması için string eşitliği yeterlidir (leksikografik = kronolojik). */
 export function getAsgariUcretByDate(isoDate: string): number | null {
+  {
+    const __day = String(isoDate ?? "").slice(0, 10);
+    const __sharedBrut = engineAsgariBrut(__day);
+    if (__sharedBrut != null) return __sharedBrut;
+  }
   const date = String(isoDate ?? "").slice(0, 10);
   if (!date) return null;
   const found = ASGARI_UCRET_TABLE.find((p) => date >= p.start && date <= p.end);
@@ -72,6 +78,10 @@ export function getAsgariUcretByDate(isoDate: string): number | null {
 
 /** Verilen [start,end] aralığıyla kesişen asgari ücret dönemlerini, kesişim sınırlarına kırpılmış olarak döner. */
 export function getAsgariUcretPeriodsInRange(startIso: string, endIso: string): AsgariUcretPeriod[] {
+  {
+    const __sharedPeriods = engineAsgariPeriodsInRange(startIso, endIso);
+    if (__sharedPeriods.length) return __sharedPeriods;
+  }
   const s = String(startIso ?? "").slice(0, 10);
   const e = String(endIso ?? "").slice(0, 10);
   if (!s || !e || s > e) return [];

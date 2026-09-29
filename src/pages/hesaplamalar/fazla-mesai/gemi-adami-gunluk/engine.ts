@@ -1,3 +1,4 @@
+import {ratesForAccrual, wageTaxKeepingModernTable, wageSummaryText } from "../../shared/historical/laborNet";
 /**
  * Gemi Adamı — Günlük Çalışan Fazla Mesai motoru (%100 lokal).
  * Backend gemiFM.service + V3 sayfa sonrası tanık FM override / birleştirme / düşüm.
@@ -10,12 +11,10 @@ import {
   FAZLA_MESAI_KATSAYI,
   GEMI_DAILY_REF_HOURS,
   HALF_YEAR_DAY_LIMIT,
-  ISSIZLIK_ORANI,
   MAX_WEEKS_PER_YEAR,
   PANDEMI_BASLANGIC,
   PANDEMI_BITIS,
   PANDEMI_SABIT_GUN,
-  SGK_ORANI,
   WEEKLY_WORK_LIMIT,
 } from "./constants";
 import {
@@ -336,6 +335,39 @@ export function createManualPeriodRow(katsayi: number, insertAfter?: string): Pe
   return makeBlankManualRow(katsayi, insertAfter);
 }
 
+export type FmGrossNet = {
+  sgk: number;
+  issizlik: number;
+  gelirVergisi: number;
+  gelirVergisiDilimleri: string;
+  damgaVergisi: number;
+  net: number;
+};
+
+/** Mevcut brütten-nete. Tam brüt ve Son Brüt Alacak için aynı fonksiyon. */
+export function netFromGrossFm(brut: number, accrual: number | string): FmGrossNet {
+  if (!(brut > 0)) {
+    return { sgk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, net: 0 };
+  }
+  const rates = ratesForAccrual(accrual);
+  const sgk = Math.round(brut * rates.sgkOran * 100) / 100;
+  const issizlik = Math.round(brut * rates.issizlikOran * 100) / 100;
+  const matrah = Math.max(0, brut - sgk - issizlik);
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, matrah, (year, income) => {
+    const modern = calculateIncomeTaxWithBrackets(year, income);
+    const summary = wageSummaryText(modern);
+    return { tax: modern.tax, summary };
+  });
+  const gelirVergisi = Math.round(gv.tax * 100) / 100;
+  const damgaVergisi = Math.round(brut * rates.damgaOran * 100) / 100;
+  const net = Math.round((brut - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri: gv.summary, damgaVergisi, net };
+}
+
+export function fmTaxYear(exitDate: string | null | undefined): number {
+  return exitDate ? Number(exitDate.slice(0, 4)) : new Date().getFullYear();
+}
+
 /* ── Totals ── */
 
 export function computeTotalsFromRows(
@@ -356,13 +388,12 @@ export function computeTotalsFromRows(
   | "sonNet"
 > {
   const toplamFm = rows.reduce((sum, r) => sum + (Number(r.fm) || 0), 0);
-  const sgk = Math.round(toplamFm * SGK_ORANI * 100) / 100;
-  const issizlik = Math.round(toplamFm * ISSIZLIK_ORANI * 100) / 100;
-  const matrah = Math.max(0, toplamFm - sgk - issizlik);
-  const gv = calculateIncomeTaxWithBrackets(exitYear, matrah);
-  const gelirVergisi = Math.round(gv.tax * 100) / 100;
-  const damgaVergisi = Math.round(toplamFm * DAMGA_ORAN * 100) / 100;
-  const netYillik = Math.round((toplamFm - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  const fullNet = netFromGrossFm(toplamFm, exitYear);
+  const sgk = fullNet.sgk;
+  const issizlik = fullNet.issizlik;
+  const gelirVergisi = fullNet.gelirVergisi;
+  const damgaVergisi = fullNet.damgaVergisi;
+  const netYillik = fullNet.net;
   const hakkaniyetIndirimi = toplamFm / 3;
   const mahsupTutari = parseMoneyInput(mahsupInput);
   const sonNet = Math.max(0, toplamFm - hakkaniyetIndirimi - mahsupTutari);
@@ -371,7 +402,7 @@ export function computeTotalsFromRows(
     sgk,
     issizlik,
     gelirVergisi,
-    gelirVergisiDilimleri: gv.summary,
+    gelirVergisiDilimleri: fullNet.gelirVergisiDilimleri,
     damgaVergisi,
     netYillik,
     hakkaniyetIndirimi,
@@ -384,7 +415,7 @@ export function computeTotalsFromRows(
 
 export function computeGemiGunlukResult(form: GemiGunlukFormSnapshot): GemiGunlukResult {
   const piped = runGemiGunlukV3Pipeline(form);
-  const exitYear = form.istenCikis ? Number(form.istenCikis.slice(0, 4)) : new Date().getFullYear();
+  const exitYear = fmTaxYear(form.istenCikis);
   const totals = computeTotalsFromRows(piped.rows, exitYear, form.mahsup);
 
   return {

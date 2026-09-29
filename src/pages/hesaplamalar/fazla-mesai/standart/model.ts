@@ -49,6 +49,13 @@ export type RowOverride = {
   hidden?: boolean;
   /** Manuel brüt şablonundan / hücreden uygulandı. */
   brutManual?: boolean;
+  /** Yazılan tutarın para dönemi. Yoksa eski kayıt: güncel TL. */
+  currencyEra?: "TRL" | "TRY";
+  /** TRL ise Eski TL, TRY ise güncel TL. Hesap `brut` alanındaki normalize tutarı kullanır. */
+  historicalBrut?: number;
+  conversionDivisor?: 1 | 1000000;
+  /** Tarih para dönemini değiştirdi; tutar dönüştürülmedi. */
+  scaleMismatch?: boolean;
 };
 
 export type PeriodRow = {
@@ -59,6 +66,11 @@ export type PeriodRow = {
   /** 270 detaylı modda düşüm öncesi hafta (V3 `originalWeekCount` paritesi). */
   originalWeekCount?: number;
   brut: number;
+  /** TRL satırında bölünmemiş Eski TL. Hesaba girmez. */
+  historicalBrut?: number;
+  currencyEra?: "TRL" | "TRY";
+  conversionDivisor?: 1 | 1000000;
+  scaleMismatch?: boolean;
   katsayi: number;
   fmHours: number;
   fm: number;
@@ -105,14 +117,19 @@ export type StandartResult = {
   toplamFm: number;
   /** Brütten nete (TOPLAM bazında): SGK %14. */
   sgk: number;
-  /** Brütten nete (TOPLAM bazında): İşsizlik %1. */
+  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki işsizlik işçi payı. */
   issizlik: number;
-  /** Brütten nete (TOPLAM bazında): kademeli gelir vergisi (işten çıkış yılı dilimleri). */
+  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki ücret gelir vergisi. */
   gelirVergisi: number;
   /** Uygulanan gelir vergisi dilimlerinin özeti, örn. "(%15, %20)". */
   gelirVergisiDilimleri: string;
-  /** Brütten nete (TOPLAM bazında): damga vergisi binde 7,59. */
+  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki ücret damga vergisi. */
   damgaVergisi: number;
+  /** Alacağı doğuran cetvel satırlarının en geç bitiş günü. Boşsa netleştirme yapılmamıştır. */
+  tahakkukTarihi: string;
+  sgkOran: number;
+  issizlikOran: number;
+  damgaOran: number;
   /** Brütten nete sonucu: toplamFm - sgk - issizlik - gelirVergisi - damgaVergisi. */
   netYillik: number;
   /** Hakkaniyet indirimi: toplamFm / 3 (BRÜT üzerinden, nete göre değil). */

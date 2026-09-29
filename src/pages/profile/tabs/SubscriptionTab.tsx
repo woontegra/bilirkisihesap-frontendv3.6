@@ -22,6 +22,7 @@ import {
   resolveSubscriptionStartsAt,
   type SubscriptionDateSource,
 } from "@/utils/subscription";
+import { PRODUCT_VERSION, PRODUCT_VERSION_NOTES } from "@/appVersion";
 import styles from "./profileTabShared.module.css";
 
 function formatSubscriptionDate(value: string | null) {
@@ -483,6 +484,16 @@ export default function SubscriptionTab() {
 
   return (
     <div className={styles.stack}>
+      <section className={styles.panel}>
+        <h3 className={styles.panelTitle}>Sürüm Bilgisi</h3>
+        <p className={styles.panelDesc}>Sürüm: {PRODUCT_VERSION}</p>
+        <p className={styles.panelDesc}>Değişiklik:</p>
+        {PRODUCT_VERSION_NOTES.map((note) => (
+          <p key={note} className={styles.panelDesc}>
+            {note}
+          </p>
+        ))}
+      </section>
       <section className={styles.panel}>
         <div className={styles.rowBetween}>
           <div>

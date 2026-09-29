@@ -1,3 +1,4 @@
+import { damgaLabelForRate } from "../shared/historical/laborNet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -463,7 +464,7 @@ export default function AyrimcilikTazminatiPage() {
           `Gelir Vergisi${result.gelirVergisiDilimleri ? ` ${result.gelirVergisiDilimleri}` : ""}`,
           `−${formatMoney(result.gelirVergisi)} ₺`,
         ],
-        ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.damgaVergisi)} ₺`],
+        [damgaLabelForRate(result.damgaOran, "binde"), `−${formatMoney(result.damgaVergisi)} ₺`],
         ["Net Ayrımcılık Tazminatı", `${formatMoney(result.netTazminat)} ₺`],
       ],
       lastRowTone: "green",
@@ -738,7 +739,7 @@ export default function AyrimcilikTazminatiPage() {
                   </strong>
                 </div>
                 <div className={styles.line}>
-                  <span>Damga vergisi (‰7,59)</span>
+                  <span>{damgaLabelForRate(result.damgaOran, "permille")}</span>
                   <strong className={styles.deduction}>
                     −<FlashValue value={formatMoney(result.damgaVergisi)} /> ₺
                   </strong>

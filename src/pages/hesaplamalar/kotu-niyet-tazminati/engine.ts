@@ -11,6 +11,7 @@
  *   base = brut+prim+ikramiye+yol+yemek+extras
  */
 
+import { stampRateForDate } from "../shared/historical/laborNet";
 import type { ExtraItem, KotuNiyetForm, KotuNiyetResult, WorkPeriod } from "./model";
 
 export const DAMGA_ORAN = 0.00759;
@@ -157,7 +158,7 @@ export function computeKotuNiyet(form: KotuNiyetForm): KotuNiyetResult {
   const gunlukUcret = toplamBrut / 30;
   const ihbarTutari = gunlukUcret * weeks * 7;
   const brutAmount = round2((toplamBrut / 30) * weeks * 7 * KOTU_NIYET_CARPAN);
-  const damgaVergisi = round2(brutAmount * DAMGA_ORAN);
+  const damgaVergisi = round2(brutAmount * stampRateForDate(form.endDate));
   const netAmount = round2(brutAmount - damgaVergisi);
 
   return {
@@ -169,5 +170,6 @@ export function computeKotuNiyet(form: KotuNiyetForm): KotuNiyetResult {
     brutAmount,
     damgaVergisi,
     netAmount,
+    damgaOran: stampRateForDate(form.endDate),
   };
 }

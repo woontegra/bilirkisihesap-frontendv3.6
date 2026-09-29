@@ -1,3 +1,4 @@
+import { asgariPeriodsWithinYear } from "../../../../shared/historical/asgariSplit";
 /**
  * Date segmentation core - Tarih aralıklarını asgari ücret dönemlerine göre böler
  * Tüm tarih işlemleri UTC ile yapılır (timezone kaynaklı 1 gün sapmasını önler)
@@ -89,7 +90,7 @@ export function splitByAsgariUcretPeriods(startDate: Date, endDate: Date): Array
   const endYear = endDate.getUTCFullYear();
 
   for (let year = startYear; year <= endYear; year++) {
-    const yearPeriods = ASGARI_UCRET_DONEMLERI[year];
+    const yearPeriods = ASGARI_UCRET_DONEMLERI[year] ?? asgariPeriodsWithinYear(year);
 
     if (!yearPeriods || yearPeriods.length === 0) {
       const yearStart = new Date(Date.UTC(year, 0, 1));

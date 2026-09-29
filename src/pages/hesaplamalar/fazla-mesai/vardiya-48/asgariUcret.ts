@@ -1,3 +1,4 @@
+import { engineAsgariBrut } from "../../shared/historical/asgariUcret";
 /**
  * Fazla Mesai — 48 Saat Vardiya — asgari brüt ücret tablosu (dönemsel).
  * 2022 öncesi yıllarda iki yarı aynı değeri taşır (tam yıl); 2022'den itibaren
@@ -54,6 +55,11 @@ const ASGARI_UCRET_BRUT: Readonly<Record<string, number>> = {
 
 /** ISO tarihe göre dönem asgari brütünü döner (tablo dışı ileri tarihlerde son dönem değeri kullanılır). */
 export function getAsgariUcretByDate(isoDate: string): number | null {
+  {
+    const __day = String(isoDate ?? "").slice(0, 10);
+    const __sharedBrut = engineAsgariBrut(__day);
+    if (__sharedBrut != null) return __sharedBrut;
+  }
   const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(String(isoDate || "").trim());
   if (!match) return null;
   const year = Number(match[1]);

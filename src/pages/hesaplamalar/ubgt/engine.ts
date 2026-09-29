@@ -3,6 +3,7 @@
  * Backend `ubgt.standard.service.js` / `ubgt.bilirkisi.service.js` ile birebir.
  * Başka hesaplama modülünden import yok. Ağ yok.
  */
+import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
 import { calculateIncomeTaxForYear, calculateIncomeTaxWithBrackets } from "./incomeTax";
 import { calculateUbgtSegments, normalizeLocalDate, type UbgtDateRangeInput } from "./lib/dateSegmentation";
 import { getUbgtDaysForPeriod, type UbgtExcludedDay, type UbgtDayEntry } from "./lib/holidays";
@@ -93,6 +94,12 @@ export function calcMahsupSonucuBilirkisi(brut: number, hakkaniyet: number, sett
   return Math.max(0, brut - hakkaniyet - settle);
 }
 
+/** Hakkaniyet ve mahsuplaşma sonrası kalan brüt. 0'ın altına düşmez. */
+export function calcSonBrutAlacak(brut: number, hakkaniyet: number, settle: number): number {
+  const mahsup = Number.isFinite(settle) ? settle : 0;
+  return Math.max(0, (brut || 0) - (hakkaniyet || 0) - mahsup);
+}
+
 /**
  * V3 UbgtNetConversion selectedYear: latest non-empty dateRanges end (2010–2100),
  * else current calendar year.
@@ -106,9 +113,18 @@ export function deriveTaxYear(dateRanges: Array<{ end?: string | null }>): numbe
   if (exitDates.length > 0) {
     const latestExit = exitDates.reduce((latest, current) => (current > latest ? current : latest));
     const year = latestExit.getFullYear();
-    if (year >= 2010 && year <= 2100) return year;
+    if (year >= 1996 && year <= 2100) return year;
   }
   return new Date().getFullYear();
+}
+
+/** Son tahakkuk günü: aralık bitişlerinin en geç olanı. Yıl sonuna yuvarlanmaz. */
+export function deriveTaxAccrualIso(dateRanges: Array<{ end?: string | null }>): string | null {
+  const ends = dateRanges
+    .map((r) => String(r.end ?? "").slice(0, 10))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+  if (!ends.length) return null;
+  return ends.reduce((a, b) => (a > b ? a : b));
 }
 
 export type UbgtPeriodRow = {
@@ -130,6 +146,8 @@ export type UbgtNetResult = {
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
   netAmount: number;
+  damgaOran?: number;
+  issizlikOran?: number;
 };
 
 export type UbgtComputeInput = {
@@ -158,18 +176,31 @@ export type UbgtResult = {
 };
 
 /** Brüt → net (SGK %14, işsizlik %1, GV, damga). Editable brut override için de kullanılır. */
-export function calculateNet(brutAmount: number, year: number): UbgtNetResult {
+export function calculateNet(brutAmount: number, accrual: number | string): UbgtNetResult {
   if (!brutAmount || brutAmount <= 0) {
     return { ssk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, netAmount: 0 };
   }
-  const ssk = round2(brutAmount * SGK_ORANI);
-  const issizlik = round2(brutAmount * ISSIZLIK_ORANI);
+  const rates = ratesForAccrual(accrual);
+  const ssk = round2(brutAmount * rates.sgkOran);
+  const issizlik = round2(brutAmount * rates.issizlikOran);
   const gelirVergisiMatrahi = Math.max(0, brutAmount - ssk - issizlik);
-  const gelirVergisi = round2(calculateIncomeTaxForYear(year, gelirVergisiMatrahi));
-  const damgaVergisi = round2(brutAmount * DAMGA_ORANI);
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, gelirVergisiMatrahi, (year, income) => ({
+    tax: calculateIncomeTaxForYear(year, income),
+    summary: calculateIncomeTaxWithBrackets(year, income).summary,
+  }));
+  const gelirVergisi = round2(gv.tax);
+  const damgaVergisi = round2(brutAmount * rates.damgaOran);
   const netAmount = round2(Math.max(0, brutAmount - ssk - issizlik - gelirVergisi - damgaVergisi));
-  const gelirVergisiDilimleri = calculateIncomeTaxWithBrackets(year, gelirVergisiMatrahi).summary;
-  return { ssk, issizlik, gelirVergisi, damgaVergisi, netAmount, gelirVergisiDilimleri };
+  return {
+    ssk,
+    issizlik,
+    gelirVergisi,
+    damgaVergisi,
+    netAmount,
+    gelirVergisiDilimleri: gv.summary,
+    damgaOran: rates.damgaOran,
+    issizlikOran: rates.issizlikOran,
+  };
 }
 
 function generateUbgtPeriods(workerStart: string, workerEnd: string) {
@@ -221,10 +252,15 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
       if (!startDate || !endDate) {
         return emptyResult(`Geçersiz tarih formatı: Başlangıç: ${range.start}, Bitiş: ${range.end}. Lütfen YYYY-MM-DD formatında girin.`);
       }
+      const startIso = String(range.start).slice(0, 10);
+      const endIso = String(range.end).slice(0, 10);
+      if (startIso < "2005-01-01" || endIso < "2005-01-01") {
+        return emptyResult("UBGT hesabı 01.01.2005 tarihinden başlar. 31.12.2004 ve öncesi için doğrulanmış ulusal bayram ve genel tatil takvimi olmadığı için hesap yapılmadı.");
+      }
       const startYear = startDate.getFullYear();
       const endYear = endDate.getFullYear();
-      if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
-        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2000-2100 arası tarih girin.`);
+      if (startYear > 2100 || endYear > 2100) {
+        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2005-2100 arası tarih girin.`);
       }
       if (endDate < startDate) {
         return emptyResult(`Bitiş tarihi (${range.end}) başlangıç tarihinden (${range.start}) önce olamaz.`);
@@ -422,7 +458,7 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
     }),
   );
   const toplamBrut = round2(periods.reduce((sum, row) => sum + row.ubgtTotal, 0));
-  const toplamNet = calculateNet(toplamBrut, year);
+  const toplamNet = calculateNet(toplamBrut, deriveTaxAccrualIso(dateRanges) || year);
 
   return {
     periods,

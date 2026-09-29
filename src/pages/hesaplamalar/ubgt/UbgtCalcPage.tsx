@@ -20,11 +20,11 @@ import {
 import {
   buildTanikRanges,
   calcHakkaniyet,
-  calcMahsupSonucuBilirkisi,
-  calcMahsupSonucuStandart,
+  calcSonBrutAlacak,
   calculateNet,
   collectDavaciHolidayIds,
   computeUbgt,
+  deriveTaxAccrualIso,
   deriveTaxYear,
   formatCoef,
   formatDateTR,
@@ -35,6 +35,7 @@ import {
   round2,
   settleAmountFromMahsupMatrix,
 } from "./engine";
+import { EquityNetLines } from "../shared/EquityNetLines";
 import { ALL_STATIC_HOLIDAY_IDS, STATIC_HOLIDAYS } from "./lib/holidays";
 import {
   createEmptyForm,
@@ -360,6 +361,17 @@ export default function UbgtCalcPage({ mode, title }: Props) {
     return deriveTaxYear(form.dateRanges);
   }, [mode, form.dateRanges, computeRanges]);
 
+  const taxAccrualIso = useMemo(() => {
+    if (mode === "bilirkisi") {
+      const ends = [
+        ...form.dateRanges.map((r) => ({ end: r.end })),
+        ...computeRanges.map((r) => ({ end: r.end })),
+      ];
+      return deriveTaxAccrualIso(ends);
+    }
+    return deriveTaxAccrualIso(form.dateRanges);
+  }, [mode, form.dateRanges, computeRanges]);
+
   useEffect(() => {
     if (mode !== "bilirkisi") {
       setBilirkisiClipError(null);
@@ -464,19 +476,27 @@ export default function UbgtCalcPage({ mode, title }: Props) {
       return { ssk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, netAmount: 0 };
     }
     if (brutOverride === null && result.toplamNet) return result.toplamNet;
-    return calculateNet(displayBrutForNet, taxYear);
-  }, [result, displayBrutForNet, brutOverride, taxYear]);
+    return calculateNet(displayBrutForNet, taxAccrualIso || taxYear);
+  }, [result, displayBrutForNet, brutOverride, taxAccrualIso, taxYear]);
 
   const hakkaniyet = useMemo(() => calcHakkaniyet(displayBrutForNet), [displayBrutForNet]);
   const settleNum = parseNum(form.settleAmount);
-  /** Mahsup sonucu kartı yalnız gerçek mahsup > 0 iken (standart + bilirkişi). */
-  const showMahsupResultCard = Number.isFinite(settleNum) && settleNum > 0;
-  const mahsupSonucu = useMemo(() => {
-    if (mode === "bilirkisi") {
-      return calcMahsupSonucuBilirkisi(displayBrutForNet, hakkaniyet, settleNum);
-    }
-    return calcMahsupSonucuStandart(effectiveNet?.netAmount ?? 0, hakkaniyet);
-  }, [mode, displayBrutForNet, hakkaniyet, settleNum, effectiveNet]);
+  const sonBrutAlacak = useMemo(
+    () => calcSonBrutAlacak(displayBrutForNet, hakkaniyet, settleNum),
+    [displayBrutForNet, hakkaniyet, settleNum],
+  );
+  const equityRaw = useMemo(() => calculateNet(sonBrutAlacak, taxAccrualIso || taxYear), [sonBrutAlacak, taxAccrualIso, taxYear]);
+  const equityNet = useMemo(
+    () => ({
+      sgk: equityRaw.ssk,
+      issizlik: equityRaw.issizlik,
+      gelirVergisi: equityRaw.gelirVergisi,
+      gelirVergisiDilimleri: equityRaw.gelirVergisiDilimleri,
+      damgaVergisi: equityRaw.damgaVergisi,
+      net: equityRaw.netAmount,
+    }),
+    [equityRaw],
+  );
 
   const handleBrutInputChange = (value: string) => {
     setBrutInputValue(value);
@@ -684,6 +704,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
         net: effectiveNet.netAmount,
         ssk: effectiveNet.ssk + effectiveNet.issizlik,
       },
+      sonBrutAlacak,
+      sonNetAlacak: equityNet.net,
     };
     const savePayload = mode === "standart" || mode === "bilirkisi" ? enrichedSave : baseSave;
     try {
@@ -888,6 +910,9 @@ export default function UbgtCalcPage({ mode, title }: Props) {
         displayBrutForNet,
         effectiveNet,
         hakkaniyet,
+        settleNum,
+        sonBrutAlacak,
+        equityNet,
       });
     }
     return buildBilirkisiUbgtPreviewSections({
@@ -898,6 +923,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
       effectiveNet,
       hakkaniyet,
       settleNum,
+      sonBrutAlacak,
+      equityNet,
     });
   }, [
     result,
@@ -907,6 +934,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
     effectiveNet,
     hakkaniyet,
     settleNum,
+    sonBrutAlacak,
+    equityNet,
     mode,
     form,
   ]);
@@ -1707,15 +1736,15 @@ export default function UbgtCalcPage({ mode, title }: Props) {
               </header>
               <div className={styles.panelBody}>
                 <div className={styles.line}>
-                  <span>1/3 hakkaniyet indirimi (brüt üzerinden)</span>
-                  <span>{formatMoney(hakkaniyet)}₺</span>
+                  <span>Toplam Brüt Alacak</span>
+                  <span>{formatMoney(displayBrutForNet)}₺</span>
                 </div>
-                <p className={styles.helper}>
-                  Brüt {formatMoney(displayBrutForNet)}₺ − 1/3 ={" "}
-                  <strong>{formatMoney(displayBrutForNet - hakkaniyet)}₺</strong>
-                </p>
+                <div className={styles.line}>
+                  <span>1/3 Hakkaniyet İndirimi</span>
+                  <span className={styles.deduction}>-{formatMoney(hakkaniyet)}₺</span>
+                </div>
                 <label className={styles.field}>
-                  <span className={styles.fieldLabel}>Mahsuplaşma miktarı</span>
+                  <span className={styles.fieldLabel}>Mahsuplaşma Tutarı</span>
                   <div className={styles.mahsupRow}>
                     <div className={styles.inputWrap}>
                       <input
@@ -1732,35 +1761,38 @@ export default function UbgtCalcPage({ mode, title }: Props) {
                     </Button>
                   </div>
                 </label>
-                {showMahsupResultCard ? (
-                  <>
-                    <div className={`${styles.line} ${styles.netLine}`}>
-                      <span>{mode === "bilirkisi" ? "Mahsuplaşma sonucu" : "Mahsuplaşma Sonucu"}</span>
-                      <FlashValue value={`${formatMoney(mahsupSonucu)} ₺`} />
-                    </div>
-                    <p className={styles.helper}>
-                      {mode === "bilirkisi"
-                        ? "Brüt − hakkaniyet − mahsup (min 0)"
-                        : "Net − hakkaniyet (mahsup rapor sonucuna dahil edilmez)"}
-                    </p>
-                  </>
-                ) : null}
+                <div className={styles.line}>
+                  <span>Mahsuplaşma Tutarı</span>
+                  <span className={styles.deduction}>-{formatMoney(Number.isFinite(settleNum) ? settleNum : 0)}₺</span>
+                </div>
+                <div className={`${styles.line} ${styles.netLine}`}>
+                  <span>Son Brüt Alacak</span>
+                  <FlashValue value={`${formatMoney(sonBrutAlacak)}₺`} />
+                </div>
+                <EquityNetLines
+                  kesinti={equityNet}
+                  formatMoney={formatMoney}
+                  lineClass={styles.line}
+                  deductClass={styles.deduction}
+                  netClass={styles.netLine}
+                  sgkLabel="SGK primi (%14)"
+                  issizlikLabel="İşsizlik primi (%1)"
+                  damgaLabel="Damga vergisi (binde 7,59)"
+                  gelirPrefix="Gelir vergisi"
+                  renderNet={(text) => <FlashValue value={text} />}
+                />
               </div>
             </article>
 
-            {showMahsupResultCard ? (
-              <div className={styles.finalNetCard} style={{ animationDelay: "300ms" }}>
-                <p className={styles.finalNetLabel}>
-                  {mode === "bilirkisi" ? "Mahsuplaşma sonucu" : "Mahsuplaşma Sonucu"}
-                </p>
-                <p className={styles.finalNetValue}>
-                  <FlashValue value={`${formatMoney(mahsupSonucu)} ₺`} />
-                </p>
-                <p className={styles.helper}>
-                  {mode === "bilirkisi" ? "Toplam UBGT günü" : "Toplam UBGT Günü"}: {displayTotalDays}
-                </p>
-              </div>
-            ) : null}
+            <div className={styles.finalNetCard} style={{ animationDelay: "300ms" }}>
+              <p className={styles.finalNetLabel}>Hakkaniyet İndirimi ve Mahsuplaşma Sonrası Net Alacak</p>
+              <p className={styles.finalNetValue}>
+                <FlashValue value={`${formatMoney(equityNet.net)} ₺`} />
+              </p>
+              <p className={styles.helper}>
+                {mode === "bilirkisi" ? "Toplam UBGT günü" : "Toplam UBGT Günü"}: {displayTotalDays}
+              </p>
+            </div>
           </>
         ) : null}
 

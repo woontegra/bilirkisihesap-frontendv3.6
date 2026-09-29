@@ -5,6 +5,8 @@
 
 import { formatMoney } from "./engine";
 import type { PeriodRow, RowOverride } from "./model";
+import { eraForIso, formatHistoricalTrl, formatTrlWageHint, formatTryWageInput, parseTurkishAmount, scaleTableBrut } from "../../shared/historical/currencyEra";
+import { getAsgariUcretRowByDate } from "../../shared/historical/asgariUcret";
 import { CetvelBrutInput } from "../shared/CetvelBrutInput";
 import styles from "./Gemi724FmPage.module.css";
 
@@ -109,11 +111,29 @@ export function CetvelTable({
                     <td>
                       <CetvelBrutInput
                         className={styles.cellInput}
-                        value={r.brut}
-                        onCommitBrut={(brut) =>
-                          onOverrideChange(r.id, { ...ov, brut, brutManual: true })
-                        }
+                        value={eraForIso(r.startISO) === "TRL" ? (ov.historicalBrut ?? getAsgariUcretRowByDate(r.startISO)?.brut ?? r.brut) : r.brut}
+                        onCommitBrut={(typed) => {
+                          const scaled = scaleTableBrut(r.startISO, typed);
+                          onOverrideChange(r.id, {
+                            ...ov,
+                            brut: scaled.normalizedGross,
+                            historicalBrut: scaled.historicalGross,
+                            currencyEra: scaled.currencyEra,
+                            conversionDivisor: scaled.conversionDivisor,
+                            brutManual: true,
+                          });
+                        }}
+                        formatValue={eraForIso(r.startISO) === "TRL" ? formatHistoricalTrl : formatTryWageInput}
+                        parseValue={parseTurkishAmount}
+                        liveGroup={eraForIso(r.startISO) === "TRL" ? "TRL" : "TRY"}
                       />
+                      {eraForIso(r.startISO) === "TRL" ? (
+                        <div className={styles.rowNote}>
+                          {formatHistoricalTrl(ov.historicalBrut ?? getAsgariUcretRowByDate(r.startISO)?.brut ?? r.brut)} Eski TL
+                          <br />
+                          {formatTrlWageHint(r.brut)}
+                        </div>
+                      ) : null}
                     </td>
                     <td>
                       <input

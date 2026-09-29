@@ -1,3 +1,4 @@
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 
 import { Briefcase } from "lucide-react";
@@ -378,7 +379,7 @@ export default function Ihbar30IsciPage() {
 
         ["Gelir Vergisi", `-${formatMoney(result.gelirVergisi)} ₺`],
 
-        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
+        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
 
         ["Net İhbar Tazminatı", `${formatMoney(result.net)} ₺`],
 
@@ -466,6 +467,7 @@ export default function Ihbar30IsciPage() {
         gelirVergisiDilimleri={result.gelirVergisiDilimleri}
 
         damgaVergisi={result.damgaVergisi}
+        damgaOran={result.damgaOran}
 
         net={result.net}
 

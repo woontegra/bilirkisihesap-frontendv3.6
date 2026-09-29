@@ -1,21 +1,12 @@
+import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
+import { equityNetPreviewRows } from "../../shared/EquityNetLines";
 import { formatDateTR, formatMoney } from "../lib/money";
+import { calculateNetFromBrut, parseSettleAmount } from "../lib/net";
 import type { ExcludedDay } from "../lib/types";
 import type { HaftaTatiliComputeResult } from "../lib/HaftaTatiliCalcPage";
 import type { BasinForm } from "./model";
 import { weekDayMultiplier } from "./model";
-
-function parseSettleNum(settleAmount: string): number {
-  return (
-    Number(
-      String(settleAmount ?? "")
-        .replace(/\./g, "")
-        .replace(",", ".")
-        .replace("₺", "")
-        .trim(),
-    ) || 0
-  );
-}
 
 export function buildBasinHtPreviewSections(opts: {
   form: BasinForm;
@@ -94,6 +85,9 @@ export function buildBasinHtPreviewSections(opts: {
     });
   }
 
+  const mahsupNum = parseSettleAmount(form.settleAmount);
+  const sonBrut = result.mahsupSonuc;
+  const equityRaw = calculateNetFromBrut(sonBrut, result.accrualIso || result.year);
   sections.push({
     id: "brutten-nete",
     title: "Brüt'ten Net'e Çeviri",
@@ -101,30 +95,40 @@ export function buildBasinHtPreviewSections(opts: {
     rows: [
       ["Brüt Hafta Tatili Alacağı", `${formatMoney(result.totalBrut)} ₺`],
       ["SGK İşçi Primi (%14)", `−${formatMoney(result.net.ssk)} ₺`],
+      [issizlikLabelForRate(result.net.issizlikOran, "İşsizlik (%1)"), `−${formatMoney(result.net.issizlik)} ₺`],
       [
         `Gelir Vergisi${result.net.gelirVergisiDilimleri ? ` ${result.net.gelirVergisiDilimleri}` : ""}`,
         `−${formatMoney(result.net.gelirVergisi)} ₺`,
       ],
-      ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.net.damgaVergisi)} ₺`],
+      [damgaLabelForRate(result.net.damgaOran, "binde"), `−${formatMoney(result.net.damgaVergisi)} ₺`],
       ["Net Hafta Tatili Alacağı", `${formatMoney(result.net.netAmount)} ₺`],
     ],
     lastRowTone: "green",
   });
-
-  const mahsupNum = parseSettleNum(form.settleAmount);
-  const mahsupSonuc = Math.max(0, result.totalBrut - result.hakkaniyet - mahsupNum);
   sections.push({
     id: "mahsuplasma",
-    title: "Mahsuplaşma",
+    title: "Hakkaniyet İndirimi / Mahsuplaşma",
     headers: ["Kalem", "Tutar"],
     rows: [
-      ["Net Hafta Tatili Alacağı", `${formatMoney(result.totalBrut)} ₺`],
+      ["Toplam Brüt Alacak", `${formatMoney(result.totalBrut)} ₺`],
       ["1/3 Hakkaniyet İndirimi", `−${formatMoney(result.hakkaniyet)} ₺`],
-      [
-        "Mahsuplaşma Miktarı",
-        mahsupNum > 0 ? `−${formatMoney(mahsupNum)} ₺` : `${formatMoney(0)} ₺`,
-      ],
-      ["Mahsuplaşma Sonucu", `${formatMoney(mahsupSonuc)} ₺`],
+      ["Mahsuplaşma Tutarı", `−${formatMoney(mahsupNum)} ₺`],
+      ["Son Brüt Alacak", `${formatMoney(sonBrut)} ₺`],
+      ...equityNetPreviewRows({
+        format: (n) => `${formatMoney(n)} ₺`,
+        kesinti: {
+          sgk: equityRaw.ssk,
+          issizlik: equityRaw.issizlik,
+          gelirVergisi: equityRaw.gelirVergisi,
+          gelirVergisiDilimleri: equityRaw.gelirVergisiDilimleri,
+          damgaVergisi: equityRaw.damgaVergisi,
+          net: equityRaw.netAmount,
+        },
+        sgkLabel: "SGK (%14)",
+        issizlikLabel: issizlikLabelForRate(equityRaw.issizlikOran, "İşsizlik (%1)"),
+        damgaLabel: damgaLabelForRate(equityRaw.damgaOran, "permille"),
+        gelirPrefix: "Gelir vergisi",
+      }),
     ],
     lastRowTone: "green",
   });

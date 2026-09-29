@@ -20,6 +20,8 @@ export type BilirkisiUbgtSaveExtras = {
   };
   excludedWeekdayHolidays: unknown[];
   katsayi: number;
+  sonBrutAlacak?: number;
+  sonNetAlacak?: number;
 };
 
 function mapPeriodRow(row: CetvelDisplayRow) {
@@ -103,6 +105,9 @@ export function buildBilirkisiUbgtSaveData(
     hakkaniyet: netConversion?.hakkaniyet ?? 0,
     settleAmount: netConversion?.settleAmount ?? form.settleAmount ?? 0,
     sonuc: Math.max(0, totalBrut - (netConversion?.hakkaniyet ?? 0)),
+    ...(result.sonBrutAlacak != null
+      ? { sonBrutAlacak: result.sonBrutAlacak, sonNetAlacak: result.sonNetAlacak }
+      : {}),
     mahsuplasamaData: form.mahsuplasamaData,
   };
 

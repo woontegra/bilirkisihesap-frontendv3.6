@@ -25,6 +25,7 @@ export type Ihbar30IsciResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
+  damgaOran?: number;
   net: number;
   ihbarSuresiLabel: string;
   formulaText: string;
@@ -44,6 +45,7 @@ export function computeIhbar30IsciResult(form: Ihbar30IsciForm): Ihbar30IsciResu
     extras: form.extras,
     totals: { yil: workPeriod.years, ay: workPeriod.months, gun: workPeriod.days },
     exitYear,
+    accrualIso: form.endDate,
   });
 
   const brutValue = parseNum(form.brut);
@@ -64,6 +66,7 @@ export function computeIhbar30IsciResult(form: Ihbar30IsciForm): Ihbar30IsciResu
     gelirVergisi: core.gelirVergisi,
     gelirVergisiDilimleri: core.gelirVergisiDilimleri,
     damgaVergisi: core.damgaVergisi,
+    damgaOran: core.damgaOran,
     net: core.net,
     ihbarSuresiLabel: weeksLabel(core.weeks),
     formulaText: formulaTextStandard(core.toplamBrut, core.weeks),

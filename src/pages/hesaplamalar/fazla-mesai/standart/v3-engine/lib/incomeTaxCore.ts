@@ -204,52 +204,71 @@ export const DAMGA_VERGISI_ORANI = 0.00759; // %0.759 damga vergisi
 // BRÜT → GELİR VERGİSİ → NET
 //------------------------------------------------------------
 
+export class WageIncomeTaxError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WageIncomeTaxError";
+  }
+}
+
+function missingWageTariffMessage(year: number): string {
+  return `${year} yılı için ücret gelir vergisi tarifesi tanımlı değil. 2010 tarifesine geçilmedi.`;
+}
+
+/** 2010 ve sonrası tablo. 2010 öncesi sessizce 2010'a düşmez. */
 function getRatesForYear(year: number): TaxBracket[] | undefined {
   if (incomeTaxRates[year]) return incomeTaxRates[year];
   const years = Object.keys(incomeTaxRates).map(Number).sort((a, b) => b - a);
   for (const y of years) {
     if (year >= y) return incomeTaxRates[y];
   }
-  return incomeTaxRates[2010];
+  return undefined;
 }
 
-export function calculateIncomeTaxForYear(year: number, income: number) {
+export function modernWageIncomeTaxBrackets(year: number): TaxBracket[] {
   const brackets = getRatesForYear(year);
-  if (!brackets) return 0;
-
-  for (const b of brackets) {
-    if (b.limit === null || income <= b.limit) {
-      return b.baseTax + (income - b.baseLimit) * b.rate;
-    }
-  }
-
-  return 0;
+  if (!brackets) throw new WageIncomeTaxError(missingWageTariffMessage(year));
+  return brackets;
 }
 
-// Bracket bilgileri ile birlikte gelir vergisi hesaplama
-export function calculateIncomeTaxWithBrackets(year: number, income: number): { tax: number; brackets: string } {
-  const brackets = getRatesForYear(year);
-  if (!brackets || income <= 0) return { tax: 0, brackets: "" };
+/** Mevcut dilim yürüyüşü: baseTax + (matrah - baseLimit) × oran. */
+export function applyWageIncomeTaxBrackets(
+  brackets: TaxBracket[],
+  income: number,
+): { tax: number; brackets: string } {
+  if (income <= 0) return { tax: 0, brackets: "" };
 
   const appliedBrackets: number[] = [];
   let tax = 0;
 
   for (const b of brackets) {
-    if (!appliedBrackets.includes(b.rate * 100)) {
-      appliedBrackets.push(b.rate * 100);
-    }
-
+    const percent = Math.round(b.rate * 100);
+    if (!appliedBrackets.includes(percent)) appliedBrackets.push(percent);
     if (b.limit === null || income <= b.limit) {
       tax = b.baseTax + (income - b.baseLimit) * b.rate;
       break;
     }
   }
 
-  const bracketString = appliedBrackets.length > 0 
-    ? `(${appliedBrackets.map(rate => `%${rate}`).join(', ')})` 
-    : '';
+  const bracketString = appliedBrackets.length > 0
+    ? `(${appliedBrackets.map((rate) => `%${rate}`).join(", ")})`
+    : "";
 
   return { tax, brackets: bracketString };
+}
+
+export function calculateIncomeTaxForYear(year: number, income: number) {
+  const brackets = modernWageIncomeTaxBrackets(year);
+  for (const b of brackets) {
+    if (b.limit === null || income <= b.limit) {
+      return b.baseTax + (income - b.baseLimit) * b.rate;
+    }
+  }
+  return 0;
+}
+
+export function calculateIncomeTaxWithBrackets(year: number, income: number): { tax: number; brackets: string } {
+  return applyWageIncomeTaxBrackets(modernWageIncomeTaxBrackets(year), income);
 }
 
 // 2 ondalık basamağa yuvarla (brütten nete için)

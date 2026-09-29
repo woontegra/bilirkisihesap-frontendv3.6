@@ -1,3 +1,4 @@
+import { engineAsgariBrut, engineAsgariPeriodsInRange } from "../../shared/historical/asgariUcret";
 /**
  * Standart Fazla Mesai — asgari ücret tablosu (1996–2026), yalnızca bu
  * klasöre ait yerel kopya. Diğer fazla mesai alt türleri veya kıdem/davacı
@@ -81,6 +82,11 @@ export function intersectIsoRanges(
 
 /** Verilen tarihin düştüğü asgari ücret dönemi tutarını döner. */
 export function getAsgariUcretByDate(isoDate: string): number | null {
+  {
+    const __day = String(isoDate ?? "").slice(0, 10);
+    const __sharedBrut = engineAsgariBrut(__day);
+    if (__sharedBrut != null) return __sharedBrut;
+  }
   const normalized = String(isoDate ?? "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return null;
   const found = ASGARI_UCRET_TABLOSU.find((p) => normalized >= p.start && normalized <= p.end);
@@ -211,6 +217,8 @@ export function getAsgariUcretPeriodsInRange(
   startISO: string,
   endISO: string,
 ): Array<{ start: string; end: string; brut: number }> {
+  const __sharedPeriods = engineAsgariPeriodsInRange(startISO, endISO);
+  if (__sharedPeriods.length) return __sharedPeriods;
   return splitRangeByAsgariPeriodBounds(startISO, endISO).map((s) => ({
     start: s.start,
     end: s.end,

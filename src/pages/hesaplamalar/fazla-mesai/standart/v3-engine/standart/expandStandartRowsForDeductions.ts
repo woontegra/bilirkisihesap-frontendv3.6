@@ -93,6 +93,7 @@ function calcRowAmounts(
   const fm = Number(
     (((brut * kats * weeks * fmHours) / FAZLA_MESAI_DENOMINATOR) * FAZLA_MESAI_KATSAYI).toFixed(2),
   );
+  // approximateRowNet: brüt FM × (1 − binde 7,59 − %15). Resmi brütten nete bunu kullanmaz.
   const net = Number((fm * (1 - DAMGA_VERGISI_ORANI - GELIR_VERGISI_ORANI)).toFixed(2));
   return { fm, net };
 }

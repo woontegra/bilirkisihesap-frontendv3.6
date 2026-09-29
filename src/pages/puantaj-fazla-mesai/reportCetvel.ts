@@ -55,6 +55,10 @@ export type OffCetvelSummary = {
   mahsupSonrasiFm: string;
   hakkaniyetIndirimi: string;
   nihaiSonuc: string;
+  toplamBrut: string;
+  mahsupTutari: string;
+  sonBrut: string;
+  sonNet: string;
   raw: {
     hesaplananToplamFmSaat: number;
     offGunSayisi: number;
@@ -345,6 +349,10 @@ export function buildOffCetvelSummary(result: PuantajFmResult): OffCetvelSummary
     mahsupSonrasiFm: formatHours(result.toplamFmSaat),
     hakkaniyetIndirimi: formatTL(result.hakkaniyetIndirimi),
     nihaiSonuc: formatTL(result.sonTutar),
+    toplamBrut: formatTL(result.toplamFmTutari),
+    mahsupTutari: formatTL(result.mahsup),
+    sonBrut: formatTL(result.sonTutar),
+    sonNet: formatTL(result.sonTutar),
     raw: {
       hesaplananToplamFmSaat: result.hesaplananToplamFmSaat,
       offGunSayisi: result.offGunSayisi,

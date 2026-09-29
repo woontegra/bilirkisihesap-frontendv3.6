@@ -111,7 +111,7 @@ export default function ReportStep({ results, fileName, templateName, settings, 
                 <MiniChip label="OFF gün" value={String(summary.toplamMahsupGun)} />
                 <MiniChip label="OFF mahsup" value={summary.toplamOffMahsup} />
                 <MiniChip label="Mahsup sonrası FM" value={summary.mahsupSonrasiFm} accent />
-                <MiniChip label="Nihai sonuç" value={summary.nihaiSonuc} accent />
+                <MiniChip label="Son net alacak" value={summary.sonNet} accent />
               </div>
 
               <div className={styles.scroll}>
@@ -206,12 +206,28 @@ export default function ReportStep({ results, fileName, templateName, settings, 
                     <td>{summary.mahsupSonrasiFm}</td>
                   </tr>
                   <tr>
-                    <td>Hakkaniyet indirimi</td>
+                    <td>Toplam Brüt Alacak</td>
+                    <td>{summary.toplamBrut}</td>
+                  </tr>
+                  <tr>
+                    <td>1/3 Hakkaniyet İndirimi</td>
                     <td>{summary.hakkaniyetIndirimi}</td>
                   </tr>
+                  <tr>
+                    <td>Mahsuplaşma Tutarı</td>
+                    <td>{summary.mahsupTutari}</td>
+                  </tr>
+                  <tr>
+                    <td>Son Brüt Alacak</td>
+                    <td>{summary.sonBrut}</td>
+                  </tr>
+                  <tr>
+                    <td>Kesinti</td>
+                    <td>Bu sayfada SGK, işsizlik, gelir vergisi ve damga vergisi uygulanmaz.</td>
+                  </tr>
                   <tr className={styles.grand}>
-                    <td>Nihai sonuç</td>
-                    <td>{summary.nihaiSonuc}</td>
+                    <td>Hakkaniyet İndirimi ve Mahsuplaşma Sonrası Net Alacak</td>
+                    <td>{summary.sonNet}</td>
                   </tr>
                 </tbody>
               </table>

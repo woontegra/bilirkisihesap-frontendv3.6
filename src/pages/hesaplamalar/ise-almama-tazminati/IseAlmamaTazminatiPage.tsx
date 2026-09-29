@@ -1,3 +1,4 @@
+import { damgaLabelForRate } from "../shared/historical/laborNet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -450,7 +451,7 @@ export default function IseAlmamaTazminatiPage() {
       rows: [
         ["Seçilen Süre", `${form.selectedKatsayi ?? 8} aylık`],
         ["Brüt İşe Başlatmama Tazminatı", `${formatMoney(result.brutForNet)} ₺`],
-        ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.damgaVergisi)} ₺`],
+        [damgaLabelForRate(result.damgaOran, "binde"), `−${formatMoney(result.damgaVergisi)} ₺`],
         ["Net İşe Başlatmama Tazminatı", `${formatMoney(result.netTazminat)} ₺`],
       ],
       lastRowTone: "green",
@@ -701,7 +702,7 @@ export default function IseAlmamaTazminatiPage() {
               </div>
               <div className={styles.lineList}>
                 <div className={styles.line}>
-                  <span>Damga vergisi (‰7,59)</span>
+                  <span>{damgaLabelForRate(result.damgaOran, "permille")}</span>
                   <strong className={styles.deduction}>
                     −
                     <FlashValue value={formatMoney(result.damgaVergisi)} /> ₺

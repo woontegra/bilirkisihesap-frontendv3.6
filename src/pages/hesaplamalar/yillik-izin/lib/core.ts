@@ -12,6 +12,7 @@
  * Borçlar: 14 gün/yıl (18-/50+: 21)
  */
 
+import { ratesForAccrual, wageTaxKeepingModernTable } from "../../shared/historical/laborNet";
 import { calculateIncomeTaxForYear, calculateIncomeTaxWithBrackets } from "./incomeTax";
 import { parseNum, round2 } from "./money";
 import type { UsedLeaveRow } from "./types";
@@ -38,6 +39,8 @@ export type YillikCoreInput = {
   brutUcret?: string | number;
   usedRows?: UsedLeaveRow[];
   exitYear: number;
+  /** Son tahakkuk günü. Yoksa exitYear 31 Aralık kullanılır. */
+  accrualIso?: string;
   is18Or50?: boolean;
   isUnderground?: boolean;
   isBorclarKanunu?: boolean;
@@ -55,6 +58,8 @@ export type YillikCoreResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
+  damgaOran?: number;
+  issizlikOran?: number;
   netIzin: number;
   error?: string;
 };
@@ -148,26 +153,23 @@ export function calculateBrutIzin(brutUcret: string | number, remainingDays: num
 export type NetIzinMode = "brackets" | "forYear";
 
 /** Backend `calculateNetIzin` — standart yol `brackets`, basın günlük olmayan `forYear`. */
-export function calculateNetIzin(brutIzin: number, year: number, mode: NetIzinMode = "brackets") {
-  const sgk = round2(brutIzin * SGK_ORANI);
-  const issizlik = round2(brutIzin * ISSIZLIK_ORANI);
+export function calculateNetIzin(brutIzin: number, accrual: number | string, mode: NetIzinMode = "brackets") {
+  const rates = ratesForAccrual(accrual);
+  const sgk = round2(brutIzin * rates.sgkOran);
+  const issizlik = round2(brutIzin * rates.issizlikOran);
   const gelirVergisiMatrahi = Math.max(0, brutIzin - sgk - issizlik);
-
-  let gelirVergisi = 0;
-  let gelirVergisiDilimleri = "";
-
-  if (mode === "forYear") {
-    gelirVergisi = round2(calculateIncomeTaxForYear(year, gelirVergisiMatrahi));
-  } else {
-    const gv = calculateIncomeTaxWithBrackets(year, gelirVergisiMatrahi);
-    gelirVergisi = round2(gv.tax);
-    gelirVergisiDilimleri = gv.summary;
-  }
-
-  const damgaVergisi = round2(brutIzin * DAMGA_ORANI);
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, gelirVergisiMatrahi, (year, income) => {
+    if (mode === "forYear") {
+      return { tax: calculateIncomeTaxForYear(year, income), summary: "" };
+    }
+    const modern = calculateIncomeTaxWithBrackets(year, income);
+    return { tax: modern.tax, summary: modern.summary };
+  });
+  const gelirVergisi = round2(gv.tax);
+  const damgaVergisi = round2(brutIzin * rates.damgaOran);
   const netIzin = round2(Math.max(0, brutIzin - sgk - issizlik - gelirVergisi - damgaVergisi));
 
-  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri, damgaVergisi, netIzin };
+  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri: gv.summary, damgaVergisi, netIzin, damgaOran: rates.damgaOran, issizlikOran: rates.issizlikOran };
 }
 
 /** Backend `calculateYillikIzin` — lokal, ağ yok. */
@@ -177,6 +179,7 @@ export function calculateYillikIzin(input: YillikCoreInput): YillikCoreResult {
     brutUcret,
     usedRows = [],
     exitYear,
+    accrualIso,
     is18Or50 = false,
     isUnderground = false,
     isBorclarKanunu = false,
@@ -225,7 +228,7 @@ export function calculateYillikIzin(input: YillikCoreInput): YillikCoreResult {
 
   if (parsedBrut > 0) {
     const year = exitYear || new Date().getFullYear();
-    if (!year || year < 2010 || year > 2030) {
+    if (!year || year < 1996 || year > 2030) {
       return {
         breakdown,
         usedTotal,
@@ -238,11 +241,11 @@ export function calculateYillikIzin(input: YillikCoreInput): YillikCoreResult {
         gelirVergisiDilimleri: "",
         damgaVergisi: 0,
         netIzin: 0,
-        error: `Geçersiz yıl: ${year}. Yıl 2010-2030 arasında olmalıdır.`,
+        error: `Geçersiz yıl: ${year}. Yıl 1996-2030 arasında olmalıdır.`,
       };
     }
     brutIzin = calculateBrutIzin(parsedBrut, remainingDays);
-    net = calculateNetIzin(brutIzin, year, "brackets");
+    net = calculateNetIzin(brutIzin, accrualIso || year, "brackets");
   }
 
   return {
@@ -258,7 +261,7 @@ export function calculateYillikIzin(input: YillikCoreInput): YillikCoreResult {
 export function resolveExitYear(exitDateISO: string): number {
   if (exitDateISO) {
     const y = new Date(exitDateISO).getFullYear();
-    if (Number.isFinite(y) && y >= 2010 && y <= 2030) return y;
+    if (Number.isFinite(y) && y >= 1996 && y <= 2030) return y;
   }
   return new Date().getFullYear();
 }

@@ -22,6 +22,7 @@ export type StandardResult = {
   rows: TableRow[];
   totalBrut: number;
   year: number;
+  accrualIso?: string;
   net: import("../lib/types").NetBreakdown;
   hakkaniyet: number;
   mahsupSonuc: number;

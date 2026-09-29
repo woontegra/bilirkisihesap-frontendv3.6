@@ -19,6 +19,7 @@
  *   net = amount − sskPrimi − issizlikPrimi − gelirVergisi − damgaVergisi (round2 UYGULANMAZ)
  */
 
+import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
 import type { ExtraItem, IsAramaForm, IsAramaResult, TarihAralikDusum, WorkPeriod } from "./model";
 
 /** Backend `round2`. */
@@ -123,7 +124,7 @@ export function calculateWeeks(totals: { yil: number; ay: number; gun: number })
 export function resolveExitYear(exitDateISO: string): number {
   if (exitDateISO) {
     const y = new Date(exitDateISO).getFullYear();
-    if (Number.isFinite(y) && y >= 2010 && y <= 2030) return y;
+    if (Number.isFinite(y) && y >= 1996 && y <= 2030) return y;
   }
   return new Date().getFullYear();
 }
@@ -336,8 +337,6 @@ export function calculateIncomeTaxWithBrackets(year: number, income: number): In
 
 /** Backend sabiti — binde 7,59. */
 export const DAMGA_ORAN = 0.00759;
-const SGK_ORAN = 0.14;
-const ISSIZLIK_ORAN = 0.01;
 
 export function computeIsArama(form: IsAramaForm): IsAramaResult {
   const workPeriod = calcWorkPeriodBilirKisi(form.startDate, form.endDate);
@@ -355,10 +354,14 @@ export function computeIsArama(form: IsAramaForm): IsAramaResult {
   const saatlikUcret = toplamBrut > 0 ? toplamBrut / 225 : 0;
   const amount = saatlikUcret * netIsAramaSaati;
 
-  const sskPrimi = amount * SGK_ORAN;
-  const issizlikPrimi = amount * ISSIZLIK_ORAN;
-  const gv = calculateIncomeTaxWithBrackets(exitYear, amount);
-  const damgaVergisi = amount * DAMGA_ORAN;
+  const rates = ratesForAccrual(form.endDate || exitYear);
+  const sskPrimi = amount * rates.sgkOran;
+  const issizlikPrimi = amount * rates.issizlikOran;
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, amount, (year, income) => {
+    const modern = calculateIncomeTaxWithBrackets(year, income);
+    return { tax: modern.tax, summary: modern.summary };
+  });
+  const damgaVergisi = amount * rates.damgaOran;
   const net = amount - sskPrimi - issizlikPrimi - gv.tax - damgaVergisi;
 
   return {
@@ -377,5 +380,7 @@ export function computeIsArama(form: IsAramaForm): IsAramaResult {
     gelirVergisiDilimleri: gv.summary,
     damgaVergisi,
     net,
+    damgaOran: rates.damgaOran,
+    issizlikOran: rates.issizlikOran,
   };
 }

@@ -1,3 +1,4 @@
+import {ratesForAccrual, wageTaxKeepingModernTable, wageSummaryText } from "../../shared/historical/laborNet";
 /**
  * Gemi Adamı — 7/24 Tam Mürettebat Fazla Mesai hesaplama motoru — %100 lokal.
  * V3 backend `gemiFullCrew24FM.service.js` + istemci expand ile aynı sonuç.
@@ -325,6 +326,39 @@ export function splitSegmentByAsgari(segment: DateSegment): (DateSegment & { bru
   }));
 }
 
+export type FmGrossNet = {
+  sgk: number;
+  issizlik: number;
+  gelirVergisi: number;
+  gelirVergisiDilimleri: string;
+  damgaVergisi: number;
+  net: number;
+};
+
+/** Mevcut brütten-nete. Tam brüt ve Son Brüt Alacak için aynı fonksiyon. */
+export function netFromGrossFm(brut: number, accrual: number | string): FmGrossNet {
+  if (!(brut > 0)) {
+    return { sgk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, net: 0 };
+  }
+  const rates = ratesForAccrual(accrual);
+  const sgk = Math.round(brut * rates.sgkOran * 100) / 100;
+  const issizlik = Math.round(brut * rates.issizlikOran * 100) / 100;
+  const matrah = Math.max(0, brut - sgk - issizlik);
+  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, matrah, (year, income) => {
+    const modern = calculateIncomeTaxWithBrackets(year, income);
+    const summary = wageSummaryText(modern);
+    return { tax: modern.tax, summary };
+  });
+  const gelirVergisi = Math.round(gv.tax * 100) / 100;
+  const damgaVergisi = Math.round(brut * rates.damgaOran * 100) / 100;
+  const net = Math.round((brut - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri: gv.summary, damgaVergisi, net };
+}
+
+export function fmTaxYear(exitDate: string | null | undefined): number {
+  return exitDate ? Number(exitDate.slice(0, 4)) : new Date().getFullYear();
+}
+
 export function computeTotalsFromRows(
   rows: { fm: number }[],
   exitYear: number,
@@ -344,13 +378,12 @@ export function computeTotalsFromRows(
   | "totalNet"
 > {
   const totalFm = round2(rows.reduce((sum, r) => sum + (r.fm || 0), 0));
-  const sgk = round2(totalFm * SGK_ORANI);
-  const issizlik = round2(totalFm * ISSIZLIK_ORANI);
-  const matrah = Math.max(0, totalFm - sgk - issizlik);
-  const gv = calculateIncomeTaxWithBrackets(exitYear, matrah);
-  const gelirVergisi = round2(gv.tax);
-  const damgaVergisi = round2(totalFm * DAMGA_ORAN);
-  const netYillik = round2(totalFm - sgk - issizlik - gelirVergisi - damgaVergisi);
+  const fullNet = netFromGrossFm(totalFm, exitYear);
+  const sgk = fullNet.sgk;
+  const issizlik = fullNet.issizlik;
+  const gelirVergisi = fullNet.gelirVergisi;
+  const damgaVergisi = fullNet.damgaVergisi;
+  const netYillik = fullNet.net;
   const hakkaniyetIndirimi = round2(totalFm / 3);
   const mahsupTutari = parseMoneyInput(mahsupInput);
   const sonNet = Math.max(0, round2(totalFm - hakkaniyetIndirimi - mahsupTutari));
@@ -359,7 +392,7 @@ export function computeTotalsFromRows(
     sgk,
     issizlik,
     gelirVergisi,
-    gelirVergisiDilimleri: gv.summary,
+    gelirVergisiDilimleri: fullNet.gelirVergisiDilimleri,
     damgaVergisi,
     netYillik,
     hakkaniyetIndirimi,
@@ -394,7 +427,7 @@ export function computeGemi724Result(form: Gemi724FormSnapshot): Gemi724Result {
     return Number(r.fmHours ?? 0) !== 0 && Number(r.weeks ?? 0) !== 0 && Number(r.fm ?? 0) !== 0;
   });
 
-  const exitYear = form.istenCikis ? Number(form.istenCikis.slice(0, 4)) : new Date().getFullYear();
+  const exitYear = fmTaxYear(form.istenCikis);
   const totals = computeTotalsFromRows(displayRows, exitYear, form.mahsup);
 
   return { fixedFmHoursWeekly: FIXED_FM_HOURS, rows: displayRows, ...totals };

@@ -24,6 +24,8 @@ import {
 
 } from "@/api/savedCases";
 
+import { netFromGrossStandartFm } from "./v3-engine/adapter";
+
 import {
 
   EXCLUSION_TYPES,
@@ -292,6 +294,18 @@ function normalizeRowOverrides(raw: unknown): Record<string, RowOverride> {
 
     if (o.brutManual === true) ov.brutManual = true;
 
+    if (o.currencyEra === "TRL" || o.currencyEra === "TRY") ov.currencyEra = o.currencyEra;
+
+    if (o.historicalBrut !== undefined && Number.isFinite(Number(o.historicalBrut))) {
+      ov.historicalBrut = Number(o.historicalBrut);
+    }
+
+    if (o.conversionDivisor === 1 || o.conversionDivisor === 1000000) {
+      ov.conversionDivisor = o.conversionDivisor;
+    }
+
+    if (o.scaleMismatch === true) ov.scaleMismatch = true;
+
     if (Object.keys(ov).length > 0) out[id] = ov;
 
   }
@@ -445,6 +459,12 @@ export function buildStandartSaveData(
     brut_total: result.toplamFm,
 
     net_total: result.netYillik,
+
+    sonBrutAlacak: result.sonNet,
+
+    sonNetAlacak: result.tahakkukTarihi
+      ? netFromGrossStandartFm(Math.max(0, result.sonNet), result.tahakkukTarihi).net
+      : 0,
 
     ise_giris: form.iseGiris || null,
 

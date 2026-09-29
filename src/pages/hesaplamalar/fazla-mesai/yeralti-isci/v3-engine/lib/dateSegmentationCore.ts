@@ -1,3 +1,4 @@
+import { asgariPeriodsWithinYear } from "../../../../shared/historical/asgariSplit";
 /**
  * Backend `aktuerya-backend/src/utils/dateSegmentationCore.js` — tanık tarih segmentasyonu.
  */
@@ -68,7 +69,7 @@ export function splitByAsgariUcretPeriods(
   const endYear = endDate.getFullYear();
 
   for (let year = startYear; year <= endYear; year++) {
-    const yearPeriods = ASGARI_UCRET_DONEMLERI[year];
+    const yearPeriods = ASGARI_UCRET_DONEMLERI[year] ?? asgariPeriodsWithinYear(year);
     if (!yearPeriods || yearPeriods.length === 0) {
       const yearStart = new Date(year, 0, 1);
       const yearEnd = new Date(year, 11, 31);

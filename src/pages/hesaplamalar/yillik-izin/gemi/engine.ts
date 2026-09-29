@@ -28,6 +28,7 @@ export function computeYillikGemiResult(form: YillikGemiForm): GemiComputeResult
     brutUcret: form.brut,
     usedDays: usedTotal,
     year: resolveExitYear(exitDate),
+    accrualIso: exitDate,
   });
 
   const brutVal = parseNum(form.brut);

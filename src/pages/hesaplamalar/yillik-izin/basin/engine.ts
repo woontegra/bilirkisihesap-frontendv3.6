@@ -18,6 +18,7 @@ export function computeYillikBasinResult(form: YillikBasinForm): StandardCompute
     brutUcret: form.brut,
     usedRows: form.usedRows,
     exitYear: resolveExitYear(form.endDate),
+    accrualIso: form.endDate,
   });
 
   const brutVal = parseNum(form.brut);
@@ -68,9 +69,11 @@ export function computeYillikBasinResult(form: YillikBasinForm): StandardCompute
     brutIzin: core.brutIzin,
     sgk: core.sgk,
     issizlik: core.issizlik,
+    issizlikOran: core.issizlikOran,
     gelirVergisi: core.gelirVergisi,
     gelirVergisiDilimleri: core.gelirVergisiDilimleri,
     damgaVergisi: core.damgaVergisi,
+    damgaOran: core.damgaOran,
     netIzin: core.netIzin,
     asgariUcretHatasi,
     basinDetail: izin,

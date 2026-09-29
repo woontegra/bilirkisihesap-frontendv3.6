@@ -1,10 +1,11 @@
 /**
  * Standart Fazla Mesai hesaplama motoru — %100 lokal, network isteği yok.
- * Bu dosya yalnızca bu klasördeki model.ts / constants.ts / asgariUcret.ts /
- * incomeTax.ts'e bağımlıdır; başka bir fazla mesai alt türüne veya
+ * Bu dosya bu klasördeki model.ts / constants.ts / asgariUcret.ts /
+ * incomeTax.ts ve tarih alt sınırı için trlScale.ts'e bağımlıdır; başka bir fazla mesai alt türüne veya
  * kıdem/davacı ücreti motorlarına referans vermez.
  */
 
+import { STANDART_FM_MIN_ISO } from "./trlScale";
 import {
   DAMGA_ORAN,
   FAZLA_MESAI_DENOMINATOR,
@@ -86,6 +87,12 @@ export function isoWeekday(iso: string): number {
 }
 
 export function validateDateRange(startIso: string, endIso: string): string | null {
+  if (startIso && isValidIsoDate(startIso) && startIso < STANDART_FM_MIN_ISO) {
+    return "İşe giriş tarihi 01.01.1996’dan önce olamaz.";
+  }
+  if (endIso && isValidIsoDate(endIso) && endIso < STANDART_FM_MIN_ISO) {
+    return "İşten çıkış tarihi 01.01.1996’dan önce olamaz.";
+  }
   if (!startIso || !endIso) return null;
   if (!isValidIsoDate(startIso) || !isValidIsoDate(endIso)) return "Geçersiz tarih.";
   if (endIso < startIso) return "İşten çıkış tarihi, işe giriş tarihinden önce olamaz.";
@@ -684,6 +691,10 @@ function emptyResult(): StandartResult {
     gelirVergisi: 0,
     gelirVergisiDilimleri: "",
     damgaVergisi: 0,
+    tahakkukTarihi: "",
+    sgkOran: 0,
+    issizlikOran: 0,
+    damgaOran: 0,
     netYillik: 0,
     hakkaniyetIndirimi: 0,
     mahsupTutari: 0,
@@ -779,6 +790,12 @@ export function computeStandartFmResult(form: StandartFormSnapshot): StandartRes
 
   const exitYear = form.istenCikis ? Number(form.istenCikis.slice(0, 4)) : new Date().getFullYear();
   const totals = computeTotalsFromRows(rows, exitYear, form.mahsup);
+  let tahakkukTarihi = "";
+  for (const row of rows) {
+    if (row.isDeductionRow) continue;
+    const end = (row.endISO || "").slice(0, 10);
+    if (end > tahakkukTarihi) tahakkukTarihi = end;
+  }
 
   return {
     dailyGrossHours: gross,
@@ -789,6 +806,10 @@ export function computeStandartFmResult(form: StandartFormSnapshot): StandartRes
     baselineWeeklyFmHours: baselineDisplay.fmHours,
     rows,
     ...totals,
+    tahakkukTarihi,
+    sgkOran: 0,
+    issizlikOran: 0,
+    damgaOran: 0,
     warnings,
   };
 }

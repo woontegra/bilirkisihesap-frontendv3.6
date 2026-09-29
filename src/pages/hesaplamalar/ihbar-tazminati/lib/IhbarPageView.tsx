@@ -1,3 +1,4 @@
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 /**
  * İhbar Tazminatı — 7 varyant için paylaşılan sunum (presentational) bileşeni.
  * İş mantığı İÇERMEZ: tüm state ve hesap her varyantın kendi Page.tsx'inde tutulur,
@@ -206,6 +207,7 @@ export type IhbarPageViewProps = {
   gelirVergisi: number;
   gelirVergisiDilimleri?: string;
   damgaVergisi: number;
+  damgaOran?: number;
   net: number;
 
   notes: NoteBlock[];
@@ -707,7 +709,7 @@ export function IhbarPageView(props: IhbarPageViewProps) {
                   </strong>
                 </div>
                 <div className={styles.line}>
-                  <span>Damga vergisi (‰7,59)</span>
+                  <span>{damgaLabelForRate(props.damgaOran, "permille")}</span>
                   <strong className={styles.deduction}>
                     −<FlashValue value={formatMoney(props.damgaVergisi)} /> ₺
                   </strong>

@@ -1,5 +1,7 @@
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
-import { calcMahsupSonucuStandart, formatDateTR, formatMoney } from "../engine";
+import { equityNetPreviewRows, type GrossNetBreakdown } from "../../shared/EquityNetLines";
+import { formatDateTR, formatMoney } from "../engine";
 import type { UbgtExcludedDayRow, UbgtForm } from "../model";
 import type { CetvelDisplayRow } from "../ubgtCetvelRows";
 import type { UbgtNetResult } from "../engine";
@@ -11,12 +13,23 @@ export function buildStandartUbgtPreviewSections(opts: {
   displayBrutForNet: number;
   effectiveNet: UbgtNetResult;
   hakkaniyet: number;
+  settleNum: number;
+  sonBrutAlacak: number;
+  equityNet: GrossNetBreakdown;
 }): PreviewSection[] {
-  const { form, displayPeriods, displayTotalDays, displayBrutForNet, effectiveNet, hakkaniyet } = opts;
-  const mahsupSonucu = calcMahsupSonucuStandart(effectiveNet.netAmount, hakkaniyet);
+  const {
+    form,
+    displayPeriods,
+    displayTotalDays,
+    displayBrutForNet,
+    effectiveNet,
+    hakkaniyet,
+    settleNum,
+    sonBrutAlacak,
+    equityNet,
+  } = opts;
   const firstStart = form.dateRanges[0]?.start ?? "";
   const lastEnd = form.dateRanges[form.dateRanges.length - 1]?.end ?? "";
-  const sgkCombined = (effectiveNet.ssk || 0) + (effectiveNet.issizlik || 0);
 
   const infoRows: string[][] = [
     ["İşe Giriş Tarihi", firstStart ? formatDateTR(firstStart) : "—"],
@@ -85,24 +98,34 @@ export function buildStandartUbgtPreviewSections(opts: {
       headers: ["Kalem", "Tutar"],
       rows: [
         ["Brüt UBGT Alacağı", `${formatMoney(displayBrutForNet)} ₺`],
-        ["SGK İşçi Primi (%15)", `−${formatMoney(sgkCombined)} ₺`],
+        ["SGK İşçi Primi (%14)", `−${formatMoney(effectiveNet.ssk)} ₺`],
+        ["İşsizlik primi (%1)", `−${formatMoney(effectiveNet.issizlik)} ₺`],
         [
           `Gelir Vergisi${effectiveNet.gelirVergisiDilimleri ? ` ${effectiveNet.gelirVergisiDilimleri}` : ""}`,
           `−${formatMoney(effectiveNet.gelirVergisi)} ₺`,
         ],
-        ["Damga Vergisi (Binde 7,59)", `−${formatMoney(effectiveNet.damgaVergisi)} ₺`],
+        [damgaLabelForRate(effectiveNet.damgaOran, "binde"), `−${formatMoney(effectiveNet.damgaVergisi)} ₺`],
         ["Net UBGT Alacağı", `${formatMoney(effectiveNet.netAmount)} ₺`],
       ],
       lastRowTone: "green",
     },
     {
       id: "mahsuplasma",
-      title: "Mahsuplaşma",
+      title: "Hakkaniyet İndirimi / Mahsuplaşma",
       headers: ["Kalem", "Tutar"],
       rows: [
-        ["Net UBGT Alacağı", `${formatMoney(effectiveNet.netAmount)} ₺`],
+        ["Toplam Brüt Alacak", `${formatMoney(displayBrutForNet)} ₺`],
         ["1/3 Hakkaniyet İndirimi", `−${formatMoney(hakkaniyet)} ₺`],
-        ["Mahsuplaşma Sonucu", `${formatMoney(mahsupSonucu)} ₺`],
+        ["Mahsuplaşma Tutarı", `−${formatMoney(Number.isFinite(settleNum) ? settleNum : 0)} ₺`],
+        ["Son Brüt Alacak", `${formatMoney(sonBrutAlacak)} ₺`],
+        ...equityNetPreviewRows({
+          format: (n) => `${formatMoney(n)} ₺`,
+          kesinti: equityNet,
+          sgkLabel: "SGK primi (%14)",
+          issizlikLabel: "İşsizlik primi (%1)",
+          damgaLabel: "Damga vergisi (binde 7,59)",
+          gelirPrefix: "Gelir vergisi",
+        }),
       ],
       lastRowTone: "green",
     },

@@ -1,3 +1,4 @@
+import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Haftalık Karma Fazla Mesai — V3.5 sayfa (V3 işlev paritesi).
  */
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
+import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
@@ -59,8 +61,11 @@ import {
 } from "./engine";
 import {
   computeHaftalikKarmaResultV3,
+  fmTaxYear,
   logHaftalikKarmaV3EngineCheck,
+  netFromGrossFm,
 } from "./v3-engine/adapter";
+import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyHaftalikKarmaForm,
   createEmptyWitness,
@@ -336,6 +341,15 @@ export default function HaftalikKarmaFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeHaftalikKarmaResultV3);
+  const equityNet = useMemo(
+    () => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+    [result.mahsupSonrasiNet, form.istenCikis],
+  );
+  const kesintiEtiket = useMemo(
+    () => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+    [result.rows, form.istenCikis],
+  );
+
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -620,7 +634,13 @@ export default function HaftalikKarmaFmPage() {
       const saved = await saveHaftalikKarmaFmCase(
         name,
         form,
-        { toplamFm: result.toplamFm, sonNet: result.mahsupSonrasiNet, rowCount: result.rows.length },
+        {
+          toplamFm: result.toplamFm,
+          sonNet: result.mahsupSonrasiNet,
+          rowCount: result.rows.length,
+          sonBrutAlacak: result.mahsupSonrasiNet,
+          sonNetAlacak: equityNet.net,
+        },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -702,9 +722,9 @@ export default function HaftalikKarmaFmPage() {
         title: "Fazla Mesai Hesaplama Cetveli",
         headers: ["Tarih Aralığı", "Hafta", "Ücret", "Kat Sayı", "FM Saat", "225", "1,5", "Fazla Mesai"],
         rows: result.rows.map((r) => [
-          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.yillikIzinAciklama || r.note ? ` ${r.yillikIzinAciklama || r.note}` : ""}`,
+          formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.yillikIzinAciklama || r.note),
           String(r.weeks),
-          money(r.brut),
+          (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
           String(r.katsayi),
           r.fmHours.toFixed(2),
           "225",
@@ -720,9 +740,9 @@ export default function HaftalikKarmaFmPage() {
         rows: [
           ["Brüt Fazla Mesai", money(result.toplamFm)],
           ["SGK (%14)", `-${money(result.sgk)}`],
-          ["İşsizlik (%1)", `-${money(result.issizlik)}`],
+          [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`.trim(), `-${money(result.gelirVergisi)}`],
-          ["Damga Vergisi (Binde 7,59)", `-${money(result.damgaVergisi)}`],
+          [kesintiEtiket.damga, `-${money(result.damgaVergisi)}`],
           ["Net Fazla Mesai", money(result.netYillik)],
         ],
         lastRowTone: "green",
@@ -732,19 +752,24 @@ export default function HaftalikKarmaFmPage() {
         title: "Mahsuplaşma",
         headers: ["Kalem", "Tutar"],
         rows: [
-          ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
+          ["Toplam Brüt Alacak", money(result.toplamFm)],
           ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetOneri)}`],
-          ...(result.mahsupTutari > 0
-            ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][])
-            : []),
-          ["Son Net Alacak", money(result.mahsupSonrasiNet)],
+          ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
+          ["Son Brüt Alacak", money(result.mahsupSonrasiNet)],
+          ...equityNetPreviewRows({
+            format: money,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: kesintiEtiket.issizlik,
+            damgaLabel: kesintiEtiket.damga,
+          }),
         ],
         lastRowTone: "green",
       },
       ],
       form.exclusions,
     );
-  }, [form, result]);
+  }, [form, result, equityNet]);
 
   return (
     <div className={styles.page} aria-busy={caseLoading || undefined}>
@@ -1113,7 +1138,7 @@ export default function HaftalikKarmaFmPage() {
               <span>−{formatMoney(result.sgk)} ₺</span>
             </div>
             <div>
-              <span>İşsizlik (%1)</span>
+              <span>{kesintiEtiket.issizlik}</span>
               <span>−{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div>
@@ -1121,7 +1146,7 @@ export default function HaftalikKarmaFmPage() {
               <span>−{formatMoney(result.gelirVergisi)} ₺</span>
             </div>
             <div>
-              <span>Damga Vergisi (Binde 7,59)</span>
+              <span>{kesintiEtiket.damga}</span>
               <span>−{formatMoney(result.damgaVergisi)} ₺</span>
             </div>
             <div className={styles.totalsHighlight}>
@@ -1161,9 +1186,20 @@ export default function HaftalikKarmaFmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Net Alacak</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.mahsupSonrasiNet)} ₺`} className={styles.sonNet} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel={kesintiEtiket.issizlik}
+              damgaLabel={kesintiEtiket.damga}
+              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
+            />
           </div>
         </article>
       </div>

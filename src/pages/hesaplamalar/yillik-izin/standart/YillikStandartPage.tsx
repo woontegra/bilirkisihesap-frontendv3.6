@@ -214,9 +214,11 @@ export default function YillikStandartPage() {
       brutIzin={result.brutIzin}
       sgk={result.sgk}
       issizlik={result.issizlik}
+        issizlikOran={result.issizlikOran}
       gelirVergisi={result.gelirVergisi}
       gelirVergisiDilimleri={result.gelirVergisiDilimleri}
       damgaVergisi={result.damgaVergisi}
+        damgaOran={result.damgaOran}
       netIzin={result.netIzin}
       employerPayment={form.employerPayment ?? ""}
       onEmployerPaymentChange={(v) => patch("employerPayment", v)}

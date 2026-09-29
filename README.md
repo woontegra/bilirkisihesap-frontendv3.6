@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Uygulama varsayılan olarak **http://localhost:5173** üzerinde açılır (`strictPort: true`).
+Uygulama varsayılan olarak **http://localhost:5174** üzerinde açılır (`strictPort: true`).
 
 ## Veri kaynağı
 

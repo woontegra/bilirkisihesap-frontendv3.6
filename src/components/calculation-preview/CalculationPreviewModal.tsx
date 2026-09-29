@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Copy, FileDown, Printer, X } from "lucide-react";
+import { Copy, FileDown, FileText, Printer, X } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { trackUsageEvent } from "@/telemetry/trackUsageEvent";
+import { alignClass, columnAlignFor, columnSpansFor, isFmCetvel } from "./previewColumnLayout";
 import { downloadPreviewPdf } from "./pdfExport";
+import { udfFileNameFromTitle } from "./udfFileName";
+import { downloadPreviewUdf } from "./udf/downloadPreviewUdf";
 import {
   buildPrintHtmlFromSections,
   copyAllTablesForWord,
@@ -21,6 +24,8 @@ type Props = {
   onClose: () => void;
   /** Stable module key — when set, fires PREVIEW_OPENED once per open */
   moduleKey?: string | null;
+  /** Ortak önizleme raporu. Varsayılan açık. */
+  udfExport?: boolean;
 };
 
 /**
@@ -34,10 +39,12 @@ export function CalculationPreviewModal({
   contentId,
   onClose,
   moduleKey,
+  udfExport = true,
 }: Props) {
   const toast = useToast();
   const previewRef = useRef<HTMLDivElement>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [udfBusy, setUdfBusy] = useState(false);
   const trackedOpenRef = useRef(false);
 
   useEffect(() => {
@@ -71,6 +78,18 @@ export function CalculationPreviewModal({
     const ok = await copySectionTableForWord(sectionId);
     if (ok) toast.success("Kopyalandı");
     else toast.error("Kopyalama başarısız");
+  };
+
+  const handleUdf = async () => {
+    if (udfBusy) return;
+    setUdfBusy(true);
+    try {
+      await downloadPreviewUdf(sections, udfFileNameFromTitle(title));
+    } catch {
+      toast.error("UDF dosyası oluşturulamadı. Lütfen tekrar deneyin.");
+    } finally {
+      setUdfBusy(false);
+    }
   };
 
   const handlePdf = async () => {
@@ -110,6 +129,18 @@ export function CalculationPreviewModal({
               <FileDown size={13} />
               {pdfBusy ? "Oluşturuluyor…" : "PDF İndir"}
             </button>
+            {udfExport ? (
+              <button
+                type="button"
+                className={styles.btnUdf}
+                onClick={() => void handleUdf()}
+                disabled={udfBusy}
+                title="Önizlemedeki bölüm ve tabloları UDF dosyası olarak indirir."
+              >
+                <FileText size={13} />
+                {udfBusy ? "Oluşturuluyor…" : "UDF İndir"}
+              </button>
+            ) : null}
             <button type="button" className={styles.btnClose} onClick={onClose}>
               <X size={13} />
               Kapat
@@ -134,10 +165,21 @@ export function CalculationPreviewModal({
                 <div className="section-content">
                   <table className={styles.table}>
                     {section.headers.length > 0 ? (
+                      <colgroup>
+                        {columnSpansFor(section.headers, isFmCetvel(section)).map((span, index) => (
+                          <col key={`${section.id}-col-${index}`} style={{ width: `${span}%` }} />
+                        ))}
+                      </colgroup>
+                    ) : null}
+                    {section.headers.length > 0 ? (
                       <thead>
                         <tr>
-                          {section.headers.map((h) => (
-                            <th key={h} scope="col">
+                          {section.headers.map((h, headerIndex) => (
+                            <th
+                              key={`${section.id}-${h}-${headerIndex}`}
+                              scope="col"
+                              className={styles[alignClass(columnAlignFor(h, isFmCetvel(section), headerIndex))]}
+                            >
                               {h}
                             </th>
                           ))}
@@ -164,8 +206,9 @@ export function CalculationPreviewModal({
                                       (isLast && section.lastRowTone === "green" && ci === row.length - 1)
                                     ? styles.cellPos
                                     : undefined;
+                              const align = styles[alignClass(columnAlignFor(section.headers[ci] ?? "", isFmCetvel(section), ci))];
                               return (
-                                <td key={`${section.id}-${i}-${ci}`} className={cellTone}>
+                                <td key={`${section.id}-${i}-${ci}`} className={[cellTone, align].filter(Boolean).join(" ")}>
                                   {cell}
                                 </td>
                               );

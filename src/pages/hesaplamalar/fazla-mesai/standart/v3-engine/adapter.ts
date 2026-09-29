@@ -14,9 +14,15 @@ import type {
 } from "../model";
 import type { ExcludedDay } from "./types/exclusionStorage";
 import type { FazlaMesaiRowBase } from "./lib/fazlaMesaiShared";
-import { calculateIncomeTaxWithBrackets } from "./lib/incomeTaxCore";
-import { DAMGA_VERGISI_ORANI } from "./lib/fazlaMesaiShared";
 import { runStandartFmV3Pipeline } from "./pipeline";
+import {
+  standartFmDamgaOrani,
+  standartFmIssizlikOrani,
+  standartFmSgkOrani,
+  wageIncomeTaxForDate,
+  WageIncomeTaxError,
+  resolveStandartFmAccrualIso,
+} from "./lib/standartFmKesinti";
 import {
   computeBaselineWeeklyFmHours,
   computeDailyNetHours,
@@ -24,8 +30,76 @@ import {
   validateDateRange,
 } from "../engine";
 
-const SSK_ORAN = 0.14;
-const ISSIZLIK_ORAN = 0.01;
+const EMPTY_GROSS_NET: StandartGrossNet = {
+  sgk: 0,
+  issizlik: 0,
+  gelirVergisi: 0,
+  gelirVergisiDilimleri: "",
+  damgaVergisi: 0,
+  net: 0,
+  sgkOran: 0,
+  issizlikOran: 0,
+  damgaOran: 0,
+  tahakkukTarihi: "",
+};
+
+export type StandartGrossNet = {
+  sgk: number;
+  issizlik: number;
+  gelirVergisi: number;
+  gelirVergisiDilimleri: string;
+  damgaVergisi: number;
+  net: number;
+  sgkOran: number;
+  issizlikOran: number;
+  damgaOran: number;
+  tahakkukTarihi: string;
+};
+
+/**
+ * Cetvelde alacağı doğuran satırların en geç bitiş günü.
+ * İşten çıkış alanı bu seçime girmez; düşüm satırları tahakkuk tarihi sayılmaz.
+ */
+export function lastStandartFmAccrualIso(
+  rows: Array<{ endISO?: string; isDeductionRow?: boolean }>,
+): string | null {
+  let last = "";
+  for (const row of rows) {
+    if (row.isDeductionRow) continue;
+    const end = String(row.endISO ?? "").slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) continue;
+    if (end > last) last = end;
+  }
+  return last || null;
+}
+
+/** Mevcut brütten-nete sırası. Toplam brüt ve Son Brüt için aynı fonksiyon, tek sefer. */
+export function netFromGrossStandartFm(brut: number, accrual: number | string): StandartGrossNet {
+  if (!(brut > 0)) return EMPTY_GROSS_NET;
+  const tahakkukTarihi = resolveStandartFmAccrualIso(accrual);
+  const sgkOran = standartFmSgkOrani(tahakkukTarihi);
+  const issizlikOran = standartFmIssizlikOrani(tahakkukTarihi);
+  const damgaOran = standartFmDamgaOrani(tahakkukTarihi);
+  const sgk = Math.round(brut * sgkOran * 100) / 100;
+  const issizlik = Math.round(brut * issizlikOran * 100) / 100;
+  const matrah = Math.max(0, brut - sgk - issizlik);
+  const gvResult = wageIncomeTaxForDate(tahakkukTarihi, matrah);
+  const gelirVergisi = Math.round(gvResult.tax * 100) / 100;
+  const damgaVergisi = Math.round(brut * damgaOran * 100) / 100;
+  const net = Math.round((brut - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  return {
+    sgk,
+    issizlik,
+    gelirVergisi,
+    gelirVergisiDilimleri: gvResult.brackets,
+    damgaVergisi,
+    net,
+    sgkOran,
+    issizlikOran,
+    damgaOran,
+    tahakkukTarihi,
+  };
+}
 
 function toExcludedDays(items: ExclusionItem[]): ExcludedDay[] {
   return items.map((item) => ({
@@ -69,6 +143,10 @@ function v3RowToPeriodRow(row: FazlaMesaiRowBase, katSayi: number): PeriodRow {
     weeks: Number(row.weeks) || 0,
     originalWeekCount: row.originalWeekCount ?? row.weeks,
     brut: Number(row.brut) || 0,
+    historicalBrut: typeof row.historicalBrut === "number" ? row.historicalBrut : undefined,
+    currencyEra: row.currencyEra === "TRL" || row.currencyEra === "TRY" ? row.currencyEra : undefined,
+    conversionDivisor: row.conversionDivisor === 1 || row.conversionDivisor === 1_000_000 ? row.conversionDivisor : undefined,
+    scaleMismatch: row.scaleMismatch === true,
     katsayi: Number(row.katsayi) || katSayi,
     fmHours: Number(row.fmHours) || 0,
     fm: Number(row.fm) || 0,
@@ -94,6 +172,10 @@ function emptyResult(): StandartResult {
     gelirVergisi: 0,
     gelirVergisiDilimleri: "",
     damgaVergisi: 0,
+    tahakkukTarihi: "",
+    sgkOran: 0,
+    issizlikOran: 0,
+    damgaOran: 0,
     netYillik: 0,
     hakkaniyetIndirimi: 0,
     mahsupTutari: 0,
@@ -153,29 +235,32 @@ export function computeStandartFmResultV3(form: StandartFormSnapshot): StandartR
   }
 
   const rows = pipeline.tableDisplayRows.map((r) => v3RowToPeriodRow(r, katsayi));
-  const toplamFm = Math.round(pipeline.totalBrut * 100) / 100;
-
-  const exitYear = form.istenCikis
-    ? new Date(form.istenCikis).getFullYear()
-    : new Date().getFullYear();
-
-  let gelirVergisi = 0;
-  let gelirVergisiDilimleri = "";
-  let damgaVergisi = 0;
-  let netYillik = 0;
-  let sgk = 0;
-  let issizlik = 0;
-
-  if (toplamFm > 0) {
-    sgk = Math.round(toplamFm * SSK_ORAN * 100) / 100;
-    issizlik = Math.round(toplamFm * ISSIZLIK_ORAN * 100) / 100;
-    const matrah = Math.max(0, toplamFm - sgk - issizlik);
-    const gvResult = calculateIncomeTaxWithBrackets(exitYear, matrah);
-    gelirVergisi = Math.round(gvResult.tax * 100) / 100;
-    gelirVergisiDilimleri = gvResult.brackets;
-    damgaVergisi = Math.round(toplamFm * DAMGA_VERGISI_ORANI * 100) / 100;
-    netYillik = Math.round((toplamFm - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  if (rows.some((row) => row.scaleMismatch)) {
+    warnings.push(
+      "Ücret ölçeği belirsiz. Para dönemi değiştiği için manuel ücret otomatik dönüştürülmedi. Tutarı yeniden girin.",
+    );
   }
+  const toplamFm = Math.round(pipeline.totalBrut * 100) / 100;
+  const tahakkukTarihi = lastStandartFmAccrualIso(rows) ?? "";
+  let fullNet = EMPTY_GROSS_NET;
+  if (toplamFm > 0 && tahakkukTarihi) {
+    try {
+      fullNet = netFromGrossStandartFm(toplamFm, tahakkukTarihi);
+    } catch (error) {
+      const message = error instanceof WageIncomeTaxError || error instanceof Error
+        ? error.message
+        : "Brütten nete çevrim yapılamadı.";
+      warnings.push(message);
+    }
+  } else if (toplamFm > 0) {
+    warnings.push("Son tahakkuk tarihi bulunamadı. Brütten nete çevrim yapılmadı.");
+  }
+  const gelirVergisi = fullNet.gelirVergisi;
+  const gelirVergisiDilimleri = fullNet.gelirVergisiDilimleri;
+  const damgaVergisi = fullNet.damgaVergisi;
+  const netYillik = fullNet.net;
+  const sgk = fullNet.sgk;
+  const issizlik = fullNet.issizlik;
 
   const hakkaniyetIndirimi = toplamFm / 3;
   const mahsupTutari = parseMahsup(form.mahsup);
@@ -195,6 +280,10 @@ export function computeStandartFmResultV3(form: StandartFormSnapshot): StandartR
     gelirVergisi,
     gelirVergisiDilimleri,
     damgaVergisi,
+    tahakkukTarihi: fullNet.tahakkukTarihi,
+    sgkOran: fullNet.sgkOran,
+    issizlikOran: fullNet.issizlikOran,
+    damgaOran: fullNet.damgaOran,
     netYillik,
     hakkaniyetIndirimi,
     mahsupTutari,

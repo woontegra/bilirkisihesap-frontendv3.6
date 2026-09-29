@@ -1,3 +1,4 @@
+import { engineAsgariBrut } from "../../../../shared/historical/asgariUcret";
 /**
  * LOCAL COPY - DO NOT MODIFY
  * This file is frozen as part of StandartIndependent page isolation
@@ -65,6 +66,11 @@ export const asgariUcretler: AsgariUcret[] = [
 ];
 
 export function getAsgariUcretByDate(dateString: string): number | null {
+  {
+    const __day = String(dateString ?? "").slice(0, 10);
+    const __sharedBrut = engineAsgariBrut(__day);
+    if (__sharedBrut != null) return __sharedBrut;
+  }
   const date = new Date(dateString);
   const found = asgariUcretler.find(
     (u) => date >= new Date(u.start) && date <= new Date(u.end)

@@ -60,6 +60,10 @@ export type RowOverride = {
   endISO?: string;
   /** Otomatik satır için − ile gizleme (V3 paritesi). Manuel satırlar silinir, gizlenmez. */
   hidden?: boolean;
+  brutManual?: boolean;
+  historicalBrut?: number;
+  currencyEra?: "TRL" | "TRY";
+  conversionDivisor?: 1 | 1000000;
 };
 
 export type FmRow = {
