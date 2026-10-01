@@ -1,4 +1,9 @@
 .button {
+  --video-cta: #dc2626;
+  --video-cta-hover: #b91c1c;
+  --video-cta-border: #b91c1c;
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -7,26 +12,57 @@
   height: 2rem;
   min-width: 2rem;
   padding: 0 0.65rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+  border: 1px solid var(--video-cta-border);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--accent);
+  background: var(--video-cta);
+  color: #fff;
   font: inherit;
   font-size: var(--fs-xs);
-  font-weight: 600;
+  font-weight: 650;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: background var(--dur-fast, 150ms), border-color var(--dur-fast, 150ms), color var(--dur-fast, 150ms);
+  box-shadow:
+    0 1px 2px rgb(185 28 28 / 0.28),
+    0 0 0 1px rgb(220 38 38 / 0.08);
+  transition:
+    background var(--dur-fast, 150ms) ease,
+    border-color var(--dur-fast, 150ms) ease,
+    box-shadow var(--dur-fast, 150ms) ease,
+    transform var(--dur-fast, 150ms) ease;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgb(220 38 38 / 0.42);
+  animation: videoCtaPulse 2.25s ease-out infinite;
 }
 
 .button:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-hover);
+  border-color: #991b1b;
+  background: var(--video-cta-hover);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 14px rgb(185 28 28 / 0.38),
+    0 0 0 1px rgb(185 28 28 / 0.16);
 }
 
-.button:focus-visible,
+.button:active {
+  transform: translateY(0);
+  background: #991b1b;
+}
+
+.button:focus-visible {
+  outline: 2px solid #f87171;
+  outline-offset: 2px;
+}
+
 .closeButton:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -34,6 +70,37 @@
 
 .buttonLabel {
   display: inline;
+  color: inherit;
+}
+
+@keyframes videoCtaPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0.45);
+    opacity: 1;
+  }
+
+  70% {
+    box-shadow: 0 0 0 11px rgb(220 38 38 / 0);
+    opacity: 0;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button::after {
+    animation: none;
+    content: none;
+  }
+
+  .button,
+  .button:hover,
+  .button:active {
+    transform: none;
+  }
 }
 
 @media (max-width: 419px) {
