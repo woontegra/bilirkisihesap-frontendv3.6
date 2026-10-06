@@ -10,7 +10,6 @@ import ProfileInfoTab from "./tabs/ProfileInfoTab";
 import SavedCalculationsTab from "./tabs/SavedCalculationsTab";
 import SettingsTab from "./tabs/SettingsTab";
 import SubscriptionTab from "./tabs/SubscriptionTab";
-import SubUsersTab from "./tabs/SubUsersTab";
 import TicketsTab from "./tabs/TicketsTab";
 import styles from "./ProfilePage.module.css";
 
@@ -63,8 +62,6 @@ export default function ProfilePage() {
         return <SubscriptionTab />;
       case "tickets":
         return <TicketsTab />;
-      case "subusers":
-        return <SubUsersTab />;
       case "settings":
         return <SettingsTab />;
       default:

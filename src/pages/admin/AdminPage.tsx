@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Shield } from "lucide-react";
 import { apiClient } from "@/api/client";
+import { decodeAccessTokenClaims, isPlatformAdmin } from "@/auth/session";
 import { formatNumberTr } from "@/utils/adminLabels";
 import { ADMIN_TOOL_CARDS } from "./adminCards";
 import { AdminToolCard, type AdminCardPreviewStat } from "./components/AdminToolCard";
@@ -20,8 +21,10 @@ type CardPreviewResponse = {
 };
 
 export default function AdminPage() {
-  const readyCount = ADMIN_TOOL_CARDS.filter((c) => c.status === "ready").length;
-  const soonCount = ADMIN_TOOL_CARDS.length - readyCount;
+  const platformBackupAdmin = isPlatformAdmin() && decodeAccessTokenClaims()?.tenantId === 1;
+  const cards = ADMIN_TOOL_CARDS.filter((card) => card.id !== "backups" || platformBackupAdmin);
+  const readyCount = cards.filter((card) => card.status === "ready").length;
+  const soonCount = cards.length - readyCount;
   const [previewById, setPreviewById] = useState<Record<string, AdminCardPreviewStat[]>>({});
   const [previewLoadingId, setPreviewLoadingId] = useState<string | null>(null);
 
@@ -100,7 +103,7 @@ export default function AdminPage() {
           </p>
         </div>
         <div className={styles.meta}>
-          <span className={styles.metaChip}>{ADMIN_TOOL_CARDS.length} araç</span>
+          <span className={styles.metaChip}>{cards.length} araç</span>
           {soonCount > 0 ? (
             <span className={styles.metaChipMuted}>{soonCount} yakında</span>
           ) : null}
@@ -111,7 +114,7 @@ export default function AdminPage() {
       </header>
 
       <section className={styles.grid} aria-label="Yönetim araçları">
-        {ADMIN_TOOL_CARDS.map((card, index) => (
+        {cards.map((card, index) => (
           <AdminToolCard
             key={card.id}
             card={card}

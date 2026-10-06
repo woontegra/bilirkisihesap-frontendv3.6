@@ -5,7 +5,6 @@ import {
   MessageSquare,
   Settings,
   User,
-  Users,
 } from "lucide-react";
 
 export type ProfileTabKey =
@@ -13,7 +12,6 @@ export type ProfileTabKey =
   | "saved"
   | "subscription"
   | "tickets"
-  | "subusers"
   | "settings";
 
 export type ProfileTabItem = {
@@ -29,7 +27,6 @@ export const PROFILE_TABS: ProfileTabItem[] = [
   { key: "saved", label: "Kayıtlı Hesaplamalar", icon: Bookmark, tenantFilter: "all" },
   { key: "subscription", label: "Abonelik Bilgilerim", icon: CreditCard, tenantFilter: "all" },
   { key: "tickets", label: "Destek Talepleri", icon: MessageSquare, tenantFilter: "all" },
-  { key: "subusers", label: "Alt Kullanıcılar", icon: Users, tenantFilter: 1 },
   { key: "settings", label: "Ayarlar", icon: Settings, tenantFilter: "all" },
 ];
 

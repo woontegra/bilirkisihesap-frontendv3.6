@@ -24,8 +24,6 @@ import {
 
   UserRound,
 
-  Users,
-
   Video,
 
 } from "lucide-react";
@@ -38,7 +36,7 @@ import { fetchNotifications, markNotificationsRead } from "@/api/notifications";
 
 import type { NotificationItem } from "@/api/types";
 
-import { logout, getSessionTenantId, readCurrentUser } from "@/auth/session";
+import { logout, readCurrentUser } from "@/auth/session";
 
 import { Button } from "@/components/ui/Button";
 
@@ -137,12 +135,6 @@ export function Topbar({
   const displayEmail = (userEmail?.trim() || sessionUser?.email || "").trim();
 
   const roleLabel = formatUserRoleLabel(userRole?.trim() || sessionUser?.role);
-
-  const tenantId = getSessionTenantId() ?? undefined;
-
-  const showSubUsers = tenantId === 1;
-
-
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -680,28 +672,6 @@ export function Topbar({
                   <span>Destek Talepleri</span>
 
                 </Link>
-
-                {showSubUsers ? (
-
-                  <Link
-
-                    to="/profile?tab=subusers"
-
-                    className={styles.menuItem}
-
-                    role="menuitem"
-
-                    onClick={closeMenu}
-
-                  >
-
-                    <Users size={15} aria-hidden />
-
-                    <span>Alt Kullanıcılar</span>
-
-                  </Link>
-
-                ) : null}
 
                 <Link
 

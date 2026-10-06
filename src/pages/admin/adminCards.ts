@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Archive,
   ArrowRightLeft,
   BarChart3,
   Building2,
@@ -73,6 +74,16 @@ export const ADMIN_TOOL_CARDS: AdminToolCardConfig[] = [
     description: "Yeni kullanıcı hesabı oluştur",
     icon: UserPlus,
     route: "/admin/users/new",
+    category: "operations",
+    status: "ready",
+    adminOnly: true,
+  },
+  {
+    id: "backups",
+    title: "Yedek Yönetimi",
+    description: "Gerçek müşteri yedeklerini gör ve geri yükle",
+    icon: Archive,
+    route: "/admin/yedekler",
     category: "operations",
     status: "ready",
     adminOnly: true,

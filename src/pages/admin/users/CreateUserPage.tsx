@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { apiClient, ApiError } from "@/api/client";
 import { AdminSkeleton } from "@/components/admin/AdminSkeleton";
 import { FormField } from "@/components/admin/FormField";
@@ -9,11 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
 import styles from "./CreateUserPage.module.css";
 
-type Tenant = { id: number; name: string; email: string | null };
 type BarAssociation = { id: number; name: string };
 
 type FormState = {
-  tenantId: string;
   name: string;
   email: string;
   password: string;
@@ -49,17 +47,9 @@ export default function CreateUserPage() {
   const navigate = useNavigate();
   const [loadingMeta, setLoadingMeta] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [barAssociations, setBarAssociations] = useState<BarAssociation[]>([]);
-  const [tenantOpen, setTenantOpen] = useState(false);
-  const [tenantSearch, setTenantSearch] = useState("");
-  const [showTenantModal, setShowTenantModal] = useState(false);
-  const [newTenantName, setNewTenantName] = useState("");
-  const [newTenantEmail, setNewTenantEmail] = useState("");
-  const [creatingTenant, setCreatingTenant] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [form, setForm] = useState<FormState>({
-    tenantId: "",
     name: "",
     email: "",
     password: "",
@@ -73,14 +63,10 @@ export default function CreateUserPage() {
     const load = async () => {
       setLoadingMeta(true);
       try {
-        const [tenantData, barData] = await Promise.all([
-          apiClient<Tenant[]>("/api/admin/tenants", { adminRole: true }),
-          apiClient<{ success?: boolean; items?: Array<{ id?: number; name?: string }> }>(
-            "/api/admin/bar-associations?status=ACTIVE",
-            { adminRole: true },
-          ),
-        ]);
-        setTenants(Array.isArray(tenantData) ? tenantData : []);
+        const barData = await apiClient<{ success?: boolean; items?: Array<{ id?: number; name?: string }> }>(
+          "/api/admin/bar-associations?status=ACTIVE",
+          { adminRole: true },
+        );
         const items = Array.isArray(barData?.items) ? barData.items : [];
         setBarAssociations(
           items
@@ -103,18 +89,6 @@ export default function CreateUserPage() {
     }
   }, [form.subscriptionType]);
 
-  const filteredTenants = useMemo(() => {
-    const q = tenantSearch.trim().toLowerCase();
-    if (!q) return tenants;
-    return tenants.filter((t) => {
-      const name = t.name.toLowerCase();
-      const email = (t.email ?? "").toLowerCase();
-      return name.includes(q) || email.includes(q);
-    });
-  }, [tenantSearch, tenants]);
-
-  const selectedTenant = tenants.find((t) => String(t.id) === form.tenantId) ?? null;
-
   const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -122,7 +96,6 @@ export default function CreateUserPage() {
 
   const validate = (): boolean => {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (!form.tenantId) next.tenantId = "Şirket seçimi gereklidir";
     if (!form.name.trim()) next.name = "Ad soyad gereklidir";
     if (!form.email.trim()) next.email = "E-posta gereklidir";
     else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)) {
@@ -131,31 +104,6 @@ export default function CreateUserPage() {
     if (!form.password || form.password.length < 6) next.password = "En az 6 karakter";
     setErrors(next);
     return Object.keys(next).length === 0;
-  };
-
-  const handleCreateTenant = async () => {
-    if (!newTenantName.trim()) {
-      toast.error("Şirket adı gereklidir");
-      return;
-    }
-    setCreatingTenant(true);
-    try {
-      const created = await apiClient<Tenant>("/api/admin/tenants", {
-        method: "POST",
-        adminRole: true,
-        body: { name: newTenantName.trim(), email: newTenantEmail.trim() || null },
-      });
-      toast.success(`${created.name} şirketi oluşturuldu`);
-      setTenants((prev) => [...prev, created]);
-      updateField("tenantId", String(created.id));
-      setShowTenantModal(false);
-      setNewTenantName("");
-      setNewTenantEmail("");
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Şirket oluşturulamadı");
-    } finally {
-      setCreatingTenant(false);
-    }
   };
 
   const handleSubmit = async (event: FormEvent) => {
@@ -167,8 +115,11 @@ export default function CreateUserPage() {
         method: "POST",
         adminRole: true,
         body: {
-          ...form,
-          tenantId: Number(form.tenantId),
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role: form.role,
+          subscriptionType: form.subscriptionType,
           barAssociationId: form.barAssociationId ? Number(form.barAssociationId) : null,
           subscriptionEndsAt: form.subscriptionEndsAt || null,
         },
@@ -210,65 +161,9 @@ export default function CreateUserPage() {
         </div>
 
         <div className={styles.formBody}>
-          <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Şirket Bilgisi</h3>
-            <div className={styles.tenantRow}>
-              <FormField label="Şirket / Tenant *" className={styles.tenantPicker}>
-                <button
-                  type="button"
-                  className={styles.pickerBtn}
-                  onClick={() => setTenantOpen((v) => !v)}
-                >
-                  <span>
-                    {selectedTenant
-                      ? `${selectedTenant.name}${selectedTenant.email ? ` — ${selectedTenant.email}` : ""}`
-                      : "Şirket seçiniz"}
-                  </span>
-                  <ChevronsUpDown size={15} />
-                </button>
-                {tenantOpen ? (
-                  <div className={styles.pickerMenu}>
-                    <div className={styles.pickerSearch}>
-                      <input
-                        placeholder="Şirket adı / e-posta ara"
-                        value={tenantSearch}
-                        onChange={(e) => setTenantSearch(e.target.value)}
-                      />
-                    </div>
-                    <div className={styles.pickerList}>
-                      {filteredTenants.length === 0 ? (
-                        <p className={styles.pickerItemEmail}>Sonuç bulunamadı.</p>
-                      ) : (
-                        filteredTenants.map((tenant) => (
-                          <button
-                            key={tenant.id}
-                            type="button"
-                            className={styles.pickerItem}
-                            onClick={() => {
-                              updateField("tenantId", String(tenant.id));
-                              setTenantOpen(false);
-                            }}
-                          >
-                            <div>
-                              <p className={styles.pickerItemName}>{tenant.name}</p>
-                              {tenant.email ? (
-                                <p className={styles.pickerItemEmail}>{tenant.email}</p>
-                              ) : null}
-                            </div>
-                            {String(tenant.id) === form.tenantId ? <Check size={15} /> : null}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-                {errors.tenantId ? <p className={styles.errorText}>{errors.tenantId}</p> : null}
-              </FormField>
-              <Button type="button" variant="soft" size="sm" onClick={() => setShowTenantModal(true)}>
-                Yeni Şirket
-              </Button>
-            </div>
-          </section>
+          <p className={styles.formDesc}>
+            Her kullanıcı için ayrı bir çalışma alanı oluşturulur. Mevcut bir şirkete bağlama yapılmaz.
+          </p>
 
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Kullanıcı Bilgisi</h3>
@@ -362,51 +257,6 @@ export default function CreateUserPage() {
           </div>
         </div>
       </form>
-
-      {showTenantModal ? (
-        <div className={styles.modalOverlay} onClick={() => setShowTenantModal(false)} role="presentation">
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-            <h3 className={styles.modalTitle}>Yeni Şirket Ekle</h3>
-            <FormField label="Şirket Adı *">
-              <input
-                value={newTenantName}
-                onChange={(e) => setNewTenantName(e.target.value)}
-                placeholder="Örn: ABC Hukuk Bürosu"
-              />
-            </FormField>
-            <FormField label="E-posta (Opsiyonel)">
-              <input
-                type="email"
-                value={newTenantEmail}
-                onChange={(e) => setNewTenantEmail(e.target.value)}
-                placeholder="info@firma.com"
-              />
-            </FormField>
-            <div className={styles.modalActions}>
-              <Button
-                type="button"
-                variant="soft"
-                disabled={creatingTenant}
-                onClick={() => {
-                  setShowTenantModal(false);
-                  setNewTenantName("");
-                  setNewTenantEmail("");
-                }}
-              >
-                İptal
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                disabled={creatingTenant || !newTenantName.trim()}
-                onClick={() => void handleCreateTenant()}
-              >
-                {creatingTenant ? "Oluşturuluyor…" : "Şirket Oluştur"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

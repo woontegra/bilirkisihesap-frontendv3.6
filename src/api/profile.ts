@@ -120,13 +120,6 @@ export type Ticket = {
   replies: TicketReply[];
 };
 
-export type SubUser = {
-  id: number;
-  name: string;
-  email: string;
-  role: "admin" | "user" | "viewer";
-};
-
 function asRecord(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -665,28 +658,4 @@ export async function updateTicketStatus(
     method: "PUT",
     body: { status },
   });
-}
-
-/* ── Sub-users ────────────────────────────────────────────────── */
-
-export async function listSubUsers(tenantId: number): Promise<SubUser[]> {
-  const data = await apiClient<SubUser[] | { data?: SubUser[] }>(
-    `/api/tenants/${tenantId}/subusers`,
-  );
-  if (Array.isArray(data)) return data;
-  return Array.isArray(data?.data) ? data.data : [];
-}
-
-export async function createSubUser(
-  tenantId: number,
-  body: { name: string; email: string; role: SubUser["role"] },
-): Promise<SubUser> {
-  return apiClient<SubUser>(`/api/tenants/${tenantId}/subusers`, {
-    method: "POST",
-    body,
-  });
-}
-
-export async function deleteSubUser(tenantId: number, id: number): Promise<void> {
-  await apiClient(`/api/tenants/${tenantId}/subusers/${id}`, { method: "DELETE" });
 }

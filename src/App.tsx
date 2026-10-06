@@ -25,6 +25,7 @@ import BarCampaignPage from "@/pages/admin/bar-campaign/BarCampaignPage";
 import FeedbackPage from "@/pages/admin/feedback/FeedbackPage";
 import InterestRatesPage from "@/pages/admin/interest-rates/InterestRatesPage";
 import BrandingPage from "@/pages/admin/branding/BrandingPage";
+import BackupAdminPage from "@/pages/admin/backups/BackupAdminPage";
 import ManualBrutWagePage from "@/pages/araclar/manuel-brut-ucret/ManualBrutWagePage";
 import DavaciUcretiPage from "@/pages/hesaplamalar/davaci-ucreti/DavaciUcretiPage";
 import KidemSelectionPage from "@/pages/hesaplamalar/kidem-tazminati/KidemSelectionPage";
@@ -212,6 +213,7 @@ export default function App() {
             <Route path="admin/feedback" element={<FeedbackPage />} />
             <Route path="admin/interest-rates" element={<InterestRatesPage />} />
             <Route path="admin/branding" element={<BrandingPage />} />
+            <Route path="admin/yedekler" element={<BackupAdminPage />} />
           </Route>
 
           <Route path="*" element={<PlaceholderPage />} />
