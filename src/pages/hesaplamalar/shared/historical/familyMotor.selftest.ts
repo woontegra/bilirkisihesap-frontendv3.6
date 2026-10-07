@@ -561,7 +561,7 @@ for (const span of SPANS.filter((s) => s.label !== "1996")) {
     selectedHolidayIds: ubgtHolidays,
   });
   if (result.error || !(result.toplamBrut > 0)) fail(`UBGT ${span.label} ${result.error || "brüt 0"}`);
-  if (span.start < "2005-01-01" && result.periods.some((period) => period.start < "2005-01-01" && period.wage >= 10000)) {
+  if (span.start < "2005-01-01" && result.periods.some((period) => (period.startISO ?? "") < "2005-01-01" && period.wage >= 10000)) {
     fail(`UBGT ${span.label} 2005 öncesi ücret ham eski TL`);
   }
   const accrual = deriveTaxAccrualIso([{ end: span.end }]);
