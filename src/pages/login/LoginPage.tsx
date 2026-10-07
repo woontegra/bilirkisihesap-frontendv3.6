@@ -341,7 +341,7 @@ export default function LoginPage() {
                 <span>hesaplama türü</span>
               </li>
               <li>
-                <strong>v3.5</strong>
+                <strong>v3.6</strong>
                 <span>güncel motor</span>
               </li>
               <li>
@@ -366,7 +366,7 @@ export default function LoginPage() {
             <div className={styles.cardGlow} aria-hidden />
 
             <div className={styles.card}>
-              <span className={styles.versionBadge}>v3.5</span>
+              <span className={styles.versionBadge}>v3.6</span>
 
               <header className={styles.brand}>
                 <div className={styles.logoSlot} aria-hidden={!ready}>
@@ -491,7 +491,7 @@ export default function LoginPage() {
 
               <footer className={styles.footer}>
                 <span className={styles.statusDot} aria-hidden />
-                Sistem aktif · Bilirkişi Hesap v3.5
+                Sistem aktif · Bilirkişi Hesap v3.6
               </footer>
             </div>
           </div>

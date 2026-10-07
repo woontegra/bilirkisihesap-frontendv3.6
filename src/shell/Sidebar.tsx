@@ -204,11 +204,11 @@ export function Sidebar({
           {!narrow ? (
             <>
               <p className={styles.footerTitle}>Bilirkişi Hesap</p>
-              <p className={styles.footerSub}>Sürüm 3.5</p>
+              <p className={styles.footerSub}>Sürüm 3.6</p>
             </>
           ) : (
-            <p className={styles.footerCollapsed} title="Bilirkişi Hesap – Sürüm 3.5">
-              3.5
+            <p className={styles.footerCollapsed} title="Bilirkişi Hesap – Sürüm 3.6">
+              3.6
             </p>
           )}
         </div>
