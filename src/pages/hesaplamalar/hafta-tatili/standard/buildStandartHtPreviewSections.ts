@@ -1,7 +1,7 @@
 import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
 import { equityNetPreviewRows } from "../../shared/EquityNetLines";
-import { formatDateTR, formatMoney } from "../lib/money";
+import { boundedIso, formatDateTR, formatMoney } from "../lib/money";
 import { calculateNetFromBrut, parseSettleAmount } from "../lib/net";
 import type { ExcludedDay } from "../lib/types";
 import type { StandardForm } from "./model";
@@ -17,11 +17,9 @@ export function buildStandartHtPreviewSections(opts: {
 
   const valid = form.dateRanges.filter((r) => r.start && r.end);
   if (valid.length > 0) {
-    const starts = valid.map((r) => new Date(r.start).getTime());
-    const ends = valid.map((r) => new Date(r.end).getTime());
     const infoRows: string[][] = [
-      ["İşe Giriş", formatDateTR(new Date(Math.min(...starts)).toISOString().slice(0, 10))],
-      ["İşten Çıkış", formatDateTR(new Date(Math.max(...ends)).toISOString().slice(0, 10))],
+      ["İşe Giriş", formatDateTR(boundedIso(valid.map((r) => r.start), "min"))],
+      ["İşten Çıkış", formatDateTR(boundedIso(valid.map((r) => r.end), "max"))],
     ];
     if (form.expiryStart) {
       infoRows.push(["Zamanaşımı Başlangıcı", formatDateTR(form.expiryStart)]);

@@ -21,6 +21,16 @@ export function formatDateTR(iso: string): string {
   return `${d}.${m}.${y}`;
 }
 
+/** Geçerli YYYY-MM-DD uç değeri. Yarım veya sayıya dönmeyen gün toISOString fırlatmaz. */
+export function boundedIso(values: string[], edge: "min" | "max"): string {
+  const real = values
+    .map((value) => String(value ?? "").slice(0, 10))
+    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)));
+  if (!real.length) return "";
+  real.sort();
+  return edge === "min" ? real[0] : real[real.length - 1];
+}
+
 export function clampYear(value: string): string {
   if (!value || !value.includes("-")) return value;
   const parts = value.split("-");

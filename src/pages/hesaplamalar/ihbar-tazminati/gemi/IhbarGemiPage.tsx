@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { Anchor } from "lucide-react";
@@ -63,7 +64,7 @@ export default function IhbarGemiPage() {
     clearStorageError,
   } = useIhbarCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeIhbarGemiResult(form), [form]);
+  const result = useFormCalcMemo(() => computeIhbarGemiResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof IhbarGemiForm>(key: K, value: IhbarGemiForm[K]) => {

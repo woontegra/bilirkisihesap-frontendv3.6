@@ -535,15 +535,18 @@ const ubgt1996 = computeUbgt({
   dateRanges: [{ start: "1996-01-01", end: "1996-12-31" }],
   selectedHolidayIds: [],
 });
-if (!ubgt1996.error) fail("UBGT 1996 hesap açıldı");
-push({ page: "ubgt", span: "1996", accrual: "", sonNet: null, note: ubgt1996.error });
+if (ubgt1996.error) fail(`UBGT 1996 reddedildi: ${ubgt1996.error}`);
+if (ubgt1996.periods[0]?.wage !== 8.46 || ubgt1996.periods.some((period) => period.wage >= 10000)) {
+  fail(`UBGT 1996 dönem ücreti ölçekli değil: ${ubgt1996.periods.map((period) => period.wage).join(",")}`);
+}
+push({ page: "ubgt", span: "1996", accrual: "", sonNet: null, note: `dönem ücretleri ${ubgt1996.periods.map((period) => period.wage).join(",")}` });
 
 const ubgt2004 = computeUbgt({
   dateRanges: [{ start: "2004-12-31", end: "2004-12-31" }],
   selectedHolidayIds: ubgtHolidays,
 });
-if (!ubgt2004.error || ubgt2004.periods.length > 0) {
-  fail(`UBGT 31.12.2004 reddedilmedi: ${ubgt2004.error || "hata yok"}`);
+if (ubgt2004.error || ubgt2004.periods[0]?.wage !== 444.15) {
+  fail(`UBGT 31.12.2004 ücret ${ubgt2004.periods[0]?.wage ?? "yok"}: ${ubgt2004.error || "hata yok"}`);
 }
 
 const ubgt2005 = computeUbgt({
@@ -557,12 +560,10 @@ for (const span of SPANS.filter((s) => s.label !== "1996")) {
     dateRanges: [{ start: span.start, end: span.end }],
     selectedHolidayIds: ubgtHolidays,
   });
-  if (span.start < "2005-01-01") {
-    if (!result.error) fail(`UBGT ${span.label} 2005 öncesi kabul edildi`);
-    push({ page: "ubgt", span: span.label, accrual: "", sonNet: null, note: result.error });
-    continue;
-  }
   if (result.error || !(result.toplamBrut > 0)) fail(`UBGT ${span.label} ${result.error || "brüt 0"}`);
+  if (span.start < "2005-01-01" && result.periods.some((period) => period.start < "2005-01-01" && period.wage >= 10000)) {
+    fail(`UBGT ${span.label} 2005 öncesi ücret ham eski TL`);
+  }
   const accrual = deriveTaxAccrualIso([{ end: span.end }]);
   const rates = ratesForAccrual(span.end);
   if (result.toplamBrut > 0) {

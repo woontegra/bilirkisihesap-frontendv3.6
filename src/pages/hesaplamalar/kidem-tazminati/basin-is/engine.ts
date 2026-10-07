@@ -4,8 +4,9 @@
  * differenceInYears/Months/Days davranışı elle üretilir (v1 ile bire bir uyum).
  */
 
+import { stampRateForDate } from "../../shared/historical/laborNet";
 import type { ExtraItem } from "./model";
-import { DAMGA_ORAN, INCOME_TAX_BRACKETS, type TaxBracket } from "./taxData";
+import { INCOME_TAX_BRACKETS, type TaxBracket } from "./taxData";
 
 /* ── Para yardımcıları ── */
 
@@ -190,18 +191,20 @@ export type BrutNetResult = {
   gelirVergisiUygulanacak: boolean;
   matrah: number;
   gelirVergisi: number;
+  damgaOran: number;
   damgaVergisi: number;
   net: number;
 };
 
-export function deriveBrutNet(brut: number, ciplakBrut: number, exitYear: number): BrutNetResult {
+export function deriveBrutNet(brut: number, ciplakBrut: number, exitYear: number, exitIso?: string | null): BrutNetResult {
   const esikDeger = ciplakBrut * 24;
   const gelirVergisiUygulanacak = brut > esikDeger && esikDeger > 0;
   const matrah = gelirVergisiUygulanacak ? Math.max(0, brut - esikDeger) : 0;
   const gelirVergisi = gelirVergisiUygulanacak ? round2(calculateIncomeTaxForYear(exitYear, matrah)) : 0;
-  const damgaVergisi = round2(brut * DAMGA_ORAN);
+  const damgaOran = stampRateForDate(exitIso);
+  const damgaVergisi = round2(brut * damgaOran);
   const net = round2(brut - damgaVergisi - gelirVergisi);
-  return { brut: round2(brut), esikDeger: round2(esikDeger), gelirVergisiUygulanacak, matrah: round2(matrah), gelirVergisi, damgaVergisi, net };
+  return { brut: round2(brut), esikDeger: round2(esikDeger), gelirVergisiUygulanacak, matrah: round2(matrah), gelirVergisi, damgaOran, damgaVergisi, net };
 }
 
 export function resolveExitYear(istenCikis: string): number {

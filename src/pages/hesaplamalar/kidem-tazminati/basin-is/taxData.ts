@@ -125,6 +125,5 @@ export const INCOME_TAX_BRACKETS: Record<number, TaxBracket[]> = {
   ],
 };
 
-export const DAMGA_ORAN = 0.00759;
 export const YEAR_MIN = 2010;
 export const YEAR_MAX = 2025;

@@ -10,6 +10,7 @@ import ChatWidget from "@/components/chat/ChatWidget";
 import { YandexMetricaTracker } from "@/analytics/YandexMetricaTracker";
 import { CalculationPageViewTracker } from "@/telemetry/CalculationPageViewTracker";
 import { useLicenseAccessOptional } from "@/context/LicenseAccessContext";
+import { WageInputGuard } from "@/hooks/useDeferredFormMemo";
 import styles from "./AppShell.module.css";
 
 const COLLAPSE_KEY = "v35_sidebarCollapsed";
@@ -95,7 +96,9 @@ export function AppShell() {
         />
         <main className={styles.content}>
           <div className={styles.contentInner}>
-            <Outlet />
+            <WageInputGuard resetKey={location.pathname}>
+              <Outlet />
+            </WageInputGuard>
           </div>
         </main>
       </div>

@@ -242,11 +242,11 @@ export function generateHaftaTatiliPeriods(
     const wpe = new Date(wp.end);
     const effStart = ws > wps ? ws : wps;
     const effEnd = we < wpe ? we : wpe;
-    if (effStart <= effEnd) {
+    if (!Number.isNaN(effStart.getTime()) && !Number.isNaN(effEnd.getTime()) && effStart <= effEnd) {
       periods.push({
         start: effStart.toISOString().split("T")[0],
-        end: effEnd.toISOString().split("T")[0],
         wage: wp.wage,
+        end: effEnd.toISOString().split("T")[0],
       });
     }
   });

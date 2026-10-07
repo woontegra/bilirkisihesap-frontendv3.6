@@ -30,7 +30,7 @@ import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -252,12 +252,10 @@ export default function YeraltiFmPage() {
   }, [form.davaciDateIn, form.davaciDateOut]);
 
   const result = useDeferredFormMemo(form, computeYeraltiResultV3);
-  const equityNet = useMemo(
-    () => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
+  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
     [result.sonNet, form.davaciDateOut],
   );
-  const kesintiEtiket = useMemo(
-    () => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
+  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
     [result.rows, form.davaciDateOut],
   );
 

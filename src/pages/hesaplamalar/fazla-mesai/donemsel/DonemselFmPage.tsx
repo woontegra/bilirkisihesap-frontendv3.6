@@ -25,7 +25,7 @@ import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
@@ -386,12 +386,10 @@ export default function DonemselFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.dateIn, form.dateOut), [form.dateIn, form.dateOut]);
   const result = useDeferredFormMemo(form, computeDonemselResultV3);
-  const equityNet = useMemo(
-    () => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
+  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
     [result.mahsupSonrasiNet, form.dateOut],
   );
-  const kesintiEtiket = useMemo(
-    () => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
+  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
     [result.rows, form.dateOut],
   );
 

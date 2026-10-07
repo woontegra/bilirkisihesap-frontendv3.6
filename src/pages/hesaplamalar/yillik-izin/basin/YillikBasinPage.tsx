@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Newspaper } from "lucide-react";
@@ -64,7 +65,7 @@ export default function YillikBasinPage() {
     clearStorageError,
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeYillikBasinResult(form), [form]);
+  const result = useFormCalcMemo(() => computeYillikBasinResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {

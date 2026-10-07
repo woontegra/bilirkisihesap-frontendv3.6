@@ -5,11 +5,9 @@
  * motorlarına referans vermez.
  */
 
+import { stampRateForDate } from "../../shared/historical/laborNet";
 import type { DurationParts, ExtraItem, IsKanunuFormSnapshot, IsKanunuResult } from "./model";
 import { findTavanForIsoDate } from "./tavanData";
-
-/** Damga vergisi oranı: binde 7,59 */
-export const DAMGA_ORAN = 0.00759;
 
 /* ── Para yardımcıları ── */
 
@@ -31,6 +29,15 @@ export { sanitizeMoneyTyping } from "@/utils/moneyInput";
 
 export function round2(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+/** Brüt kıdem × çıkış tarihindeki ortak tarihsel damga oranı. */
+export function isKanunuDamga(
+  brutKidem: number,
+  exitIso: string | null | undefined,
+): { damgaOran: number; damgaVergisi: number } {
+  const damgaOran = stampRateForDate(exitIso);
+  return { damgaOran, damgaVergisi: round2(brutKidem * damgaOran) };
 }
 
 /* ── Tarih yardımcıları (yerel takvim günü; saat dilimi kaymasız) ── */
@@ -133,6 +140,7 @@ function emptyResult(): IsKanunuResult {
     tavanApplied: false,
     esasAylik: 0,
     brutKidem: 0,
+    damgaOran: stampRateForDate(""),
     damgaVergisi: 0,
     netKidem: 0,
     shortTenureWarning: false,
@@ -145,7 +153,7 @@ function emptyResult(): IsKanunuResult {
  * 2) Çıplak brüt + prim + ikramiye + yol + yemek + ek kalemlerden giydirilmiş aylık,
  * 3) Çıkış tarihine göre tavan kontrolü (giydirilmiş aylık tavanı aşarsa tavan esas alınır),
  * 4) Brüt kıdem = esas aylık × yıl + (esas aylık/12) × ay + (esas aylık/365) × gün,
- * 5) Damga vergisi = brüt × 0,00759; Net (ekran) = brüt − damga.
+ * 5) Damga vergisi = brüt × çıkış tarihindeki oran; Net (ekran) = brüt − damga.
  */
 export function computeIsKanunuResult(form: IsKanunuFormSnapshot): IsKanunuResult {
   const giydirilmisAylik = computeGiydirilmisAylik(form);
@@ -166,7 +174,7 @@ export function computeIsKanunuResult(form: IsKanunuFormSnapshot): IsKanunuResul
     );
   }
 
-  const damgaVergisi = round2(brutKidem * DAMGA_ORAN);
+  const { damgaOran, damgaVergisi } = isKanunuDamga(brutKidem, form.istenCikisTarihi);
   const netKidem = round2(brutKidem - damgaVergisi);
   const shortTenureWarning =
     !!duration &&
@@ -181,6 +189,7 @@ export function computeIsKanunuResult(form: IsKanunuFormSnapshot): IsKanunuResul
     tavanApplied,
     esasAylik,
     brutKidem,
+    damgaOran,
     damgaVergisi,
     netKidem,
     shortTenureWarning,

@@ -20,7 +20,7 @@ import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -233,7 +233,7 @@ export default function StandartFmPage() {
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
 
   const result = useDeferredFormMemo(form, computeStandartFmResultV3);
-  const equityNet = useMemo(() => {
+  const equityNet = useFormCalcMemo(() => {
     if (!(result.sonNet > 0) || !result.tahakkukTarihi) return netFromGrossStandartFm(0, "2013-01-01");
     return netFromGrossStandartFm(result.sonNet, result.tahakkukTarihi);
   }, [result.sonNet, result.tahakkukTarihi]);

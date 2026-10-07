@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { FileClock } from "lucide-react";
@@ -63,7 +64,7 @@ export default function IhbarBelirliPage() {
     clearStorageError,
   } = useIhbarCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeIhbarBelirliResult(form), [form]);
+  const result = useFormCalcMemo(() => computeIhbarBelirliResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof IhbarBelirliForm>(key: K, value: IhbarBelirliForm[K]) => {

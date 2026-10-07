@@ -133,4 +133,3 @@ export const GEMI_INCOME_TAX_BRACKETS: Record<number, GemiTaxBracket[]> = {
 };
 
 export const GEMI_YEAR_MIN = 2010;
-export const GEMI_DAMGA_ORANI = 0.00759;

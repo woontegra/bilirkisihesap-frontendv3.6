@@ -87,6 +87,20 @@ export function getAsgariUcretRowByDate(isoDate: string): AsgariUcret | null {
   return asgariUcretler.find((u) => day >= u.start && day <= u.end) ?? null;
 }
 
+/**
+ * Uyarı eşiği. Dönem satırı varsa ölçeklenmiş brüt.
+ * Tablo bitiminden sonraki gün son satıra düşer. Tablo öncesi ve boş gün null döner.
+ */
+export function warningAsgariBrut(isoDate: string): number | null {
+  const day = String(isoDate ?? "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const exact = engineAsgariBrut(day);
+  if (exact != null) return exact;
+  const last = asgariUcretler[asgariUcretler.length - 1];
+  if (last && day > last.end) return engineAsgariBrut(last.end);
+  return null;
+}
+
 /** Tablo tutarını hesap motoru ölçeğine bir kez çevirir. 2005 sonrası bölen 1'dir. */
 export function engineAsgariBrut(isoDate: string): number | null {
   const day = String(isoDate ?? "").slice(0, 10);

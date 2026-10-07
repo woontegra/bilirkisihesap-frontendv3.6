@@ -3,6 +3,7 @@
  * Backend `ubgt.standard.service.js` / `ubgt.bilirkisi.service.js` ile birebir.
  * Başka hesaplama modülünden import yok. Ağ yok.
  */
+import { engineAsgariBrut, engineAsgariPeriodsInRange } from "../shared/historical/asgariUcret";
 import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
 import { calculateIncomeTaxForYear, calculateIncomeTaxWithBrackets } from "./incomeTax";
 import { calculateUbgtSegments, normalizeLocalDate, type UbgtDateRangeInput } from "./lib/dateSegmentation";
@@ -203,12 +204,40 @@ export function calculateNet(brutAmount: number, accrual: number | string): Ubgt
   };
 }
 
+function wageFromMinTable(iso: string): number {
+  const day = new Date(iso);
+  if (Number.isNaN(day.getTime())) return 0;
+  for (const wagePeriod of MIN_WAGE_TABLE) {
+    const wageStart = new Date(wagePeriod.start);
+    const wageEnd = new Date(wagePeriod.end);
+    if (day >= wageStart && day <= wageEnd) return wagePeriod.wage;
+  }
+  return 0;
+}
+
+function wageOn(iso: string): number {
+  const day = String(iso ?? "").slice(0, 10);
+  if (day < "2005-01-01") return engineAsgariBrut(day) ?? 0;
+  return wageFromMinTable(day);
+}
+
 function generateUbgtPeriods(workerStart: string, workerEnd: string) {
   if (!workerStart || !workerEnd) return [] as Array<{ start: string; end: string; wage: number }>;
-  const workerStartDate = new Date(workerStart);
-  const workerEndDate = new Date(workerEnd);
+  const startIso = String(workerStart).slice(0, 10);
+  const endIso = String(workerEnd).slice(0, 10);
   const periods: Array<{ start: string; end: string; wage: number }> = [];
 
+  if (startIso <= "2004-12-31") {
+    const preEnd = endIso < "2004-12-31" ? endIso : "2004-12-31";
+    if (startIso <= preEnd) {
+      for (const row of engineAsgariPeriodsInRange(startIso, preEnd)) {
+        periods.push({ start: row.start, end: row.end, wage: row.brut });
+      }
+    }
+  }
+
+  const workerStartDate = new Date(workerStart);
+  const workerEndDate = new Date(workerEnd);
   MIN_WAGE_TABLE.forEach((wagePeriod) => {
     const wagePeriodStart = new Date(wagePeriod.start);
     const wagePeriodEnd = new Date(wagePeriod.end);
@@ -252,15 +281,10 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
       if (!startDate || !endDate) {
         return emptyResult(`Geçersiz tarih formatı: Başlangıç: ${range.start}, Bitiş: ${range.end}. Lütfen YYYY-MM-DD formatında girin.`);
       }
-      const startIso = String(range.start).slice(0, 10);
-      const endIso = String(range.end).slice(0, 10);
-      if (startIso < "2005-01-01" || endIso < "2005-01-01") {
-        return emptyResult("UBGT hesabı 01.01.2005 tarihinden başlar. 31.12.2004 ve öncesi için doğrulanmış ulusal bayram ve genel tatil takvimi olmadığı için hesap yapılmadı.");
-      }
       const startYear = startDate.getFullYear();
       const endYear = endDate.getFullYear();
       if (startYear > 2100 || endYear > 2100) {
-        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2005-2100 arası tarih girin.`);
+        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2100 ve öncesi tarih girin.`);
       }
       if (endDate < startDate) {
         return emptyResult(`Bitiş tarihi (${range.end}) başlangıç tarihinden (${range.start}) önce olamaz.`);
@@ -284,16 +308,7 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
       }
       if (new Date(effectiveStart) > new Date(effectiveEnd)) return;
 
-      const segStartDate = new Date(effectiveStart);
-      let wage = 0;
-      for (const wagePeriod of MIN_WAGE_TABLE) {
-        const wageStart = new Date(wagePeriod.start);
-        const wageEnd = new Date(wagePeriod.end);
-        if (segStartDate >= wageStart && segStartDate <= wageEnd) {
-          wage = wagePeriod.wage;
-          break;
-        }
-      }
+      const wage = wageOn(effectiveStart);
       if (wage === 0) return;
 
       const segmentHolidayIds = new Set<string>();

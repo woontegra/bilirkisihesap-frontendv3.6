@@ -49,6 +49,7 @@ import {
   sanitizeMoneyTyping,
 } from "./engine";
 import { emptyForm, newLocalId, type BasinFormSnapshot, type ExtraItem, type SavedCase, type SavedExtraSet } from "./model";
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { getAsgariUcretByDate } from "./asgariUcret";
 import { deleteExtraSet, describeSetsError, listExtraSets, saveExtraSet } from "./extraSetsApi";
 import { clearCorruptCases, deleteCase, loadCasesSafe } from "./storage";
@@ -58,7 +59,7 @@ import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 
 const PAGE_TITLE = "Kıdem Tazminatı — Basın İş";
 const NOTE_INFO =
-  "Basın iş kıdem tazminatında kıdem süresi mesleğe başlangıç veya işe giriş tarihine göre hesaplanır; deneme süresi düşümü uygulanır. Brüt gün payı 365 güne göre bulunur. Net tutar, brüt tazminattan damga vergisi (binde 7,59) ve GVK 25/7 kapsamında gelir vergisi düşülerek hesaplanır.";
+  "Basın iş kıdem tazminatında kıdem süresi mesleğe başlangıç veya işe giriş tarihine göre hesaplanır; deneme süresi düşümü uygulanır. Brüt gün payı 365 güne göre bulunur. Net tutar, brüt tazminattan çıkış tarihindeki damga vergisi ve GVK 25/7 kapsamında gelir vergisi düşülerek hesaplanır.";
 const EXTRA_HINT = "Ekstra Hesaplamalar (Prim, İkramiye, Yemek vb.)";
 const FIXED_EXTRA_IDS = ["prim", "ikramiye", "yol", "yemek", "diger"] as const;
 type FixedExtraField = (typeof FIXED_EXTRA_IDS)[number];
@@ -258,8 +259,8 @@ export default function BasinKidemPage() {
   const ciplakBrutValue = useMemo(() => parseNum(form.ciplakBrut), [form.ciplakBrut]);
 
   const brutNet = useMemo(
-    () => deriveBrutNet(brutKidem, ciplakBrutValue, exitYear),
-    [brutKidem, ciplakBrutValue, exitYear],
+    () => deriveBrutNet(brutKidem, ciplakBrutValue, exitYear, form.istenCikis),
+    [brutKidem, ciplakBrutValue, exitYear, form.istenCikis],
   );
 
   const startedRef = useRef(false);
@@ -747,7 +748,7 @@ export default function BasinKidemPage() {
       sections.push({ id: "hesap", title: "Kıdem Hesabı", headers: ["Hesap", "Tutar"], rows: hesapRows, lastRowTone: "blue" });
 
       const netRows: string[][] = [["Brüt kıdem tazminatı", money(brutKidem)]];
-      netRows.push(["Damga vergisi (binde 7,59)", `-${money(brutNet.damgaVergisi)}`]);
+      netRows.push([damgaLabelForRate(brutNet.damgaOran), `-${money(brutNet.damgaVergisi)}`]);
       if (brutNet.gelirVergisiUygulanacak) {
         netRows.push(["Gelir vergisi (matrah: brüt − 24 aylık istisna)", `-${money(brutNet.gelirVergisi)}`]);
       }
@@ -1138,7 +1139,7 @@ export default function BasinKidemPage() {
                   {brutNet.gelirVergisiUygulanacak
                     ? `Brüt kıdem, çıplak brütün 24 katını (${fmtCurrency(brutNet.esikDeger)}₺) aştığı için gelir vergisi uygulanır.`
                     : `Brüt kıdem, 24 aylık istisnayı aşmadığı için gelir vergisi uygulanmaz.`}{" "}
-                  Damga vergisi binde 7,59 kesilir.
+                  {damgaLabelForRate(brutNet.damgaOran)} kesilir.
                 </p>
                 <div className={styles.line}>
                   <span>Brüt kıdem</span>
@@ -1151,7 +1152,7 @@ export default function BasinKidemPage() {
                   </div>
                 ) : null}
                 <div className={styles.line}>
-                  <span>Damga vergisi</span>
+                  <span>{damgaLabelForRate(brutNet.damgaOran)}</span>
                   <span className={styles.deduction}>-{fmtCurrency(brutNet.damgaVergisi)} ₺</span>
                 </div>
                 <div className={`${styles.line} ${styles.netLine}`}>

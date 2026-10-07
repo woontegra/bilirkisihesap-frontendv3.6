@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { Clock3 } from "lucide-react";
@@ -63,7 +64,7 @@ export default function IhbarKismiPage() {
     clearStorageError,
   } = useIhbarCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeIhbarKismiResult(form), [form]);
+  const result = useFormCalcMemo(() => computeIhbarKismiResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof IhbarKismiForm>(key: K, value: IhbarKismiForm[K]) => {

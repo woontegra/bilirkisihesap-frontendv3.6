@@ -41,6 +41,7 @@ import {
   parseNum,
   sanitizeMoneyTyping,
 } from "./engine";
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { deleteExtraSet, describeSetsError, listExtraSets, saveExtraSet } from "./extraSetsApi";
 import {
   createEmptyGemiForm,
@@ -758,7 +759,7 @@ export default function GemiKidemPage() {
       headers: ["Kalem", "Tutar"],
       rows: [
         ["Brüt kıdem tazminatı", money(result.brutKidem)],
-        ["Damga vergisi (binde 7,59)", `-${money(result.damgaVergisi)}`],
+        [damgaLabelForRate(result.damgaOran), `-${money(result.damgaVergisi)}`],
         ["GVK 25/7 muafiyeti (24 × çıplak brüt)", money(result.muafiyetTutari)],
         [
           `Gelir vergisi (${exitYear})`,
@@ -1090,7 +1091,7 @@ export default function GemiKidemPage() {
                 <FlashValue value={`${fmtCurrency(result.brutKidem)} ₺`} />
               </div>
               <div className={styles.line}>
-                <span>Damga vergisi (binde 7,59)</span>
+                <span>{damgaLabelForRate(result.damgaOran)}</span>
                 <span className={styles.deduction}>-{fmtCurrency(result.damgaVergisi)} ₺</span>
               </div>
               <div className={styles.line}>

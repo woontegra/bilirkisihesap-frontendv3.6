@@ -37,6 +37,7 @@ export type GemiResultSummary = {
   kullanilacakBrut: number;
   tavanUygulandi: boolean;
   brutKidem: number;
+  damgaOran: number;
   damgaVergisi: number;
   muafiyetTutari: number;
   gelirVergisiMatrahi: number;

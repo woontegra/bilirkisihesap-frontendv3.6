@@ -46,6 +46,7 @@ import {
   parseNum,
   sanitizeMoneyTyping,
 } from "./engine";
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { describeSetsError, listExtraSets, removeExtraSet, upsertExtraSet } from "./extraSetsApi";
 import {
   createEmptyMevsimlikForm,
@@ -64,7 +65,7 @@ import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 
 const PAGE_TITLE = "Mevsimlik İşçi Kıdem Tazminatı";
 const NOTE_INFO =
-  "Çalışma süresi toplam gün üzerinden yıl/ay/gün'e çevrilir; günlük kıdem payı 360 günlük yıla göre hesaplanır. Net kıdem, brüt tutardan yalnızca damga vergisi (binde 7,59) düşülerek bulunur.";
+  "Çalışma süresi toplam gün üzerinden yıl/ay/gün'e çevrilir; günlük kıdem payı 360 günlük yıla göre hesaplanır. Net kıdem, brüt tutardan yalnızca çıkış tarihindeki damga vergisi düşülerek bulunur.";
 const EXTRA_HINT = "Ekstra Hesaplamalar (Prim, İkramiye, Yemek vb.)";
 const FIXED_EXTRA_IDS = ["prim", "ikramiye", "yol", "yemek", "diger"] as const;
 const FIXED_EXTRA_ROWS: Array<{ id: (typeof FIXED_EXTRA_IDS)[number]; label: string }> = [
@@ -810,7 +811,7 @@ export default function MevsimlikKidemPage() {
       headers: ["Kalem", "Tutar"],
       rows: [
         ["Brüt Kıdem Tazminatı", money(result.brutKidem)],
-        ["Damga Vergisi (Binde 7,59)", `-${money(result.damgaVergisi)}`],
+        [damgaLabelForRate(result.damgaOran), `-${money(result.damgaVergisi)}`],
         ["Toplam Net Kıdem Tazminatı", money(result.netKidem)],
       ],
       lastRowTone: "green",
@@ -1228,7 +1229,7 @@ export default function MevsimlikKidemPage() {
                 <FlashValue value={`${fmtCurrency(result.brutKidem)} ₺`} />
               </div>
               <div className={styles.line}>
-                <span>Damga Vergisi (Binde 7,59)</span>
+                <span>{damgaLabelForRate(result.damgaOran)}</span>
                 <span className={styles.deduction}>-{fmtCurrency(result.damgaVergisi)} ₺</span>
               </div>
               <div className={`${styles.line} ${styles.netLine}`}>

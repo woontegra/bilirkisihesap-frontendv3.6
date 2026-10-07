@@ -45,6 +45,7 @@ export type IsKanunuResult = {
   tavanApplied: boolean;
   esasAylik: number;
   brutKidem: number;
+  damgaOran: number;
   damgaVergisi: number;
   netKidem: number;
   shortTenureWarning: boolean;

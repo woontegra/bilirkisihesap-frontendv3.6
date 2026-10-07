@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 
@@ -127,7 +128,7 @@ export default function IhbarBorclarPage() {
 
 
 
-  const result = useMemo(() => computeIhbarBorclarResult(form), [form]);
+  const result = useFormCalcMemo(() => computeIhbarBorclarResult(form), [form]);
 
   const dirty = snapshotKey(form) !== baseline;
 

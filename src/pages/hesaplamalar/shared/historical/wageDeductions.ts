@@ -223,25 +223,73 @@ const WAGE_TARIFF_PERIODS: TariffPeriod[] = [
   },
 ];
 
-export function assertAccrualIso(value: string): string {
-  const day = value.slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
-    throw new WageIncomeTaxError("Son tahakkuk tarihi geçersiz. Brütten nete çevrim yapılmadı.");
-  }
+const ACCRUAL_YEAR_MIN = 1996;
+const ACCRUAL_YEAR_MAX = 2030;
+
+/** İlk 10 karakter gerçek bir Gregoryen günü mü. Artık yıl ve ay uzunluğu kontrol edilir. */
+export function isRealCalendarIso(value: string): boolean {
+  const day = String(value ?? "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
   const [year, month, date] = day.split("-").map(Number);
   const utc = new Date(Date.UTC(year, month - 1, date));
-  if (utc.getUTCFullYear() !== year || utc.getUTCMonth() !== month - 1 || utc.getUTCDate() !== date) {
+  return utc.getUTCFullYear() === year && utc.getUTCMonth() === month - 1 && utc.getUTCDate() === date;
+}
+
+export function assertAccrualIso(value: string): string {
+  const day = String(value ?? "").slice(0, 10);
+  if (!isRealCalendarIso(day)) {
     throw new WageIncomeTaxError("Son tahakkuk tarihi geçersiz. Brütten nete çevrim yapılmadı.");
   }
   return day;
 }
 
+function currentCalendarYear(): number {
+  return new Date().getFullYear();
+}
+
+/**
+ * Boş, yarım veya takvimde olmayan girdiden yıl.
+ * 1996–2030 dışındaki yıl mevcut yıla düşer. Geçerli günler bu fonksiyona girmez.
+ */
+function fallbackAccrualYear(value: string): number {
+  const match = /^(\d{4})/.exec(value.trim());
+  if (!match) return currentCalendarYear();
+  const year = Number(match[1]);
+  if (year >= ACCRUAL_YEAR_MIN && year <= ACCRUAL_YEAR_MAX) return year;
+  return currentCalendarYear();
+}
+
+function calendarYear(day: string): number {
+  return Number(day.slice(0, 4));
+}
+
+/**
+ * Ekrandan gelen tahakkuk ancak gerçek bir günse ve yıl 1996 veya sonrasıysa kullanılabilir.
+ * `0202-05-20` takvimde vardır; yıl sıfırla dolduğu için tamamlanmış tarih sayılmaz.
+ */
+export function isUsableAccrualIso(value: string): boolean {
+  const day = String(value ?? "").trim().slice(0, 10);
+  if (!isRealCalendarIso(day)) return false;
+  return calendarYear(day) >= ACCRUAL_YEAR_MIN;
+}
+
+/**
+ * 1996 ve sonrası gerçek gün aynen kalır.
+ * Boş, yarım, takvimde olmayan gün ve sıfırla dolmuş yıl (`0202-05-20`) yıl sonuna düşer.
+ * 1000–1995 arasındaki tamamlanmış gün burada kesilmez; oran kontrolü reddetmeye devam eder.
+ */
 export function resolveStandartFmAccrualIso(accrual: number | string): string {
   if (typeof accrual === "number" && Number.isInteger(accrual)) {
     return assertAccrualIso(`${accrual}-12-31`);
   }
-  if (typeof accrual === "string") return assertAccrualIso(accrual);
-  throw new WageIncomeTaxError("Son tahakkuk tarihi geçersiz. Brütten nete çevrim yapılmadı.");
+  if (typeof accrual === "string") {
+    const trimmed = accrual.trim();
+    const day = trimmed.slice(0, 10);
+    if (isUsableAccrualIso(trimmed)) return assertAccrualIso(trimmed);
+    if (isRealCalendarIso(day) && calendarYear(day) >= 1000) return assertAccrualIso(day);
+    return assertAccrualIso(`${fallbackAccrualYear(trimmed)}-12-31`);
+  }
+  return assertAccrualIso(`${currentCalendarYear()}-12-31`);
 }
 
 function requireKnownDay(iso: string): string {

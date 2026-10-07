@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Fragment, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Calculator, CirclePlay, Download, Eye, FilePlus2, FolderOpen, Plus, Save, ShieldCheck, Trash2, X } from "lucide-react";
@@ -414,7 +415,7 @@ export default function UbgtCalcPage({ mode, title }: Props) {
   );
   const deferredUbgtComputeInput = useDeferredValue(ubgtComputeInput);
 
-  const result = useMemo(() => {
+  const result = useFormCalcMemo(() => {
     if (!deferredUbgtComputeInput.dateRanges.length) return null;
     return computeUbgt(deferredUbgtComputeInput);
   }, [deferredUbgtComputeInput]);
@@ -470,7 +471,7 @@ export default function UbgtCalcPage({ mode, title }: Props) {
   }, [displayToplamBrut]);
 
   const displayBrutForNet = brutOverride !== null ? brutOverride : displayToplamBrut;
-  const effectiveNet = useMemo(() => {
+  const effectiveNet = useFormCalcMemo(() => {
     if (!result || result.error) return null;
     if (displayBrutForNet <= 0) {
       return { ssk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, netAmount: 0 };
@@ -485,7 +486,7 @@ export default function UbgtCalcPage({ mode, title }: Props) {
     () => calcSonBrutAlacak(displayBrutForNet, hakkaniyet, settleNum),
     [displayBrutForNet, hakkaniyet, settleNum],
   );
-  const equityRaw = useMemo(() => calculateNet(sonBrutAlacak, taxAccrualIso || taxYear), [sonBrutAlacak, taxAccrualIso, taxYear]);
+  const equityRaw = useFormCalcMemo(() => calculateNet(sonBrutAlacak, taxAccrualIso || taxYear), [sonBrutAlacak, taxAccrualIso, taxYear]);
   const equityNet = useMemo(
     () => ({
       sgk: equityRaw.ssk,

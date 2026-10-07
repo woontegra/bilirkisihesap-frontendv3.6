@@ -23,7 +23,7 @@ import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -235,12 +235,10 @@ export default function TanikliStandartFmPage() {
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
 
   const result = useDeferredFormMemo(form, computeTanikliFmResultV3);
-  const equityNet = useMemo(
-    () => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
     [result.mahsupSonrasiNet, form.istenCikis],
   );
-  const kesintiEtiket = useMemo(
-    () => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
+  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
     [result.rows, form.istenCikis],
   );
 

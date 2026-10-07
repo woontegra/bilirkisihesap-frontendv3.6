@@ -26,7 +26,7 @@ import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -229,12 +229,10 @@ export default function Vardiya48FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeVardiya48Result);
-  const equityNet = useMemo(
-    () => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
+  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
     [result.sonNet, form.istenCikis],
   );
-  const kesintiEtiket = useMemo(
-    () => deductionLabels(lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
+  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
     [result.rows, form.istenCikis],
   );
 

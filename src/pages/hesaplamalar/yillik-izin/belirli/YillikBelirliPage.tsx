@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { FileCheck } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { YillikPageView } from "../lib/YillikPageView";
@@ -64,7 +65,7 @@ export default function YillikBelirliPage() {
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
   const syncedForm = useMemo(() => withSyncedSpan(form), [form]);
-  const result = useMemo(() => computeYillikBelirliResult(syncedForm), [syncedForm]);
+  const result = useFormCalcMemo(() => computeYillikBelirliResult(syncedForm), [syncedForm]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {

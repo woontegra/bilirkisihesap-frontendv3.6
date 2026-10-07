@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { Sun } from "lucide-react";
@@ -63,7 +64,7 @@ export default function IhbarMevsimPage() {
     clearStorageError,
   } = useIhbarCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeIhbarMevsimResult(form), [form]);
+  const result = useFormCalcMemo(() => computeIhbarMevsimResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof IhbarMevsimForm>(key: K, value: IhbarMevsimForm[K]) => {

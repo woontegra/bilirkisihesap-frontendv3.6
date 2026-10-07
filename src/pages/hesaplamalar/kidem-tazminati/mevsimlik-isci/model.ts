@@ -54,6 +54,7 @@ export type MevsimlikResultSummary = {
   ayTutar: number;
   gunTutar: number;
   brutKidem: number;
+  damgaOran: number;
   damgaVergisi: number;
   netKidem: number;
 };

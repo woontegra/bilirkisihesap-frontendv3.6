@@ -10,6 +10,34 @@
 export type TavanDonem = { start: string; end: string; tavan: number };
 
 export const KIDEM_TAVAN_DONEMLERI: TavanDonem[] = [
+  { start: "01.01.1996", end: "30.06.1996", tavan: 35.17625 },
+  { start: "01.07.1996", end: "31.12.1996", tavan: 53.3125 },
+  { start: "01.01.1997", end: "30.06.1997", tavan: 77.219375 },
+  { start: "01.07.1997", end: "31.12.1997", tavan: 104.734375 },
+  { start: "01.01.1998", end: "30.06.1998", tavan: 149.99 },
+  { start: "01.07.1998", end: "30.09.1998", tavan: 181.685 },
+  { start: "01.10.1998", end: "31.12.1998", tavan: 200.625 },
+  { start: "01.01.1999", end: "30.06.1999", tavan: 286.34125 },
+  { start: "01.07.1999", end: "31.12.1999", tavan: 345.2 },
+  { start: "01.01.2000", end: "14.06.2000", tavan: 488.99 },
+  { start: "15.06.2000", end: "30.06.2000", tavan: 506.74 },
+  { start: "01.07.2000", end: "14.12.2000", tavan: 558.44 },
+  { start: "15.12.2000", end: "31.12.2000", tavan: 587.72 },
+  { start: "01.01.2001", end: "14.04.2001", tavan: 646.56 },
+  { start: "15.04.2001", end: "14.05.2001", tavan: 663 },
+  { start: "15.05.2001", end: "14.06.2001", tavan: 730.7 },
+  { start: "15.06.2001", end: "30.06.2001", tavan: 768.1 },
+  { start: "01.07.2001", end: "14.09.2001", tavan: 807.5 },
+  { start: "15.09.2001", end: "14.10.2001", tavan: 835.95 },
+  { start: "15.10.2001", end: "14.11.2001", tavan: 884.83 },
+  { start: "15.11.2001", end: "14.12.2001", tavan: 938.33 },
+  { start: "15.12.2001", end: "31.12.2001", tavan: 978.02 },
+  { start: "01.01.2002", end: "14.05.2002", tavan: 1076.4 },
+  { start: "15.05.2002", end: "30.06.2002", tavan: 1103.54 },
+  { start: "01.07.2002", end: "30.09.2002", tavan: 1160.15 },
+  { start: "01.10.2002", end: "31.12.2002", tavan: 1260.15 },
+  { start: "01.01.2003", end: "30.06.2003", tavan: 1323.95 },
+  { start: "01.07.2003", end: "31.12.2003", tavan: 1389.95 },
   { start: "01.01.2004", end: "30.06.2004", tavan: 1485430000 / 1000000 },
   { start: "01.07.2004", end: "31.12.2004", tavan: 1574740000 / 1000000 },
   { start: "01.01.2005", end: "30.06.2005", tavan: 1648.9 },
@@ -25,6 +53,7 @@ export const KIDEM_TAVAN_DONEMLERI: TavanDonem[] = [
   { start: "01.01.2010", end: "30.06.2010", tavan: 2427.04 },
   { start: "01.07.2010", end: "31.12.2010", tavan: 2517.01 },
   { start: "01.01.2011", end: "30.06.2011", tavan: 2623.23 },
+  { start: "01.07.2011", end: "31.12.2011", tavan: 2731.85 },
   { start: "01.01.2012", end: "30.06.2012", tavan: 2917.27 },
   { start: "01.07.2012", end: "31.12.2012", tavan: 3033.98 },
   { start: "01.01.2013", end: "30.06.2013", tavan: 3129.25 },
@@ -73,5 +102,4 @@ export function findKidemTavan(exitDate: Date): number | null {
   return null;
 }
 
-export const DAMGA_ORAN = 0.00759;
 export const SSK_YIL_GUN = 360;

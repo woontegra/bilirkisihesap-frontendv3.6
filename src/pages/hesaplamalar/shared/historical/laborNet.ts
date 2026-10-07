@@ -6,6 +6,7 @@
 import { eraForIso, formatHistoricalTrl, formatTrlWageHint, scaleTableBrut } from "./currencyEra";
 import { getAsgariUcretRowByDate } from "./asgariUcret";
 import {
+  isRealCalendarIso,
   resolveStandartFmAccrualIso,
   standartFmDamgaLabel,
   standartFmDamgaOrani,
@@ -33,10 +34,8 @@ export function accrualIsoFromYearOrDate(accrual: number | string | null | undef
   if (typeof accrual === "number" && Number.isInteger(accrual)) {
     return resolveStandartFmAccrualIso(`${accrual}-12-31`);
   }
-  if (typeof accrual === "string" && accrual.trim()) {
-    return resolveStandartFmAccrualIso(accrual);
-  }
-  throw new Error("Son tahakkuk tarihi geçersiz. Brütten nete çevrim yapılmadı.");
+  if (typeof accrual === "string") return resolveStandartFmAccrualIso(accrual);
+  return resolveStandartFmAccrualIso(new Date().getFullYear());
 }
 
 export type ModernWageTax = { tax: number; summary: string };
@@ -82,7 +81,7 @@ export function ratesForAccrual(accrual: number | string): {
 /** Tarih yoksa, geçersizse veya 1996 öncesiyse sayfanın mevcut binde 7,59 oranı korunur. */
 export function stampRateForDate(iso: string | null | undefined): number {
   const day = String(iso ?? "").slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < "1996-01-01") return 0.00759;
+  if (!isRealCalendarIso(day) || day < "1996-01-01") return 0.00759;
   return standartFmDamgaOrani(day);
 }
 

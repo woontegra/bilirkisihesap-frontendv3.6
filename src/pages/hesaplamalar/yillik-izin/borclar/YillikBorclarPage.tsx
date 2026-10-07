@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Scale } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useToast } from "@/context/ToastContext";
@@ -63,7 +64,7 @@ export default function YillikBorclarPage() {
     clearStorageError,
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeYillikBorclarResult(form), [form]);
+  const result = useFormCalcMemo(() => computeYillikBorclarResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {

@@ -4,6 +4,7 @@
  * (365 gün = 1 yıl, kalan 30 günlük dilim = 1 ay).
  */
 
+import { stampRateForDate } from "../../shared/historical/laborNet";
 import type { ExtraItem, MevsimlikFormSnapshot, MevsimlikResultSummary, WorkPeriod } from "./model";
 import { findMevsimlikTavan } from "./tavanData";
 
@@ -156,10 +157,8 @@ export function calculateBrutKidem(kullanilacakBrut: number, totals: { yil: numb
   );
 }
 
-export const MEVSIMLIK_DAMGA_ORANI = 0.00759;
-
-export function calculateDamgaVergisi(brutKidem: number): number {
-  return brutKidem * MEVSIMLIK_DAMGA_ORANI;
+export function calculateDamgaVergisi(brutKidem: number, exitIso?: string | null): number {
+  return brutKidem * stampRateForDate(exitIso);
 }
 
 export function calculateNetKidem(brutKidem: number, damgaVergisi: number): number {
@@ -186,7 +185,9 @@ export function deriveMevsimlikResult(form: MevsimlikFormSnapshot): MevsimlikRes
   const ayTutar = (kullanilacakBrut / 12) * totals.ay;
   const gunTutar = (kullanilacakBrut / 360) * totals.gun;
   const brutKidem = round2(calculateBrutKidem(kullanilacakBrut, totals));
-  const damgaVergisi = round2(calculateDamgaVergisi(brutKidem));
+  const exitIso = latestPeriodEndISO(form.periods);
+  const damgaOran = stampRateForDate(exitIso);
+  const damgaVergisi = round2(calculateDamgaVergisi(brutKidem, exitIso));
   const netKidem = round2(calculateNetKidem(brutKidem, damgaVergisi));
 
   return {
@@ -203,6 +204,7 @@ export function deriveMevsimlikResult(form: MevsimlikFormSnapshot): MevsimlikRes
     ayTutar: round2(ayTutar),
     gunTutar: round2(gunTutar),
     brutKidem,
+    damgaOran,
     damgaVergisi,
     netKidem,
   };

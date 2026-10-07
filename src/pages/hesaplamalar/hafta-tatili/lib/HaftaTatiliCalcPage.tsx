@@ -22,7 +22,7 @@ import { DraftDateInput, DraftNumberInput, DraftTextInput } from "@/components/f
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import { useCalculationCaseBinding } from "@/hooks/useCalculationCaseBinding";
@@ -270,8 +270,7 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
 
   const dirty = config.snapshotKey(form) !== baseline;
   const result = useDeferredFormMemo(form, config.compute);
-  const equityRaw = useMemo(
-    () => calculateNetFromBrut(Math.max(0, result.mahsupSonuc), result.accrualIso || result.year),
+  const equityRaw = useFormCalcMemo(() => calculateNetFromBrut(Math.max(0, result.mahsupSonuc), result.accrualIso || result.year),
     [result.mahsupSonuc, result.accrualIso, result.year],
   );
   const equityNet = useMemo(
@@ -476,7 +475,7 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
     );
   };
 
-  const previewSections = useMemo((): PreviewSection[] => {
+  const previewSections = useFormCalcMemo((): PreviewSection[] => {
     if (backend?.buildPreviewSections) {
       return backend.buildPreviewSections({
         form,

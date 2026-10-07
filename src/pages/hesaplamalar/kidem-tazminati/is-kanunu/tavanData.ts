@@ -4,9 +4,8 @@
  * tanımlanır; bu biçimde string karşılaştırması doğrudan kronolojik sırayla
  * çalışır, ekstra tarih ayrıştırmasına gerek kalmaz.
  *
- * Not: 2011-07-01 → 2011-12-31 aralığı için ayrı bir dönem kaydı yoktur
- * (referans tabloda bilinçli olarak boş bırakılmıştır); bu aralığa denk gelen
- * çıkış tarihleri için tavan tutarı null döner.
+ * 1996–2003 ve 2011 ikinci yarı tutarları güncel TL ölçeğindedir.
+ * 2004 ve sonrası kayıtlar değiştirilmez.
  */
 
 export type KidemTavanPeriod = {
@@ -16,6 +15,34 @@ export type KidemTavanPeriod = {
 };
 
 export const KIDEM_TAVAN_PERIODS: readonly KidemTavanPeriod[] = [
+  { start: "1996-01-01", end: "1996-06-30", tavan: 35.17625 },
+  { start: "1996-07-01", end: "1996-12-31", tavan: 53.3125 },
+  { start: "1997-01-01", end: "1997-06-30", tavan: 77.219375 },
+  { start: "1997-07-01", end: "1997-12-31", tavan: 104.734375 },
+  { start: "1998-01-01", end: "1998-06-30", tavan: 149.99 },
+  { start: "1998-07-01", end: "1998-09-30", tavan: 181.685 },
+  { start: "1998-10-01", end: "1998-12-31", tavan: 200.625 },
+  { start: "1999-01-01", end: "1999-06-30", tavan: 286.34125 },
+  { start: "1999-07-01", end: "1999-12-31", tavan: 345.2 },
+  { start: "2000-01-01", end: "2000-06-14", tavan: 488.99 },
+  { start: "2000-06-15", end: "2000-06-30", tavan: 506.74 },
+  { start: "2000-07-01", end: "2000-12-14", tavan: 558.44 },
+  { start: "2000-12-15", end: "2000-12-31", tavan: 587.72 },
+  { start: "2001-01-01", end: "2001-04-14", tavan: 646.56 },
+  { start: "2001-04-15", end: "2001-05-14", tavan: 663 },
+  { start: "2001-05-15", end: "2001-06-14", tavan: 730.7 },
+  { start: "2001-06-15", end: "2001-06-30", tavan: 768.1 },
+  { start: "2001-07-01", end: "2001-09-14", tavan: 807.5 },
+  { start: "2001-09-15", end: "2001-10-14", tavan: 835.95 },
+  { start: "2001-10-15", end: "2001-11-14", tavan: 884.83 },
+  { start: "2001-11-15", end: "2001-12-14", tavan: 938.33 },
+  { start: "2001-12-15", end: "2001-12-31", tavan: 978.02 },
+  { start: "2002-01-01", end: "2002-05-14", tavan: 1076.4 },
+  { start: "2002-05-15", end: "2002-06-30", tavan: 1103.54 },
+  { start: "2002-07-01", end: "2002-09-30", tavan: 1160.15 },
+  { start: "2002-10-01", end: "2002-12-31", tavan: 1260.15 },
+  { start: "2003-01-01", end: "2003-06-30", tavan: 1323.95 },
+  { start: "2003-07-01", end: "2003-12-31", tavan: 1389.95 },
   { start: "2004-01-01", end: "2004-06-30", tavan: 1485.43 },
   { start: "2004-07-01", end: "2004-12-31", tavan: 1574.74 },
   { start: "2005-01-01", end: "2005-06-30", tavan: 1648.9 },
@@ -31,6 +58,7 @@ export const KIDEM_TAVAN_PERIODS: readonly KidemTavanPeriod[] = [
   { start: "2010-01-01", end: "2010-06-30", tavan: 2427.04 },
   { start: "2010-07-01", end: "2010-12-31", tavan: 2517.01 },
   { start: "2011-01-01", end: "2011-06-30", tavan: 2623.23 },
+  { start: "2011-07-01", end: "2011-12-31", tavan: 2731.85 },
   { start: "2012-01-01", end: "2012-06-30", tavan: 2917.27 },
   { start: "2012-07-01", end: "2012-12-31", tavan: 3033.98 },
   { start: "2013-01-01", end: "2013-06-30", tavan: 3129.25 },

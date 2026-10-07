@@ -38,6 +38,7 @@ import {
   mapKismiRecordToSavedCase,
   KIDEM_KISMI_SURELI_TYPE,
 } from "./backendCase";
+import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { listKidemSavedCases } from "../shared/listKidemCases";
 import { formatKidemMoneyFields } from "../shared/formatKidemMoneyFields";
 import {
@@ -73,7 +74,7 @@ import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 
 const PAGE_TITLE = "Kıdem Tazminatı — Kısmi Süreli / Part Time";
 const NOTE_INFO =
-  "Çalışma süresi 360 günlük yıla göre yıl/ay/gün'e çevrilir; günlük pay brüt ücretin 360'a bölünmesiyle bulunur. Net tutar, brüt tazminattan yalnızca binde 7,59 oranında damga vergisi düşülerek hesaplanır.";
+  "Çalışma süresi 360 günlük yıla göre yıl/ay/gün'e çevrilir; günlük pay brüt ücretin 360'a bölünmesiyle bulunur. Net tutar, brüt tazminattan yalnızca çıkış tarihindeki damga vergisi düşülerek hesaplanır.";
 
 /* Sabit ekstra satırları (V3 KidemTazminatiForm sırası ve id/ad eşlemesi) */
 type FixedFieldKey = "prim" | "ikramiye" | "yol" | "yemek" | "diger";
@@ -309,7 +310,7 @@ export default function KismiKidemPage() {
     [toplamBrutUcret, yil, ay, gun, istenCikis],
   );
 
-  const brutNet = useMemo(() => deriveBrutNet(kismiResult.toplamTutar), [kismiResult.toplamTutar]);
+  const brutNet = useMemo(() => deriveBrutNet(kismiResult.toplamTutar, istenCikis), [kismiResult.toplamTutar, istenCikis]);
 
   const startedRef = useRef(false);
   const completedFingerprintRef = useRef<string | null>(null);
@@ -796,7 +797,7 @@ export default function KismiKidemPage() {
 
     const netRows: string[][] = [
       ["Brüt Kıdem Tazminatı", money(brutNet.brut)],
-      ["Damga Vergisi (Binde 7,59)", `-${money(brutNet.damgaVergisi)}`],
+      [damgaLabelForRate(brutNet.damgaOran), `-${money(brutNet.damgaVergisi)}`],
       ["Toplam Net Kıdem Tazminatı", money(brutNet.net)],
     ];
     sections.push({ id: "net", title: "Brüt'ten Net'e", headers: ["Kalem", "Tutar"], rows: netRows, lastRowTone: "green" });
@@ -1181,7 +1182,7 @@ export default function KismiKidemPage() {
                 <span>{fmtCurrency(brutNet.brut)} ₺</span>
               </div>
               <div className={styles.line}>
-                <span>Damga Vergisi (Binde 7,59)</span>
+                <span>{damgaLabelForRate(brutNet.damgaOran)}</span>
                 <span className={styles.deduction}>-{fmtCurrency(brutNet.damgaVergisi)} ₺</span>
               </div>
               <div className={`${styles.line} ${styles.netLine}`}>
@@ -1189,7 +1190,7 @@ export default function KismiKidemPage() {
                 <FlashValue value={`${fmtCurrency(brutNet.net)} ₺`} />
               </div>
               <p className={styles.panelHint}>
-                Kısmi süreli çalışmada net tutar brüt tazminattan yalnızca binde 7,59 damga vergisi düşülerek
+                Kısmi süreli çalışmada net tutar brüt tazminattan yalnızca çıkış tarihindeki damga vergisi düşülerek
                 hesaplanır; gelir vergisi uygulanmaz.
               </p>
             </div>

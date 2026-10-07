@@ -1,3 +1,4 @@
+import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Ship } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { YillikPageView } from "../lib/YillikPageView";
@@ -68,7 +69,7 @@ export default function YillikGemiPage() {
     clearStorageError,
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useMemo(() => computeYillikGemiResult(form), [form]);
+  const result = useFormCalcMemo(() => computeYillikGemiResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
   const { startDate, endDate } = resolveGemiDates(form);
 
