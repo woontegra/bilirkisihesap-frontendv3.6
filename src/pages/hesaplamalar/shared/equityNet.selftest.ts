@@ -223,7 +223,7 @@ assert(puantaj.sonBrut === puantaj.sonNet, "puantaj son net = son brut");
 assert(puantaj.toplamBrut.includes("90"), "puantaj toplam brut");
 near(puantaj.raw.sonTutar, Math.max(0, round2(BRUT - round2(BRUT / 3) - MAHSUP)), "puantaj raw");
 
-assert(PRODUCT_VERSION === "3.6.0", "surum");
+assert(PRODUCT_VERSION === "3.6.2", "surum");
 assert(PRODUCT_VERSION_NOTE.includes("brütten nete"), "surum notu");
 
 const report = {

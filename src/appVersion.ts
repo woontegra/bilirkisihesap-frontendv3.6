@@ -1,5 +1,5 @@
 /** Tek kaynak. Abonelik sayfası ve masaüstü sürüm bilgisi buradan okunur. */
-export const PRODUCT_VERSION = "3.6.0";
+export const PRODUCT_VERSION = "3.6.2";
 
 export const PRODUCT_VERSION_NOTES = [
   "Hakkaniyet indirimi ve mahsuplaşma sonrası brütten nete hesaplama eklendi.",
