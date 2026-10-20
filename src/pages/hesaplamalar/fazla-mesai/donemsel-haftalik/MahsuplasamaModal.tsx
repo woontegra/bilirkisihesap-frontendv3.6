@@ -1,6 +1,6 @@
 ﻿/**
- * TanÄ±klÄ± Standart Fazla Mesai â€” MahsuplaÅŸma Ekle modalÄ± (V3 paritesi).
- * Cetveldeki yÄ±llar iÃ§in ay bazÄ±nda tutar girilir; toplam, mahsup tutarÄ±na yazÄ±lÄ±r.
+ * Tanıklı Standart Fazla Mesai — Mahsuplaşma Ekle modalı (V3 paritesi).
+ * Cetveldeki yıllar için ay bazında tutar girilir; toplam, mahsup tutarına yazılır.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -10,17 +10,17 @@ import styles from "./DonemselHaftalikFmPage.module.css";
 
 const MONTH_NAMES = [
   "Ocak",
-  "Åubat",
+  "Şubat",
   "Mart",
   "Nisan",
-  "MayÄ±s",
+  "Mayıs",
   "Haziran",
   "Temmuz",
-  "AÄŸustos",
-  "EylÃ¼l",
+  "Ağustos",
+  "Eylül",
   "Ekim",
-  "KasÄ±m",
-  "AralÄ±k",
+  "Kasım",
+  "Aralık",
 ] as const;
 
 export function MahsuplasamaModal({
@@ -30,7 +30,7 @@ export function MahsuplasamaModal({
   onClose,
 }: {
   open: boolean;
-  /** Cetvel dÃ¶nemlerinden Ã§Ä±karÄ±lan yÄ±llar (artan sÄ±rada). */
+  /** Cetvel dönemlerinden çıkarılan yıllar (artan sırada). */
   years: number[];
   onSave: (total: number) => void;
   onClose: () => void;
@@ -60,11 +60,11 @@ export function MahsuplasamaModal({
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className={styles.modalTitle}>MahsuplaÅŸma Ekle</h2>
-        <p className={styles.modalDesc}>Ay ve yÄ±l bazÄ±nda mahsuplaÅŸma miktarlarÄ±nÄ± girin.</p>
+        <h2 className={styles.modalTitle}>Mahsuplaşma Ekle</h2>
+        <p className={styles.modalDesc}>Ay ve yıl bazında mahsuplaşma miktarlarını girin.</p>
 
         {years.length === 0 ? (
-          <p className={styles.emptyText}>Hesaplama tablosunda veri bulunamadÄ±. Ã–nce hesaplama yapÄ±n.</p>
+          <p className={styles.emptyText}>Hesaplama tablosunda veri bulunamadı. Önce hesaplama yapın.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.resultTable}>
@@ -90,7 +90,7 @@ export function MahsuplasamaModal({
                           value={values[`${year}-${idx + 1}`] ?? ""}
                           onChange={(e) => setCell(year, idx + 1, e.target.value)}
                           placeholder="0"
-                          aria-label={`${name} ${year} mahsup tutarÄ±`}
+                          aria-label={`${name} ${year} mahsup tutarı`}
                         />
                       </td>
                     ))}
@@ -103,13 +103,13 @@ export function MahsuplasamaModal({
 
         <div className={styles.zamanasimiSummary}>
           <div className={`${styles.line} ${styles.netLine}`}>
-            <span>Toplam: {formatMoney(total)} â‚º</span>
+            <span>Toplam: {formatMoney(total)} ₺</span>
           </div>
         </div>
 
         <div className={styles.modalActions}>
           <Button variant="soft" onClick={onClose}>
-            Ä°ptal
+            İptal
           </Button>
           <Button
             variant="primary"

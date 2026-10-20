@@ -77,6 +77,7 @@ import { ZamanasimiPickerModal } from "./ZamanasimiPickerModal";
 import { ZamanasimiCetvelBanner } from "../shared/ZamanasimiCetvelBanner";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./DonemselFmPage.module.css";
 
@@ -1257,7 +1258,7 @@ export default function DonemselFmPage() {
         open={showKatsayiModal}
         currentKatsayi={katSayiNum}
         onApply={(k) => {
-          setField("katSayi", String(k));
+          setField("katSayi", formatKatsayiForForm(k));
           setShowKatsayiModal(false);
         }}
         onReset={() => {

@@ -73,6 +73,7 @@ import { insertExclusionsPreviewSection } from "../shared/exclusionsPreview";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./Vardiya24FmPage.module.css";
 
@@ -971,7 +972,7 @@ export default function Vardiya24FmPage() {
       <KatsayiModal
         open={showKatsayiModal}
         currentKatsayi={katSayiNum}
-        onApply={(k) => setField("katSayi", String(k))}
+        onApply={(k) => setField("katSayi", formatKatsayiForForm(k))}
         onReset={() => setField("katSayi", "1")}
         onClose={() => setShowKatsayiModal(false)}
       />

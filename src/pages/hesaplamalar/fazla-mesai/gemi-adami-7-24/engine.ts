@@ -15,6 +15,7 @@ import type {
 import { newLocalId } from "./model";
 import { runGemi724V3Pipeline } from "./v3-engine/pipeline";
 import { hesaplaHakkaniyetIndirimi, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
+import { parseDecimalKatsayi } from "../shared/katsayiForm";
 
 /* ── Sabitler ── */
 export const WEEKLY_LIMIT = 48;
@@ -52,8 +53,7 @@ export function parseMoneyInput(value: string): number {
 }
 
 export function parseKatsayi(value: string): number {
-  const n = parseMoneyInput(value);
-  return n > 0 ? n : 1;
+  return parseDecimalKatsayi(value);
 }
 
 export { sanitizeMoneyTyping } from "@/utils/moneyInput";

@@ -1,6 +1,6 @@
 ﻿/**
- * TanÄ±klÄ± Standart Fazla Mesai â€” Kat SayÄ± Hesapla modalÄ± (V3 paritesi).
- * Bilinen Ã¼cret / asgari Ã¼cret oranÄ±ndan katsayÄ± Ã¼retir (4 hane).
+ * Tanıklı Standart Fazla Mesai — Kat Sayı Hesapla modalı (V3 paritesi).
+ * Bilinen ücret / asgari ücret oranından katsayı üretir (4 hane).
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -43,11 +43,11 @@ export function KatsayiModal({
   return (
     <div className={styles.modalOverlay} role="presentation" onClick={onClose}>
       <div className={styles.modalCard} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.modalTitle}>Kat SayÄ± Hesapla</h2>
+        <h2 className={styles.modalTitle}>Kat Sayı Hesapla</h2>
 
         <div className={styles.basicGrid}>
           <label className={styles.field}>
-            <span className={styles.fieldLabel}>Bilinen Ãœcret</span>
+            <span className={styles.fieldLabel}>Bilinen Ücret</span>
             <div className={styles.inputWrap}>
               <input
                 className={styles.input}
@@ -57,12 +57,12 @@ export function KatsayiModal({
                 placeholder="0"
               />
               <span className={styles.currency} aria-hidden>
-                â‚º
+                ₺
               </span>
             </div>
           </label>
           <label className={styles.field}>
-            <span className={styles.fieldLabel}>Asgari Ãœcret</span>
+            <span className={styles.fieldLabel}>Asgari Ücret</span>
             <div className={styles.inputWrap}>
               <input
                 className={styles.input}
@@ -72,7 +72,7 @@ export function KatsayiModal({
                 placeholder="0"
               />
               <span className={styles.currency} aria-hidden>
-                â‚º
+                ₺
               </span>
             </div>
           </label>
@@ -81,7 +81,7 @@ export function KatsayiModal({
         <div className={styles.zamanasimiSummary}>
           <div className={`${styles.line} ${styles.netLine}`}>
             <span>
-              KatsayÄ±: <strong>{katsayi ? katsayi.toFixed(4) : "0.0000"}</strong>
+              Katsayı: <strong>{katsayi ? katsayi.toFixed(4) : "0.0000"}</strong>
             </span>
           </div>
         </div>
@@ -95,11 +95,11 @@ export function KatsayiModal({
                 onClose();
               }}
             >
-              SÄ±fÄ±rla (1)
+              Sıfırla (1)
             </Button>
           ) : null}
           <Button variant="soft" onClick={onClose}>
-            Ä°ptal
+            İptal
           </Button>
           <Button
             variant="primary"

@@ -550,9 +550,10 @@ export function computeVardiya48Result(form: Vardiya48FormSnapshot): Vardiya48Re
     return !(wt === 0 && fmH === 0);
   });
 
-  let apiRows: PeriodRow[] = visibleRows48.map((w) => {
+  // rowOverrides satır kimliğiyle eşleşir; kimlik her hesaplamada aynı kalmalı.
+  let apiRows: PeriodRow[] = visibleRows48.map((w, idx) => {
     const row: PeriodRow = {
-      id: newLocalId(),
+      id: `v48-row-${idx}-${w.startDate}-${w.endDate}`,
       isManual: false,
       rangeLabel: `${formatDateTR(w.startDate)}–${formatDateTR(w.endDate)}`,
       weeks: w.weekCount,

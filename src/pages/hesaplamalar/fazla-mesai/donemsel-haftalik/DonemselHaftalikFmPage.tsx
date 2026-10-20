@@ -78,6 +78,7 @@ import { ZamanasimiCetvelBanner } from "../shared/ZamanasimiCetvelBanner";
 import { insertExclusionsPreviewSection } from "../shared/exclusionsPreview";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./DonemselHaftalikFmPage.module.css";
 
@@ -1458,7 +1459,7 @@ export default function DonemselHaftalikFmPage() {
         open={showKatsayiModal}
         currentKatsayi={katSayiNum}
         onApply={(k) => {
-          setField("katSayi", String(k));
+          setField("katSayi", formatKatsayiForForm(k));
           setShowKatsayiModal(false);
         }}
         onReset={() => {

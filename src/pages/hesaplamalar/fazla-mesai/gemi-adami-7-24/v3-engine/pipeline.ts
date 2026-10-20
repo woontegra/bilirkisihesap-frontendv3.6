@@ -6,16 +6,12 @@ import { expandGemi724RowsForDeductions } from "../expandRowsForDeductions";
 import type { Gemi724FormSnapshot, PeriodRow, RowOverride } from "../model";
 import { buildClassicPeriodRows } from "./computeClassicPeriods";
 import { calculateWeeksBetweenDates } from "./dateUtils";
+import { parseDecimalKatsayi } from "../../shared/katsayiForm";
 
 const DENOM = 240;
 const FACTOR = 1.25;
 const DAMGA_ORANI = 0.00759;
 const GELIR_VERGISI_ORANI = 0.15;
-
-function parseKatsayi(value: string): number {
-  const n = Number(String(value ?? "").replace(/\./g, "").replace(",", "."));
-  return Number.isFinite(n) && n > 0 ? n : 1;
-}
 
 function validateDateRange(start: string, end: string): string | null {
   if (!start || !end) return null;
@@ -138,7 +134,7 @@ export function runGemi724V3Pipeline(form: Gemi724FormSnapshot): {
     return { rows: [], warnings };
   }
 
-  const katsayi = parseKatsayi(form.katSayi);
+  const katsayi = parseDecimalKatsayi(form.katSayi);
   let pipeRows = buildClassicPeriodRows(form);
   pipeRows = mergeAdjacentRows(pipeRows, katsayi);
 

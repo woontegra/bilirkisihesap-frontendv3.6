@@ -14,7 +14,6 @@ import {
 } from "../engine";
 import { GEMI_DAILY_REF_HOURS, MODE270_SIMPLE_REDUCTION_HOURS } from "../constants";
 import type { GemiGunlukFormSnapshot, PeriodRow, SevenDayMode, Witness } from "../model";
-import { newLocalId } from "../model";
 import { apply270ToPeriodsUnified } from "./lib/apply270ToPeriodsUnified";
 import { normalizeDate, normalizeLocalDate, toISODateLocal } from "./lib/dateHelpers";
 import { normalizeWitnessDateRanges } from "./lib/dateSegmentationCore";
@@ -228,8 +227,9 @@ export function buildClassicPeriodRows(form: GemiGunlukFormSnapshot): PeriodRow[
     const w = calculateWeekCountBackend(segmentStart, segmentEnd);
     const brut = getAsgariUcretByDate(segment.startDate) || 0;
 
+    // rowOverrides satır kimliğiyle eşleşir; kimlik her hesaplamada aynı kalmalı.
     rows.push({
-      id: newLocalId("row"),
+      id: `gg-row-${rows.length}-${segment.startDate}-${segment.endDate}`,
       startISO: segment.startDate,
       endISO: segment.endDate,
       weeks: w,
