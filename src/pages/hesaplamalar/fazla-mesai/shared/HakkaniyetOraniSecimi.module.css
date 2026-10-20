@@ -1,0 +1,29 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.select {
+  height: 1.75rem;
+  padding: 0 1.4rem 0 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--surface-elevated, var(--surface));
+  color: var(--text-strong);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}

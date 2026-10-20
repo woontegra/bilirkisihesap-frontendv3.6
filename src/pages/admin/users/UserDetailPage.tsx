@@ -27,7 +27,7 @@ import { StatusBadge, statusToneFromRaw } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { useToast } from "@/context/ToastContext";
-import { formatDateTr, getAccountStatusLabel, getStatusLabel, getSubscriptionAccessTone, getSubscriptionTypeLabel } from "@/utils/adminLabels";
+import { formatDateTr, getStatusLabel, getSubscriptionTypeLabel } from "@/utils/adminLabels";
 import styles from "./UserDetailPage.module.css";
 
 type TabKey = "genel" | "abonelik" | "gecmis" | "cihaz" | "demo" | "islem" | "destek";
@@ -95,13 +95,6 @@ type UserDetailData = {
     endDate: string | null;
     remainingDays: number | null;
     status: string;
-    access?: {
-      allowed?: boolean;
-      code?: string;
-      label?: string;
-      expiresAt?: string | null;
-      licenseStatus?: string | null;
-    };
   };
   license: {
     licenseId: string | null;
@@ -718,10 +711,8 @@ export default function UserDetailPage() {
             </h1>
             <p className={styles.userEmail}>{user.email}</p>
             <div className={styles.badges}>
-              <StatusBadge tone={statusToneFromRaw(user.status)}>{getAccountStatusLabel(user.status)}</StatusBadge>
-              <StatusBadge tone={getSubscriptionAccessTone(sub.access?.code)}>
-                {sub.access?.label || getSubscriptionTypeLabel(sub.type)}
-              </StatusBadge>
+              <StatusBadge tone={statusToneFromRaw(user.status)}>{getStatusLabel(user.status)}</StatusBadge>
+              <StatusBadge tone="accent">{getSubscriptionTypeLabel(sub.type)}</StatusBadge>
               <StatusBadge tone="neutral">
                 {sub.remainingDays != null ? `${Math.max(0, sub.remainingDays)} gün` : NO_DATA}
               </StatusBadge>
@@ -746,7 +737,7 @@ export default function UserDetailPage() {
         />
         <StatCard
           label="Lisans / Cihaz"
-          value={license ? (sub.access?.label || getStatusLabel(license.status)) : (sub.access?.label || "Lisans yok")}
+          value={license ? getStatusLabel(license.status) : "Lisans yok"}
           hint={license ? `${license.deviceCount} cihaz kayıtlı` : NO_DATA}
           icon={Key}
           tone="blue"
@@ -854,9 +845,8 @@ export default function UserDetailPage() {
               <div className={styles.infoItem}><p className={styles.infoLabel}>Ad Soyad</p><p className={styles.infoValue}>{user.name}</p></div>
               <div className={styles.infoItem}><p className={styles.infoLabel}>E-posta</p><p className={styles.infoValue}>{user.email}</p></div>
               <div className={styles.infoItem}><p className={styles.infoLabel}>Şirket</p><p className={styles.infoValue}>{user.company || NO_DATA}</p></div>
-              <div className={styles.infoItem}><p className={styles.infoLabel}>Hesap durumu</p><p className={styles.infoValue}>{getAccountStatusLabel(user.status)}</p></div>
+              <div className={styles.infoItem}><p className={styles.infoLabel}>Durum</p><p className={styles.infoValue}>{getStatusLabel(user.status)}</p></div>
               <div className={styles.infoItem}><p className={styles.infoLabel}>Abonelik</p><p className={styles.infoValue}>{getSubscriptionTypeLabel(sub.type)}</p></div>
-              <div className={styles.infoItem}><p className={styles.infoLabel}>Abonelik durumu</p><p className={styles.infoValue}>{sub.access?.label || "—"}</p></div>
               <div className={styles.infoItem}>
                 <p className={styles.infoLabel}>Müdahale durumu</p>
                 <p className={`${styles.infoValue} ${interventionReasons.length ? styles.riskWarn : ""}`}>{riskLabel}</p>
@@ -894,7 +884,7 @@ export default function UserDetailPage() {
                   {license.supheli ? <StatusBadge tone="danger">Şüpheli kullanım</StatusBadge> : null}
                 </>
               ) : (
-                <p className={styles.infoValue}>{sub.access?.label || "Lisans kaydı yok"}</p>
+                <p className={styles.infoValue}>Aktif lisans kaydı yok</p>
               )}
             </div>
           </div>

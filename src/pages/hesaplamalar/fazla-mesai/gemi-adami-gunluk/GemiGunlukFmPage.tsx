@@ -1,4 +1,3 @@
-import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Gemi Adamı — Günlük Çalışan Fazla Mesai (V3.5; V3 işlev/metin paritesi, lokal motor).
  */
@@ -21,12 +20,11 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
-import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -62,14 +60,11 @@ import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import {
   computeGemiGunlukResult,
   createManualPeriodRow,
-  fmTaxYear,
   formatMoney,
-  netFromGrossFm,
   parseKatsayi,
   sanitizeMoneyTyping,
   validateDateRange,
 } from "./engine";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyForm,
   createEmptyWitness,
@@ -79,6 +74,8 @@ import {
   type SevenDayMode,
   type Witness,
 } from "./model";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./GemiGunlukFmPage.module.css";
 
 const PAGE_TITLE = "Gemi Adamı — Günlük Çalışan Fazla Mesai";
@@ -233,13 +230,6 @@ export default function GemiGunlukFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeGemiGunlukResult);
-  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
-    [result.sonNet, form.istenCikis],
-  );
-  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
-    [result.rows, form.istenCikis],
-  );
-
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum > 0 && katSayiNum !== 1;
 
@@ -477,13 +467,7 @@ export default function GemiGunlukFmPage() {
       const saved = await saveGemiGunlukFmCase(
         name,
         form,
-        {
-          toplamFm: result.toplamFm,
-          sonNet: result.sonNet,
-          rowCount: result.rows.length,
-          sonBrutAlacak: result.sonNet,
-          sonNetAlacak: equityNet.net,
-        },
+        { toplamFm: result.toplamFm, sonNet: result.sonNet, rowCount: result.rows.length },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -559,9 +543,9 @@ export default function GemiGunlukFmPage() {
         title: "Fazla Mesai Cetveli (Gemi)",
         headers: ["Dönem", "Hafta", "Ücret", "Kat", "FM Saat", "240", "1,25", "FM"],
         rows: result.rows.map((r) => [
-          formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.yillikIzinAciklama || r.note),
+          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.yillikIzinAciklama || r.note ? ` ${r.yillikIzinAciklama || r.note}` : ""}`,
           String(r.weeks),
-          (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
+          money(r.brut),
           String(r.katsayi),
           r.fmHours.toFixed(2),
           "240",
@@ -577,7 +561,7 @@ export default function GemiGunlukFmPage() {
         rows: [
           ["Brüt Fazla Mesai", money(result.toplamFm)],
           ["SGK (%14)", `-${money(result.sgk)}`],
-          [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
+          ["İşsizlik (%1)", `-${money(result.issizlik)}`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`, `-${money(result.gelirVergisi)}`],
           ["Damga Vergisi", `-${money(result.damgaVergisi)}`],
           ["Net Fazla Mesai", money(result.netYillik)],
@@ -589,24 +573,19 @@ export default function GemiGunlukFmPage() {
         title: "Mahsuplaşma",
         headers: ["Kalem", "Tutar"],
         rows: [
-          ["Toplam Brüt Alacak", money(result.toplamFm)],
-          ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetIndirimi)}`],
-          ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
-          ["Son Brüt Alacak", money(result.sonNet)],
-          ...equityNetPreviewRows({
-            format: money,
-            kesinti: equityNet,
-            sgkLabel: "SGK (%14)",
-            issizlikLabel: kesintiEtiket.issizlik,
-            damgaLabel: "Damga",
-          }),
+          ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
+          [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
+          ...(result.mahsupTutari > 0
+            ? [["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`] as [string, string]]
+            : []),
+          ["Son Net Alacak", money(result.sonNet)],
         ],
         lastRowTone: "green",
       },
       ],
       form.exclusions,
     );
-  }, [form, result, equityNet]);
+  }, [form, result]);
 
   return (
     <div className={styles.page} data-page="fazla-mesai-gemi-adami-gunluk">
@@ -954,7 +933,7 @@ export default function GemiGunlukFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.sgk)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>{kesintiEtiket.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span className={styles.deduction}>-{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div className={styles.line}>
@@ -1002,7 +981,11 @@ export default function GemiGunlukFmPage() {
               <span>{formatMoney(result.toplamFm)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>1/3 hakkaniyet indirimi</span>
+              <HakkaniyetOraniSecimi
+                value={form.hakkaniyetOrani}
+                onChange={(v) => setField("hakkaniyetOrani", v)}
+                metin="hakkaniyet indirimi"
+              />
               <span className={styles.deduction}>-{formatMoney(result.hakkaniyetIndirimi)} ₺</span>
             </div>
             <div className={styles.line}>
@@ -1010,19 +993,9 @@ export default function GemiGunlukFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.mahsupTutari)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son Brüt Alacak</span>
+              <span>Son net</span>
               <span>{formatMoney(result.sonNet)} ₺</span>
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass={styles.line}
-              deductClass={styles.deduction}
-              netClass={styles.netLine}
-              sgkLabel="SGK (%14)"
-              issizlikLabel={kesintiEtiket.issizlik}
-              damgaLabel="Damga"
-            />
           </div>
         </article>
 

@@ -20,17 +20,6 @@ export async function fetchDashboardFromApi(isAdmin: boolean): Promise<Dashboard
     if (typeof me.id === "number") {
       userInfo = me as UserInfo;
     }
-    const paid =
-      String(me.role || "").toLowerCase() === "admin" || me.licenseActive === true;
-    if (!paid) {
-      return {
-        savedCases: [],
-        userInfo,
-        financial: null,
-        financialError: null,
-        connectionError,
-      };
-    }
   } catch (err) {
     userInfo = null;
     connectionError =

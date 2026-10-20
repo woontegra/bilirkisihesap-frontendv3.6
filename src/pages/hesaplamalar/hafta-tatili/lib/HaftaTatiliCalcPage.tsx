@@ -1,4 +1,3 @@
-import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -22,13 +21,13 @@ import { DraftDateInput, DraftNumberInput, DraftTextInput } from "@/components/f
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import { useCalculationCaseBinding } from "@/hooks/useCalculationCaseBinding";
 import type { CalcSaveResult } from "../../shared/calcBackendCrud";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
-import { calculateNetFromBrut, parseSettleAmount } from "./net";
+import { hakkaniyetOraniEtiketi, type HakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../../fazla-mesai/shared/HakkaniyetOraniSecimi";
 import HaftaTatiliExpiryBox from "./HaftaTatiliExpiryBox";
 import {
   createHaftaTatiliGuidedTour,
@@ -61,7 +60,6 @@ export type HaftaTatiliComputeResult = {
   rows: TableRow[];
   totalBrut: number;
   year: number;
-  accrualIso?: string;
   net: NetBreakdown;
   hakkaniyet: number;
   mahsupSonuc: number;
@@ -74,6 +72,7 @@ export type HaftaTatiliBaseForm = {
   selectedHolidayIds: string[];
   rows: TableRow[];
   settleAmount: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   globalCoefficient: number;
   kullanimBaslangic?: string;
   kullanimBitis?: string;
@@ -117,8 +116,6 @@ export type HaftaTatiliBackendConfig<TForm extends HaftaTatiliBaseForm> = {
     net: NetBreakdown;
     globalCoefficient: number;
     rowOverrides?: Record<string, unknown>;
-    sonBrutAlacak?: number;
-    sonNetAlacak?: number;
   }) => CalcSaveResult;
   buildRowOverrides?: (rows: TableRow[]) => Record<string, unknown> | undefined;
   validateSave?: (form: TForm, result: HaftaTatiliComputeResult) => { ok: true } | { ok: false; message: string };
@@ -270,21 +267,6 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
 
   const dirty = config.snapshotKey(form) !== baseline;
   const result = useDeferredFormMemo(form, config.compute);
-  const equityRaw = useFormCalcMemo(() => calculateNetFromBrut(Math.max(0, result.mahsupSonuc), result.accrualIso || result.year),
-    [result.mahsupSonuc, result.accrualIso, result.year],
-  );
-  const equityNet = useMemo(
-    () => ({
-      sgk: equityRaw.ssk,
-      issizlik: equityRaw.issizlik,
-      gelirVergisi: equityRaw.gelirVergisi,
-      gelirVergisiDilimleri: equityRaw.gelirVergisiDilimleri,
-      damgaVergisi: equityRaw.damgaVergisi,
-      net: equityRaw.netAmount,
-    }),
-    [equityRaw],
-  );
-  const mahsupTutar = parseSettleAmount(form.settleAmount);
   const manualBrutActive = useMemo(
     () => result.rows.some((r) => r.brutManual === true && r.wage > 0),
     [result.rows],
@@ -475,7 +457,7 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
     );
   };
 
-  const previewSections = useFormCalcMemo((): PreviewSection[] => {
+  const previewSections = useMemo((): PreviewSection[] => {
     if (backend?.buildPreviewSections) {
       return backend.buildPreviewSections({
         form,
@@ -526,35 +508,17 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
       rows: [
         ["Brüt", `${formatMoney(result.totalBrut)} ₺`],
         ["SGK (%14)", `-${formatMoney(result.net.ssk)} ₺`],
-        [issizlikLabelForRate(result.net.issizlikOran, "İşsizlik (%1)"), `-${formatMoney(result.net.issizlik)} ₺`],
+        ["İşsizlik (%1)", `-${formatMoney(result.net.issizlik)} ₺`],
         [`Gelir Vergisi ${result.net.gelirVergisiDilimleri}`, `-${formatMoney(result.net.gelirVergisi)} ₺`],
         ["Damga (7,59‰)", `-${formatMoney(result.net.damgaVergisi)} ₺`],
         ["Net", `${formatMoney(result.net.netAmount)} ₺`],
-      ],
-      lastRowTone: "green",
-    });
-    secs.push({
-      id: "hakkaniyet",
-      title: "Hakkaniyet İndirimi / Mahsuplaşma",
-      headers: ["Kalem", "Tutar"],
-      rows: [
-        ["Toplam Brüt Alacak", `${formatMoney(result.totalBrut)} ₺`],
-        ["1/3 Hakkaniyet İndirimi", `-${formatMoney(result.hakkaniyet)} ₺`],
-        ["Mahsuplaşma Tutarı", `-${formatMoney(mahsupTutar)} ₺`],
-        ["Son Brüt Alacak", `${formatMoney(result.mahsupSonuc)} ₺`],
-        ...equityNetPreviewRows({
-          format: (n) => `${formatMoney(n)} ₺`,
-          kesinti: equityNet,
-          sgkLabel: "SGK (%14)",
-          issizlikLabel: issizlikLabelForRate(equityRaw.issizlikOran, "İşsizlik (%1)"),
-          damgaLabel: damgaLabelForRate(equityRaw.damgaOran, "permille"),
-          gelirPrefix: "Gelir vergisi",
-        }),
+        [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet`, `-${formatMoney(result.hakkaniyet)} ₺`],
+        ["Mahsuplaşma Sonucu", `${formatMoney(result.mahsupSonuc)} ₺`],
       ],
       lastRowTone: "green",
     });
     return secs;
-  }, [form, result, config.showGeceCalisan, daily50Header, backend, equityNet, mahsupTutar]);
+  }, [form, result, config.showGeceCalisan, daily50Header, backend]);
 
   const defaultSaveGate = useCallback(
     (f: TForm, r: HaftaTatiliComputeResult): { ok: true } | { ok: false; message: string } => {
@@ -585,8 +549,6 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
           net: result.net,
           globalCoefficient: form.globalCoefficient,
           rowOverrides: backend.buildRowOverrides?.(result.rows),
-          sonBrutAlacak: result.mahsupSonuc,
-          sonNetAlacak: equityNet.net,
         });
         const record = await backend.caseCrud.saveCase(name, form, saveResult, activeId);
         const recordId = String(record.id);
@@ -970,7 +932,7 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
                   <strong className={styles.deduction}>−{formatMoney(result.net.ssk)} ₺</strong>
                 </div>
                 <div className={styles.line}>
-                  <span>{issizlikLabelForRate(result.net.issizlikOran, "İşsizlik (%1)")}</span>
+                  <span>İşsizlik (%1)</span>
                   <strong className={styles.deduction}>−{formatMoney(result.net.issizlik)} ₺</strong>
                 </div>
                 <div className={styles.line}>
@@ -978,7 +940,7 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
                   <strong className={styles.deduction}>−{formatMoney(result.net.gelirVergisi)} ₺</strong>
                 </div>
                 <div className={styles.line}>
-                  <span>{damgaLabelForRate(result.net.damgaOran, "permille")}</span>
+                  <span>Damga vergisi (‰7,59)</span>
                   <strong className={styles.deduction}>−{formatMoney(result.net.damgaVergisi)} ₺</strong>
                 </div>
               </div>
@@ -1002,15 +964,15 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
                   <strong>{formatMoney(result.totalBrut)} ₺</strong>
                 </div>
                 <div className={styles.line}>
-                  <span>1/3 Hakkaniyet İndirimi</span>
+                  <HakkaniyetOraniSecimi
+                    value={form.hakkaniyetOrani}
+                    onChange={(v) => patch("hakkaniyetOrani", v as TForm["hakkaniyetOrani"])}
+                    metin="Hakkaniyet"
+                  />
                   <strong className={styles.deduction}>−{formatMoney(result.hakkaniyet)} ₺</strong>
                 </div>
-                <div className={styles.line}>
-                  <span>Mahsuplaşma Tutarı</span>
-                  <strong className={styles.deduction}>−{formatMoney(mahsupTutar)} ₺</strong>
-                </div>
               </div>
-              <label className={styles.label}>Mahsuplaşma Tutarı (₺)</label>
+              <label className={styles.label}>Mahsuplaşma miktarı (₺)</label>
               <div className={styles.settleRow}>
                 <input
                   className={styles.input}
@@ -1022,21 +984,11 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
                 </Button>
               </div>
               <div className={`${styles.resultCard} ${styles.resultCardAccent}`}>
-                <div className={styles.resultLabel}>Son Brüt Alacak</div>
+                <div className={styles.resultLabel}>Mahsup sonucu</div>
                 <div className={styles.resultValue}>
                   <AnimatedMoney value={result.mahsupSonuc} /> ₺
                 </div>
               </div>
-              <EquityNetLines
-                kesinti={equityNet}
-                formatMoney={formatMoney}
-                lineClass={styles.line}
-                deductClass={styles.deduction}
-                sgkLabel="SGK (%14)"
-                issizlikLabel={issizlikLabelForRate(equityRaw.issizlikOran, "İşsizlik (%1)")}
-                damgaLabel={damgaLabelForRate(equityRaw.damgaOran, "permille")}
-                gelirPrefix="Gelir vergisi"
-              />
             </div>
           </section>
 

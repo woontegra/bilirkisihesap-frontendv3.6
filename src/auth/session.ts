@@ -1,6 +1,10 @@
 import { API_BASE_URL } from "@/config/apiBase";
-import { clearLicenseAccessSnapshot } from "@/license/access";
 import { trackAppEnteredOnce } from "@/telemetry/trackUsageEvent";
+import {
+  LoginSubscriptionError,
+  isSubscriptionAccessCode,
+  messageForSubscriptionCode,
+} from "@/auth/subscriptionLogin";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
@@ -25,21 +29,6 @@ const AUTH_KEYS = [
   "v35_session",
   "must_change_password",
 ] as const;
-
-let authMeCache: { userId: number; me: Record<string, unknown> } | null = null;
-
-export function readAuthMeCache(userId: number | null | undefined): Record<string, unknown> | null {
-  if (!userId || !authMeCache || authMeCache.userId !== userId) return null;
-  return authMeCache.me;
-}
-
-export function writeAuthMeCache(userId: number, me: Record<string, unknown>): void {
-  authMeCache = { userId, me };
-}
-
-export function invalidateAuthMeCache(): void {
-  authMeCache = null;
-}
 
 export type AuthUser = {
   id: number;
@@ -173,9 +162,9 @@ export function applyAuthMeResponse(me: Record<string, unknown>): void {
   localStorage.setItem("user_id", String(id));
   localStorage.setItem("user_role", role ?? "");
   if (typeof me.mustChangePassword === "boolean") {
-    setMustChangePasswordRequired(me.mustChangePassword);
-  } else if (typeof me.requirePasswordChange === "boolean") {
-    setMustChangePasswordRequired(me.requirePasswordChange);
+    setMustChangePasswordRequired(me.mustChangePassword === true);
+  } else if (me.requirePasswordChange === true) {
+    setMustChangePasswordRequired(true);
   }
   window.dispatchEvent(new Event("auth-changed"));
 }
@@ -198,10 +187,6 @@ export type LoginResponse = {
   refreshToken: string;
   user: AuthUser;
   licenseType?: string | null;
-  licenseActive?: boolean;
-  licenseAccessCode?: string | null;
-  licenseStatus?: string | null;
-  subscriptionEndsAt?: string | null;
   professionalLicenseValid?: boolean;
   professionalLicense?: {
     license_key?: string;
@@ -273,8 +258,6 @@ export function saveSession(accessToken: string, refreshToken: string, user: Aut
 }
 
 export function clearSession(): void {
-  invalidateAuthMeCache();
-  clearLicenseAccessSnapshot();
   for (const key of AUTH_KEYS) {
     localStorage.removeItem(key);
   }
@@ -347,10 +330,15 @@ export async function loginWithPassword(email: string, password: string): Promis
 
   const payload = (await response.json().catch(() => ({}))) as LoginResponse & {
     error?: string;
+    code?: string;
     message?: string;
   };
 
   if (!response.ok) {
+    const code = String(payload.code ?? payload.error ?? "");
+    if (isSubscriptionAccessCode(code)) {
+      throw new LoginSubscriptionError(code, messageForSubscriptionCode(code));
+    }
     throw new Error(payload.error || payload.message || "Giriş başarısız");
   }
 
@@ -374,10 +362,10 @@ export async function loginWithPassword(email: string, password: string): Promis
 
   patchCurrentUserProfile({
     licenseType: payload.licenseType ?? null,
-    hasValidLicense: payload.licenseActive ?? payload.professionalLicenseValid ?? false,
+    hasValidLicense: payload.professionalLicenseValid ?? false,
   });
 
-  if (payload.licenseActive ?? payload.professionalLicenseValid) {
+  if (payload.professionalLicenseValid) {
     localStorage.setItem("licenseValid", "true");
     localStorage.setItem(
       "professionalLicenseKey",

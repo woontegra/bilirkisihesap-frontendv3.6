@@ -6,6 +6,8 @@ import { IS_KANUNU_CASES_KEY } from "./storage";
 
 import type { SavedCaseRecord } from "@/api/savedCases";
 import { unwrapCalcData, type CalcSaveResult } from "../../shared/calcBackendCrud";
+import { normalizeEklentiGunEsasi } from "../../shared/eklentiGunEsasi";
+import { normalizeEklentiDokumleri } from "../../shared/eklentiDokumu";
 import { createKidemCrud, KIDEM_30ISCI_TYPE } from "../shared/kidemCaseCrud";
 import { formatKidemMoneyFields } from "../shared/formatKidemMoneyFields";
 import { newLocalId, type ExtraItem, type IsKanunuFormSnapshot, type SavedCase } from "./model";
@@ -136,6 +138,8 @@ export function mapIsKanunuFormFromBackend(
       yemek: str(form.yemek),
       extras: mapExtras(form.extras),
       notes: str(form.notes),
+      eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+      eklentiDokumleri: normalizeEklentiDokumleri(form.eklentiDokumleri),
     });
   } catch {
     return null;

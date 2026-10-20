@@ -1,10 +1,9 @@
 /**
  * UBGT Alacağı — lokal hesaplama motoru.
  * Backend `ubgt.standard.service.js` / `ubgt.bilirkisi.service.js` ile birebir.
- * Başka hesaplama modülünden import yok. Ağ yok.
+ * Başka hesaplama modülünden yalnızca ortak hakkaniyet oranı yardımcısı alınır. Ağ yok.
  */
-import { engineAsgariBrut, engineAsgariPeriodsInRange } from "../shared/historical/asgariUcret";
-import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
+import { hesaplaHakkaniyetIndirimi, type HakkaniyetOrani } from "../fazla-mesai/shared/hakkaniyetOrani";
 import { calculateIncomeTaxForYear, calculateIncomeTaxWithBrackets } from "./incomeTax";
 import { calculateUbgtSegments, normalizeLocalDate, type UbgtDateRangeInput } from "./lib/dateSegmentation";
 import { getUbgtDaysForPeriod, type UbgtExcludedDay, type UbgtDayEntry } from "./lib/holidays";
@@ -80,9 +79,9 @@ export function formatDateTRLong(iso: string): string {
   return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-/** V3 UbgtNetConversion: hakkaniyet = brut / 3 (NO round2 on hakkaniyet itself). */
-export function calcHakkaniyet(brut: number): number {
-  return (brut || 0) / 3;
+/** V3 UbgtNetConversion: hakkaniyet = brut × seçilen oran (varsayılan brut / 3; NO round2 on hakkaniyet itself). */
+export function calcHakkaniyet(brut: number, hakkaniyetOrani?: HakkaniyetOrani): number {
+  return hesaplaHakkaniyetIndirimi(brut || 0, hakkaniyetOrani);
 }
 
 /** V3 Standart REPORT mahsup sonucu: max(0, net − hakkaniyet) — settle NOT subtracted. */
@@ -93,12 +92,6 @@ export function calcMahsupSonucuStandart(net: number, hakkaniyet: number): numbe
 /** V3 Bilirkisi REPORT mahsup sonucu: max(0, brut − hakkaniyet − settleAmount). */
 export function calcMahsupSonucuBilirkisi(brut: number, hakkaniyet: number, settle: number): number {
   return Math.max(0, brut - hakkaniyet - settle);
-}
-
-/** Hakkaniyet ve mahsuplaşma sonrası kalan brüt. 0'ın altına düşmez. */
-export function calcSonBrutAlacak(brut: number, hakkaniyet: number, settle: number): number {
-  const mahsup = Number.isFinite(settle) ? settle : 0;
-  return Math.max(0, (brut || 0) - (hakkaniyet || 0) - mahsup);
 }
 
 /**
@@ -114,18 +107,9 @@ export function deriveTaxYear(dateRanges: Array<{ end?: string | null }>): numbe
   if (exitDates.length > 0) {
     const latestExit = exitDates.reduce((latest, current) => (current > latest ? current : latest));
     const year = latestExit.getFullYear();
-    if (year >= 1996 && year <= 2100) return year;
+    if (year >= 2010 && year <= 2100) return year;
   }
   return new Date().getFullYear();
-}
-
-/** Son tahakkuk günü: aralık bitişlerinin en geç olanı. Yıl sonuna yuvarlanmaz. */
-export function deriveTaxAccrualIso(dateRanges: Array<{ end?: string | null }>): string | null {
-  const ends = dateRanges
-    .map((r) => String(r.end ?? "").slice(0, 10))
-    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
-  if (!ends.length) return null;
-  return ends.reduce((a, b) => (a > b ? a : b));
 }
 
 export type UbgtPeriodRow = {
@@ -147,8 +131,6 @@ export type UbgtNetResult = {
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
   netAmount: number;
-  damgaOran?: number;
-  issizlikOran?: number;
 };
 
 export type UbgtComputeInput = {
@@ -177,67 +159,26 @@ export type UbgtResult = {
 };
 
 /** Brüt → net (SGK %14, işsizlik %1, GV, damga). Editable brut override için de kullanılır. */
-export function calculateNet(brutAmount: number, accrual: number | string): UbgtNetResult {
+export function calculateNet(brutAmount: number, year: number): UbgtNetResult {
   if (!brutAmount || brutAmount <= 0) {
     return { ssk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, netAmount: 0 };
   }
-  const rates = ratesForAccrual(accrual);
-  const ssk = round2(brutAmount * rates.sgkOran);
-  const issizlik = round2(brutAmount * rates.issizlikOran);
+  const ssk = round2(brutAmount * SGK_ORANI);
+  const issizlik = round2(brutAmount * ISSIZLIK_ORANI);
   const gelirVergisiMatrahi = Math.max(0, brutAmount - ssk - issizlik);
-  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, gelirVergisiMatrahi, (year, income) => ({
-    tax: calculateIncomeTaxForYear(year, income),
-    summary: calculateIncomeTaxWithBrackets(year, income).summary,
-  }));
-  const gelirVergisi = round2(gv.tax);
-  const damgaVergisi = round2(brutAmount * rates.damgaOran);
+  const gelirVergisi = round2(calculateIncomeTaxForYear(year, gelirVergisiMatrahi));
+  const damgaVergisi = round2(brutAmount * DAMGA_ORANI);
   const netAmount = round2(Math.max(0, brutAmount - ssk - issizlik - gelirVergisi - damgaVergisi));
-  return {
-    ssk,
-    issizlik,
-    gelirVergisi,
-    damgaVergisi,
-    netAmount,
-    gelirVergisiDilimleri: gv.summary,
-    damgaOran: rates.damgaOran,
-    issizlikOran: rates.issizlikOran,
-  };
-}
-
-function wageFromMinTable(iso: string): number {
-  const day = new Date(iso);
-  if (Number.isNaN(day.getTime())) return 0;
-  for (const wagePeriod of MIN_WAGE_TABLE) {
-    const wageStart = new Date(wagePeriod.start);
-    const wageEnd = new Date(wagePeriod.end);
-    if (day >= wageStart && day <= wageEnd) return wagePeriod.wage;
-  }
-  return 0;
-}
-
-function wageOn(iso: string): number {
-  const day = String(iso ?? "").slice(0, 10);
-  if (day < "2005-01-01") return engineAsgariBrut(day) ?? 0;
-  return wageFromMinTable(day);
+  const gelirVergisiDilimleri = calculateIncomeTaxWithBrackets(year, gelirVergisiMatrahi).summary;
+  return { ssk, issizlik, gelirVergisi, damgaVergisi, netAmount, gelirVergisiDilimleri };
 }
 
 function generateUbgtPeriods(workerStart: string, workerEnd: string) {
   if (!workerStart || !workerEnd) return [] as Array<{ start: string; end: string; wage: number }>;
-  const startIso = String(workerStart).slice(0, 10);
-  const endIso = String(workerEnd).slice(0, 10);
-  const periods: Array<{ start: string; end: string; wage: number }> = [];
-
-  if (startIso <= "2004-12-31") {
-    const preEnd = endIso < "2004-12-31" ? endIso : "2004-12-31";
-    if (startIso <= preEnd) {
-      for (const row of engineAsgariPeriodsInRange(startIso, preEnd)) {
-        periods.push({ start: row.start, end: row.end, wage: row.brut });
-      }
-    }
-  }
-
   const workerStartDate = new Date(workerStart);
   const workerEndDate = new Date(workerEnd);
+  const periods: Array<{ start: string; end: string; wage: number }> = [];
+
   MIN_WAGE_TABLE.forEach((wagePeriod) => {
     const wagePeriodStart = new Date(wagePeriod.start);
     const wagePeriodEnd = new Date(wagePeriod.end);
@@ -283,8 +224,8 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
       }
       const startYear = startDate.getFullYear();
       const endYear = endDate.getFullYear();
-      if (startYear > 2100 || endYear > 2100) {
-        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2100 ve öncesi tarih girin.`);
+      if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
+        return emptyResult(`Geçersiz yıl: Başlangıç yılı ${startYear}, Bitiş yılı ${endYear}. Lütfen 2000-2100 arası tarih girin.`);
       }
       if (endDate < startDate) {
         return emptyResult(`Bitiş tarihi (${range.end}) başlangıç tarihinden (${range.start}) önce olamaz.`);
@@ -308,7 +249,16 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
       }
       if (new Date(effectiveStart) > new Date(effectiveEnd)) return;
 
-      const wage = wageOn(effectiveStart);
+      const segStartDate = new Date(effectiveStart);
+      let wage = 0;
+      for (const wagePeriod of MIN_WAGE_TABLE) {
+        const wageStart = new Date(wagePeriod.start);
+        const wageEnd = new Date(wagePeriod.end);
+        if (segStartDate >= wageStart && segStartDate <= wageEnd) {
+          wage = wagePeriod.wage;
+          break;
+        }
+      }
       if (wage === 0) return;
 
       const segmentHolidayIds = new Set<string>();
@@ -473,7 +423,7 @@ export function computeUbgt(input: UbgtComputeInput): UbgtResult {
     }),
   );
   const toplamBrut = round2(periods.reduce((sum, row) => sum + row.ubgtTotal, 0));
-  const toplamNet = calculateNet(toplamBrut, deriveTaxAccrualIso(dateRanges) || year);
+  const toplamNet = calculateNet(toplamBrut, year);
 
   return {
     periods,

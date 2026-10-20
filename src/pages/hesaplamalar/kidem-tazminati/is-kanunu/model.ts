@@ -5,6 +5,8 @@
  * kullanıcı hesabında saklanması ayrı API katmanı üzerinden yapılır.
  */
 
+import type { EklentiDokumleri } from "../../shared/eklentiDokumu";
+
 export type ExtraItem = {
   id: string;
   name: string;
@@ -29,6 +31,10 @@ export type IsKanunuFormSnapshot = {
   yemek: string;
   extras: ExtraItem[];
   notes: string;
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: 360 | 365;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type DurationParts = {
@@ -45,7 +51,6 @@ export type IsKanunuResult = {
   tavanApplied: boolean;
   esasAylik: number;
   brutKidem: number;
-  damgaOran: number;
   damgaVergisi: number;
   netKidem: number;
   shortTenureWarning: boolean;
@@ -82,6 +87,7 @@ export function createEmptyForm(): IsKanunuFormSnapshot {
     yemek: "",
     extras: [],
     notes: "",
+    eklentiGunEsasi: 360,
   };
 }
 

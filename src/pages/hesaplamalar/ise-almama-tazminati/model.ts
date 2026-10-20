@@ -22,7 +22,6 @@ export type IseAlmamaResult = {
   selectedKatsayi: number;
   brutForNet: number;
   damgaVergisi: number;
-  damgaOran?: number;
   netTazminat: number;
   workPeriod: WorkPeriod | null;
   asgariUcretHatasi: string | null;

@@ -20,7 +20,7 @@ import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -60,10 +60,7 @@ import {
   sanitizeMoneyTyping,
   validateDateRange,
 } from "./engine";
-import { eraForIso, formatTrlWageLines, STANDART_FM_MIN_ISO } from "./trlScale";
-import { computeStandartFmResultV3, logStandartFmV3EngineCheck, netFromGrossStandartFm } from "./v3-engine/adapter";
-import { standartFmDamgaLabel, standartFmIssizlikLabel } from "./v3-engine/lib/standartFmKesinti";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
+import { computeStandartFmResultV3, logStandartFmV3EngineCheck } from "./v3-engine/adapter";
 import {
   createEmptyForm,
   type ExclusionItem,
@@ -73,7 +70,8 @@ import {
   type StandartFormSnapshot,
 } from "./model";
 import { isCetvelRowVisible } from "../cetvelDisplay";
-import { standartPreviewCetvelCells } from "./previewPeriodLabel";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./StandartFmPage.module.css";
 
 const PAGE_TITLE = "Standart Fazla Mesai Hesaplama";
@@ -180,7 +178,6 @@ export default function StandartFmPage() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const [saveFlash, setSaveFlash] = useState(false);
   const [formSwap, setFormSwap] = useState(false);
-  const [eraShiftWarning, setEraShiftWarning] = useState<string | null>(null);
   const [baseline, setBaseline] = useState("");
   const [exclusionOverlayOpen, setExclusionOverlayOpen] = useState(false);
   const tour = useGuidedTourController();
@@ -233,20 +230,6 @@ export default function StandartFmPage() {
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
 
   const result = useDeferredFormMemo(form, computeStandartFmResultV3);
-  const equityNet = useFormCalcMemo(() => {
-    if (!(result.sonNet > 0) || !result.tahakkukTarihi) return netFromGrossStandartFm(0, "2013-01-01");
-    return netFromGrossStandartFm(result.sonNet, result.tahakkukTarihi);
-  }, [result.sonNet, result.tahakkukTarihi]);
-  const kesintiLabels = useMemo(() => {
-    if (!result.tahakkukTarihi) {
-      return { sgk: "SGK (%14)", issizlik: "İşsizlik (%1)", damga: "Damga Vergisi (Binde 7,59)" };
-    }
-    return {
-      sgk: "SGK (%14)",
-      issizlik: standartFmIssizlikLabel(result.issizlikOran),
-      damga: standartFmDamgaLabel(result.damgaOran),
-    };
-  }, [result.tahakkukTarihi, result.issizlikOran, result.damgaOran]);
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -353,7 +336,6 @@ export default function StandartFmPage() {
     backendLoadedCaseIdRef.current = null;
     clearCaseIdParam();
     resetFormFields();
-    setEraShiftWarning(null);
     triggerFormSwap();
   }, [clearCaseIdParam, resetFormFields]);
 
@@ -601,20 +583,16 @@ export default function StandartFmPage() {
       title: "Fazla Mesai Hesaplama Cetveli",
       headers: ["Dönem", "Hafta", "Ücret", "Katsayı", "FM Saat", "225", "1,5", "Fazla Mesai"],
       rows: [
-        ...visibleRows.map((r) =>
-          standartPreviewCetvelCells({
-            dateRange: formatIsoDateRangeTR(r.startISO, r.endISO),
-            note: r.note,
-            weeks: String(r.weeks),
-            wage:
-              r.currencyEra === "TRL" && r.historicalBrut != null
-                ? formatTrlWageLines(r.historicalBrut, r.brut)
-                : money(r.brut),
-            katsayi: String(r.katsayi),
-            fmHours: r.fmHours.toFixed(2).replace(".", ","),
-            fm: money(r.fm),
-          }),
-        ),
+        ...visibleRows.map((r) => [
+          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.note ? ` ${r.note}` : ""}`,
+          String(r.weeks),
+          money(r.brut),
+          String(r.katsayi),
+          r.fmHours.toFixed(2).replace(".", ","),
+          "225",
+          "1,5",
+          money(r.fm),
+        ]),
         // Ana cetvel tfoot ile aynı kaynak: result.toplamFm (satırları yeniden toplama).
         ...(visibleRows.length > 0
           ? [["", "", "", "", "", "", "Toplam Fazla Mesai:", money(result.toplamFm)]]
@@ -629,10 +607,10 @@ export default function StandartFmPage() {
       headers: ["Kalem", "Tutar"],
       rows: [
         ["Brüt Fazla Mesai", money(result.toplamFm)],
-        [kesintiLabels.sgk, `-${money(result.sgk)}`],
-        [kesintiLabels.issizlik, `-${money(result.issizlik)}`],
+        ["SGK (%14)", `-${money(result.sgk)}`],
+        ["İşsizlik (%1)", `-${money(result.issizlik)}`],
         [`Gelir Vergisi ${result.gelirVergisiDilimleri}`.trim(), `-${money(result.gelirVergisi)}`],
-        [kesintiLabels.damga, `-${money(result.damgaVergisi)}`],
+        ["Damga Vergisi (Binde 7,59)", `-${money(result.damgaVergisi)}`],
         ["Net Fazla Mesai", money(result.netYillik)],
       ],
       lastRowTone: "green",
@@ -643,23 +621,16 @@ export default function StandartFmPage() {
       title: "Mahsuplaşma",
       headers: ["Kalem", "Tutar"],
       rows: [
-        ["Toplam Brüt Alacak", money(result.toplamFm)],
-        ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetIndirimi)}`],
-        ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
+        ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
+        [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
+        ...(result.mahsupTutari > 0 ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][]) : []),
         ["Son Brüt Alacak", money(result.sonNet)],
-        ...equityNetPreviewRows({
-          format: money,
-          kesinti: equityNet,
-          sgkLabel: kesintiLabels.sgk,
-          issizlikLabel: kesintiLabels.issizlik,
-          damgaLabel: kesintiLabels.damga,
-        }),
       ],
       lastRowTone: "green",
     });
 
     return insertExclusionsPreviewSection(sections, form.exclusions);
-  }, [form, result, weeklyFmSummaryHours, equityNet, kesintiLabels]);
+  }, [form, result, weeklyFmSummaryHours]);
 
   return (
     <div className={styles.page} aria-busy={caseLoading || undefined}>
@@ -741,16 +712,8 @@ export default function StandartFmPage() {
               <span className={styles.fieldLabel}>İşe Giriş</span>
               <DraftDateInput
                 className={styles.dateInput}
-                min={STANDART_FM_MIN_ISO}
                 value={form.iseGiris}
-                onCommit={(v) => {
-                  if (form.iseGiris && v && eraForIso(form.iseGiris) !== eraForIso(v) && manualBrutActive) {
-                    setEraShiftWarning(
-                      "İşlem tarihi para dönemini değiştirdi. Mevcut manuel ücret otomatik dönüştürülmedi. Tutarı yeniden girin.",
-                    );
-                  }
-                  setField("iseGiris", v);
-                }}
+                onCommit={(v) => setField("iseGiris", v)}
               />
             </label>
             <label className={styles.field}>
@@ -758,22 +721,13 @@ export default function StandartFmPage() {
               <div className={`${styles.dateWrap} ${dateError ? styles.inputWrapError : ""}`}>
                 <DraftDateInput
                   className={styles.dateInput}
-                  min={STANDART_FM_MIN_ISO}
                   value={form.istenCikis}
-                  onCommit={(v) => {
-                    if (form.istenCikis && v && eraForIso(form.istenCikis) !== eraForIso(v) && manualBrutActive) {
-                      setEraShiftWarning(
-                        "İşlem tarihi para dönemini değiştirdi. Mevcut manuel ücret otomatik dönüştürülmedi. Tutarı yeniden girin.",
-                      );
-                    }
-                    setField("istenCikis", v);
-                  }}
+                  onCommit={(v) => setField("istenCikis", v)}
                   aria-invalid={dateError ? true : undefined}
                 />
               </div>
             </label>
             {dateError ? <p className={styles.errorText}>{dateError}</p> : null}
-            {eraShiftWarning ? <p className={styles.errorText}>{eraShiftWarning}</p> : null}
 
             <label className={styles.field}>
               <span className={styles.fieldLabel}>Haftada Çalışılan Gün (1-7)</span>
@@ -974,11 +928,11 @@ export default function StandartFmPage() {
               <FlashValue value={`${formatMoney(result.toplamFm)} ₺`} />
             </div>
             <div className={styles.line}>
-              <span>{kesintiLabels.sgk}</span>
+              <span>SGK (%14)</span>
               <span className={styles.deduction}>-{formatMoney(result.sgk)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>{kesintiLabels.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span className={styles.deduction}>-{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div className={styles.line}>
@@ -986,7 +940,7 @@ export default function StandartFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.gelirVergisi)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>{kesintiLabels.damga}</span>
+              <span>Damga Vergisi (Binde 7,59)</span>
               <span className={styles.deduction}>-{formatMoney(result.damgaVergisi)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
@@ -1006,7 +960,7 @@ export default function StandartFmPage() {
               <span>{formatMoney(result.toplamFm)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>1/3 Hakkaniyet İndirimi</span>
+              <HakkaniyetOraniSecimi value={form.hakkaniyetOrani} onChange={(v) => setField("hakkaniyetOrani", v)} />
               <span className={styles.deduction}>-{formatMoney(result.hakkaniyetIndirimi)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.mahsupLine}`}>
@@ -1038,23 +992,12 @@ export default function StandartFmPage() {
               <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} />
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass={styles.line}
-              deductClass={styles.deduction}
-              netClass={styles.netLine}
-              sgkLabel={kesintiLabels.sgk}
-              issizlikLabel={kesintiLabels.issizlik}
-              damgaLabel={kesintiLabels.damga}
-              renderNet={(text) => <FlashValue value={text} />}
-            />
             <p className={styles.noteInfo}></p>
           </div>
         </article>
 
         <section className={styles.card} style={{ animationDelay: "220ms" }}>
-          <NotlarAccordion />
+          <NotlarAccordion hakkaniyetOrani={form.hakkaniyetOrani} />
         </section>
       </div>
 

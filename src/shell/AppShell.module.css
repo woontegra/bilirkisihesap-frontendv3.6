@@ -81,10 +81,6 @@
   }
 }
 
-.shell[data-restricted="true"] {
-  display: block;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .shell {
     transition: none;

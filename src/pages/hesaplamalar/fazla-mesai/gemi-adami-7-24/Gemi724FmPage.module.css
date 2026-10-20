@@ -491,6 +491,12 @@
   box-shadow: 0 0 0 2px var(--accent-ring);
 }
 
+.resultTable:has(td.moneyCell) thead th:nth-last-child(2) {
+  text-align: right;
+  padding-left: 0.6rem;
+  padding-right: 0.5rem;
+}
+
 .moneyCell {
   text-align: right;
   white-space: nowrap;
@@ -557,6 +563,12 @@
 .rowRemoveBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* Geçici: satır sonundaki + / − butonları gizli. */
+.rowAddBtn,
+.rowRemoveBtn {
+  display: none;
 }
 
 .totalsRow td {

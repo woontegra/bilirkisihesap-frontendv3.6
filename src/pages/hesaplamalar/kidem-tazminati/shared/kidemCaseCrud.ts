@@ -8,6 +8,7 @@ import {
   createCalcBackendCrud,
   type CalcSaveResult,
 } from "../../shared/calcBackendCrud";
+import { eklentiDokumleriniFormaYerlestir } from "../../shared/eklentiDokumu";
 
 export const KIDEM_30ISCI_TYPE = "kidem_30isci" as const;
 export const KIDEM_BASIN_TYPE = "kidem_basin" as const;
@@ -39,7 +40,7 @@ export function buildKidemSaveData<TForm extends Record<string, unknown>>(
 ): Record<string, unknown> {
   const dates = pickDates(form);
   return buildCalcSavePayload({
-    form,
+    form: eklentiDokumleriniFormaYerlestir(form),
     result,
     iseGiris: dates.iseGiris,
     istenCikis: dates.istenCikis,

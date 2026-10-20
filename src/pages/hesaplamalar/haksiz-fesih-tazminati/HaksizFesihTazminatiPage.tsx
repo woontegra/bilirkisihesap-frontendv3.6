@@ -1,4 +1,3 @@
-import { damgaLabelForRate } from "../shared/historical/laborNet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -440,7 +439,7 @@ export default function HaksizFesihTazminatiPage() {
     const netRows: string[][] = [
       ["Seçilen Süre", `${form.netAyKatsayi ?? 6} aylık`],
       ["Brüt Haksız Fesih Tazminatı", `${formatMoney(result.brutForNet)} ₺`],
-      [damgaLabelForRate(result.damgaOran, "binde"), `−${formatMoney(result.damgaVergisi)} ₺`],
+      ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.damgaVergisi)} ₺`],
       ["Net Haksız Fesih Tazminatı", `${formatMoney(result.netTazminat)} ₺`],
     ];
     if (result.odenenVal > 0) {
@@ -710,7 +709,7 @@ export default function HaksizFesihTazminatiPage() {
               </div>
               <div className={styles.lineList}>
                 <div className={styles.line}>
-                  <span>{damgaLabelForRate(result.damgaOran, "permille")}</span>
+                  <span>Damga vergisi (‰7,59)</span>
                   <strong className={styles.deduction}>
                     −
                     <FlashValue value={formatMoney(result.damgaVergisi)} /> ₺

@@ -164,7 +164,6 @@ export type GemiCoreInput = {
   brutUcret: string | number;
   usedDays: number;
   year: number;
-  accrualIso?: string;
 };
 
 export type GemiCoreResult = {
@@ -179,8 +178,6 @@ export type GemiCoreResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   netIzin: number;
   error?: string;
 };
@@ -219,7 +216,7 @@ export function calculateYillikIzinGemi(input: GemiCoreInput): GemiCoreResult {
 
   const brutIzin = round2(coreBrutIzin(brut, remainingDays));
   const selectedYear = year || new Date().getFullYear();
-  const net = calculateNetIzin(brutIzin, input.accrualIso || selectedYear, "brackets");
+  const net = calculateNetIzin(brutIzin, selectedYear, "brackets");
 
   return {
     totalWorkDays,

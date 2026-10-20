@@ -15,7 +15,7 @@
     "test:puantaj-detect": "npx vite-node --config vite.config.ts src/pages/puantaj-fazla-mesai/detect.test.ts",
     "test:guided-tour": "npx vite-node --config vite.config.ts src/components/guided-tour/guidedTour.selftest.ts",
     "test:yandex-metrica": "npx vite-node --config vite.config.ts src/analytics/yandexMetrica.selftest.ts",
-    "test:license-gate": "npx vite-node --config vite.config.ts src/license/licenseGate.selftest.ts",
+    "test:subscription-login": "npx vite-node --config vite.config.ts src/auth/subscriptionLogin.selftest.ts",
     "preview": "vite preview"
   },
   "dependencies": {

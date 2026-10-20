@@ -744,6 +744,19 @@
   margin-top: 0.75rem;
 }
 
+.eklentiResultRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.eklentiResultRow .eklentiGunEsasi {
+  margin: 0;
+}
+
 .monthField {
   display: grid;
   gap: 0.2rem;

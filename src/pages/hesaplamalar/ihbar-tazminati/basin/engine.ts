@@ -32,7 +32,6 @@ export type IhbarBasinResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
   net: number;
   ihbarSuresiLabel: string;
   kidemSuresiLabel: string;
@@ -55,7 +54,6 @@ export function computeIhbarBasinResult(form: IhbarBasinForm): IhbarBasinResult 
     extras: form.extras,
     totals: { yil: workPeriod.years, ay: workPeriod.months, gun: workPeriod.days },
     exitYear,
-    accrualIso: form.endDate,
     kidemTotals: hasBasinKidem ? { yil: kidemDiff.years, ay: kidemDiff.months, gun: kidemDiff.days } : null,
   });
 
@@ -86,7 +84,6 @@ export function computeIhbarBasinResult(form: IhbarBasinForm): IhbarBasinResult 
     gelirVergisi: core.gelirVergisi,
     gelirVergisiDilimleri: core.gelirVergisiDilimleri,
     damgaVergisi: core.damgaVergisi,
-    damgaOran: core.damgaOran,
     net: core.net,
     ihbarSuresiLabel,
     kidemSuresiLabel: hasBasinKidem ? kidemDiff.label : "—",

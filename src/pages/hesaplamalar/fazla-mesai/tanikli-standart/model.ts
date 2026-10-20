@@ -4,6 +4,8 @@
  * mesai alt türüne referans vermez.
  */
 
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
+
 export type Mode270 = "none" | "simple" | "detailed";
 
 export type SevenDayMode = "tatilli" | "tatilsiz";
@@ -60,9 +62,6 @@ export type RowOverride = {
   hidden?: boolean;
   /** Manuel brüt şablonundan / hücreden uygulandı. */
   brutManual?: boolean;
-  historicalBrut?: number;
-  currencyEra?: "TRL" | "TRY";
-  conversionDivisor?: 1 | 1000000;
 };
 
 export type PeriodRow = {
@@ -103,6 +102,7 @@ export type TanikliFormSnapshot = {
   katSayi: string;
   mode270: Mode270;
   mahsup: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   notes: string;
   zamanasimi: ZamanasimiInfo;
   rowOverrides: Record<string, RowOverride>;
@@ -173,6 +173,7 @@ export function createEmptyForm(): TanikliFormSnapshot {
     katSayi: "1",
     mode270: "none",
     mahsup: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     notes: "",
     zamanasimi: null,
     rowOverrides: {},

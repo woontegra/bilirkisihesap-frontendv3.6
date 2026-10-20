@@ -11,6 +11,7 @@ import {
   type UbgtForm,
   type WitnessRow,
 } from "./model";
+import { normalizeHakkaniyetOrani } from "../fazla-mesai/shared/hakkaniyetOrani";
 import type { UbgtExclusionRule, UbgtHolidayType } from "./filterExcludedUbgtHolidays";
 import type { UbgtMahsuplasamaMatrix } from "./mahsuplasama";
 import { sumMahsuplasamaMatrix } from "./mahsuplasama";
@@ -421,6 +422,7 @@ export function mapLegacyStandardUbgtCase(
       excludedWeekdays,
       year,
       settleAmount,
+      hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
       mahsuplasamaData,
       periodOverrides,
       manualPeriodRows,
@@ -560,6 +562,7 @@ export function mapLegacyExpertUbgtCase(
       excludedWeekdays,
       year,
       settleAmount,
+      hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
       mahsuplasamaData,
       periodOverrides,
       manualPeriodRows,

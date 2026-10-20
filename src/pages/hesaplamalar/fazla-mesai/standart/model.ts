@@ -3,6 +3,8 @@
  * motoru %100 lokaldir; başka bir fazla mesai alt türüne referans vermez.
  */
 
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
+
 export type Mode270 = "none" | "simple" | "detailed";
 
 export type SevenDayMode = "tatilli" | "tatilsiz";
@@ -49,13 +51,6 @@ export type RowOverride = {
   hidden?: boolean;
   /** Manuel brüt şablonundan / hücreden uygulandı. */
   brutManual?: boolean;
-  /** Yazılan tutarın para dönemi. Yoksa eski kayıt: güncel TL. */
-  currencyEra?: "TRL" | "TRY";
-  /** TRL ise Eski TL, TRY ise güncel TL. Hesap `brut` alanındaki normalize tutarı kullanır. */
-  historicalBrut?: number;
-  conversionDivisor?: 1 | 1000000;
-  /** Tarih para dönemini değiştirdi; tutar dönüştürülmedi. */
-  scaleMismatch?: boolean;
 };
 
 export type PeriodRow = {
@@ -66,11 +61,6 @@ export type PeriodRow = {
   /** 270 detaylı modda düşüm öncesi hafta (V3 `originalWeekCount` paritesi). */
   originalWeekCount?: number;
   brut: number;
-  /** TRL satırında bölünmemiş Eski TL. Hesaba girmez. */
-  historicalBrut?: number;
-  currencyEra?: "TRL" | "TRY";
-  conversionDivisor?: 1 | 1000000;
-  scaleMismatch?: boolean;
   katsayi: number;
   fmHours: number;
   fm: number;
@@ -94,6 +84,7 @@ export type StandartFormSnapshot = {
   katSayi: string;
   mode270: Mode270;
   mahsup: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   notes: string;
   zamanasimi: ZamanasimiInfo;
   /** Cetvel satırlarında hafta/ücret/FM saati/tarih alanlarına yapılan manuel düzeltmeler (satır id → düzeltme). */
@@ -117,22 +108,17 @@ export type StandartResult = {
   toplamFm: number;
   /** Brütten nete (TOPLAM bazında): SGK %14. */
   sgk: number;
-  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki işsizlik işçi payı. */
+  /** Brütten nete (TOPLAM bazında): İşsizlik %1. */
   issizlik: number;
-  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki ücret gelir vergisi. */
+  /** Brütten nete (TOPLAM bazında): kademeli gelir vergisi (işten çıkış yılı dilimleri). */
   gelirVergisi: number;
   /** Uygulanan gelir vergisi dilimlerinin özeti, örn. "(%15, %20)". */
   gelirVergisiDilimleri: string;
-  /** Brütten nete (TOPLAM bazında): son tahakkuk tarihindeki ücret damga vergisi. */
+  /** Brütten nete (TOPLAM bazında): damga vergisi binde 7,59. */
   damgaVergisi: number;
-  /** Alacağı doğuran cetvel satırlarının en geç bitiş günü. Boşsa netleştirme yapılmamıştır. */
-  tahakkukTarihi: string;
-  sgkOran: number;
-  issizlikOran: number;
-  damgaOran: number;
   /** Brütten nete sonucu: toplamFm - sgk - issizlik - gelirVergisi - damgaVergisi. */
   netYillik: number;
-  /** Hakkaniyet indirimi: toplamFm / 3 (BRÜT üzerinden, nete göre değil). */
+  /** Hakkaniyet indirimi: toplamFm × seçilen oran (varsayılan 1/3; BRÜT üzerinden, nete göre değil). */
   hakkaniyetIndirimi: number;
   mahsupTutari: number;
   /** Son net alacak: max(0, toplamFm - hakkaniyetIndirimi - mahsupTutari). Brüt bazlı; vergi düşülmez. */
@@ -173,6 +159,7 @@ export function createEmptyForm(): StandartFormSnapshot {
     katSayi: "1",
     mode270: "none",
     mahsup: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     notes: "",
     zamanasimi: null,
     rowOverrides: {},

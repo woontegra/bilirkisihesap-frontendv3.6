@@ -10,7 +10,7 @@ import {
   generateHaftaTatiliPeriods,
   getHaftaTatiliDaysForPeriod,
 } from "../lib/calculations";
-import { calcHakkaniyet, calcMahsupSonuc, calculateNetFromBrut, resolveTaxAccrualIso, resolveTaxYear } from "../lib/net";
+import { calcHakkaniyet, calcMahsupSonuc, calculateNetFromBrut, resolveTaxYear } from "../lib/net";
 import { formatMoney, newLocalId, parseNum, round2 } from "../lib/money";
 import type { TableRow } from "../lib/types";
 import type { StandardForm, StandardResult } from "./model";
@@ -85,12 +85,11 @@ export function computeStandardHaftaTatili(form: StandardForm, weekMultiplier = 
   const rows = resolveDisplayRows(form, weekMultiplier);
   const totalBrut = round2(rows.reduce((s, r) => s + (r.haftaTatiliTotal ?? 0), 0));
   const year = resolveTaxYear(form.dateRanges);
-  const accrualIso = resolveTaxAccrualIso(form.dateRanges) || undefined;
-  const net = calculateNetFromBrut(totalBrut, accrualIso || year);
-  const hakkaniyet = calcHakkaniyet(totalBrut);
-  const mahsupSonuc = calcMahsupSonuc(totalBrut, form.settleAmount);
+  const net = calculateNetFromBrut(totalBrut, year);
+  const hakkaniyet = calcHakkaniyet(totalBrut, form.hakkaniyetOrani);
+  const mahsupSonuc = calcMahsupSonuc(totalBrut, form.settleAmount, form.hakkaniyetOrani);
 
-  return { rows, totalBrut, year, accrualIso, net, hakkaniyet, mahsupSonuc };
+  return { rows, totalBrut, year, net, hakkaniyet, mahsupSonuc };
 }
 
 export function applyGlobalCoefficient(rows: TableRow[], k: number, weekMultiplier = 1): TableRow[] {

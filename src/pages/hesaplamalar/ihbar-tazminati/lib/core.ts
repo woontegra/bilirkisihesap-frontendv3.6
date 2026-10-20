@@ -22,7 +22,6 @@
  * Bu dosya yalnızca ihbar-tazminati/lib içinde paylaşılır. Ağ isteği yoktur.
  */
 
-import { ratesForAccrual, wageTaxKeepingModernTable } from "../../shared/historical/laborNet";
 import { calculateIncomeTaxWithBrackets } from "./incomeTax";
 import { formatMoney, parseNum } from "./money";
 
@@ -56,8 +55,6 @@ export type IhbarCoreInput = {
   extras: ExtraItem[];
   totals: WorkTotals;
   exitYear: number;
-  /** Son tahakkuk günü. Yoksa exitYear 31 Aralık kullanılır. */
-  accrualIso?: string;
   /** Yalnızca Basın varyantı: mesleğe başlangıç → işten çıkış kıdem süresi (yıl/ay/gün). */
   kidemTotals?: WorkTotals | null;
 };
@@ -71,7 +68,6 @@ export type IhbarCoreResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
   net: number;
 };
 
@@ -93,22 +89,21 @@ export function calculateToplamBrut(input: {
   return brutValue + primValue + ikramiyeValue + yolValue + yemekValue + extrasSum;
 }
 
-/** Eklenti: 12 aylık toplam / 360 × 30 (inline — başka modülden import yok). */
-export function computeEklentiResult(months: string[]): number {
+/** Eklenti: 12 aylık toplam / gün esası × 30 — gün esası 360 (varsayılan) veya 365 (inline — başka modülden import yok). */
+export function computeEklentiResult(months: string[], gunEsasi: 360 | 365 = 360): number {
   const sum = months.reduce((acc, v) => acc + parseNum(v), 0);
-  return (sum / 360) * 30;
+  return (sum / gunEsasi) * 30;
 }
 
-function calculateStandardAmounts(toplamBrut: number, totals: WorkTotals, accrual: number | string) {
+function calculateStandardAmounts(toplamBrut: number, totals: WorkTotals, year: number) {
+  const selectedYear = year || new Date().getFullYear();
   const weeks = calculateWeeks(totals);
   const amount = toplamBrut ? (toplamBrut / 30) * weeks * 7 : 0;
-  const rates = ratesForAccrual(accrual);
-  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, amount, (year, income) => {
-    const modern = calculateIncomeTaxWithBrackets(year, income);
-    return { tax: modern.tax, summary: modern.summary };
-  });
+  const gv = calculateIncomeTaxWithBrackets(selectedYear, amount);
+  // FrontendV3 calculations.ts: calculateDamgaVergisi + calculateGelirVergisi (lump-sum) + calculateNetDisplay
+  // calculateIncomeTaxWithBrackets.tax artık V3 lump-sum (baseTax) — ek round2 gerekmez (zaten lump-sum içinde).
   const gelirVergisi = gv.tax;
-  const damgaVergisi = round2(amount * rates.damgaOran);
+  const damgaVergisi = round2(amount * DAMGA_ORAN);
   const net = round2(amount - gelirVergisi - damgaVergisi);
   return {
     weeks,
@@ -118,7 +113,6 @@ function calculateStandardAmounts(toplamBrut: number, totals: WorkTotals, accrua
     gelirVergisiDilimleri: gv.summary,
     damgaVergisi,
     net,
-    damgaOran: rates.damgaOran,
   };
 }
 
@@ -127,21 +121,18 @@ function calculateStandardAmounts(toplamBrut: number, totals: WorkTotals, accrua
  * 5 yıl ve üzeri kıdem → 90 gün; aksi halde 30 gün. Brüt ihbar = (toplam brüt / 30) × gün.
  * kidemTotals boş/sıfır ise `null` döner (standart yola düşülür).
  */
-function calculateBasinAmounts(toplamBrut: number, kidemTotals: WorkTotals | null | undefined, accrual: number | string) {
+function calculateBasinAmounts(toplamBrut: number, kidemTotals: WorkTotals | null | undefined, year: number) {
   const ky = kidemTotals?.yil || 0;
   const ka = kidemTotals?.ay || 0;
   const kg = kidemTotals?.gun || 0;
   const hasKidem = ky > 0 || ka > 0 || kg > 0;
   if (!hasKidem || !toplamBrut || toplamBrut <= 0) return null;
 
+  const selectedYear = year || new Date().getFullYear();
   const ihbarGun = ky >= 5 ? 90 : 30;
   const amount = (toplamBrut / 30) * ihbarGun;
-  const rates = ratesForAccrual(accrual);
-  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, amount, (year, income) => {
-    const modern = calculateIncomeTaxWithBrackets(year, income);
-    return { tax: modern.tax, summary: modern.summary };
-  });
-  const damgaVergisi = round2(amount * rates.damgaOran);
+  const gv = calculateIncomeTaxWithBrackets(selectedYear, amount);
+  const damgaVergisi = round2(amount * DAMGA_ORAN);
   const net = round2(amount - gv.tax - damgaVergisi);
 
   return {
@@ -152,7 +143,6 @@ function calculateBasinAmounts(toplamBrut: number, kidemTotals: WorkTotals | nul
     gelirVergisiDilimleri: gv.summary || "",
     damgaVergisi,
     net,
-    damgaOran: rates.damgaOran,
   };
 }
 
@@ -160,8 +150,7 @@ function calculateBasinAmounts(toplamBrut: number, kidemTotals: WorkTotals | nul
 export function calculateIhbar(input: IhbarCoreInput): IhbarCoreResult {
   const toplamBrut = calculateToplamBrut(input);
 
-  const accrual = input.accrualIso || input.exitYear;
-  const basin = calculateBasinAmounts(toplamBrut, input.kidemTotals, accrual);
+  const basin = calculateBasinAmounts(toplamBrut, input.kidemTotals, input.exitYear);
   if (basin) {
     return {
       weeks: basin.weeks,
@@ -172,11 +161,10 @@ export function calculateIhbar(input: IhbarCoreInput): IhbarCoreResult {
       gelirVergisiDilimleri: basin.gelirVergisiDilimleri,
       damgaVergisi: basin.damgaVergisi,
       net: basin.net,
-      damgaOran: basin.damgaOran,
     };
   }
 
-  const std = calculateStandardAmounts(toplamBrut, input.totals, accrual);
+  const std = calculateStandardAmounts(toplamBrut, input.totals, input.exitYear);
   return {
     weeks: std.weeks,
     ihbarGun: std.ihbarGun,
@@ -186,7 +174,6 @@ export function calculateIhbar(input: IhbarCoreInput): IhbarCoreResult {
     gelirVergisiDilimleri: std.gelirVergisiDilimleri,
     damgaVergisi: std.damgaVergisi,
     net: std.net,
-    damgaOran: std.damgaOran,
   };
 }
 
@@ -194,7 +181,7 @@ export function calculateIhbar(input: IhbarCoreInput): IhbarCoreResult {
 export function resolveExitYear(exitDateISO: string): number {
   if (exitDateISO) {
     const y = new Date(exitDateISO).getFullYear();
-    if (Number.isFinite(y) && y >= 1996 && y <= 2030) return y;
+    if (Number.isFinite(y) && y >= 2010 && y <= 2030) return y;
   }
   return new Date().getFullYear();
 }

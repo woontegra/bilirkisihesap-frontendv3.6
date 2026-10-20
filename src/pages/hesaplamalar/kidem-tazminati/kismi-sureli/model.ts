@@ -4,6 +4,8 @@
  * Backend/API çağrısı yoktur; SSK 360 gün kuralları tamamen bu modül içinde uygulanır.
  */
 
+import type { EklentiDokumleri } from "../../shared/eklentiDokumu";
+
 export type WorkPeriod = {
   id: string;
   start: string;
@@ -30,6 +32,10 @@ export type KismiFormSnapshot = {
   diger: string;
   extras: ExtraItem[];
   notes: string;
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: 360 | 365;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type SavedCase = {
@@ -69,5 +75,6 @@ export function emptyForm(): KismiFormSnapshot {
     diger: "",
     extras: [],
     notes: "",
+    eklentiGunEsasi: 360,
   };
 }

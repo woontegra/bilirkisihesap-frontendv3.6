@@ -1,4 +1,3 @@
-import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * 48 Saat Çalışma Hesaplama — V3.5 sayfa (V3 işlev / alan / metin paritesi).
  */
@@ -21,12 +20,11 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
-import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -52,13 +50,10 @@ import {
   computeVardiya48Result,
   createManualPeriodRow,
   formatMoney,
-  netFromGrossFm,
   parseKatsayi,
   sanitizeMoneyTyping,
   validateDateRange,
-  vardiya48TaxYear,
 } from "./engine";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyForm,
   createEmptyWitness,
@@ -78,6 +73,8 @@ import { ZamanasimiCetvelBanner } from "../shared/ZamanasimiCetvelBanner";
 import { insertExclusionsPreviewSection } from "../shared/exclusionsPreview";
 import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./Vardiya48FmPage.module.css";
 
 const PAGE_TITLE = "48 Saat Çalışma Hesaplama";
@@ -229,13 +226,6 @@ export default function Vardiya48FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeVardiya48Result);
-  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
-    [result.sonNet, form.istenCikis],
-  );
-  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || vardiya48TaxYear(form.istenCikis)),
-    [result.rows, form.istenCikis],
-  );
-
 
   const displayRows = useMemo(
     () =>
@@ -471,13 +461,7 @@ export default function Vardiya48FmPage() {
       const saved = await saveVardiya48FmCase(
         name,
         { ...form, mode270: "none" },
-        {
-          toplamFm: result.toplamFm,
-          sonNet: result.sonNet,
-          rowCount: result.rows.length,
-          sonBrutAlacak: result.sonNet,
-          sonNetAlacak: equityNet.net,
-        },
+        { toplamFm: result.toplamFm, sonNet: result.sonNet, rowCount: result.rows.length },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -545,11 +529,12 @@ export default function Vardiya48FmPage() {
         rows: [
           ...displayRows.map((r) => {
             const period = formatIsoDateRangeTR(r.startISO, r.endISO, "–");
+            const withNote = r.yillikIzinAciklama ? `${period} ${r.yillikIzinAciklama}` : period;
             return [
-              formatPreviewPeriodCell(period, r.yillikIzinAciklama),
+              withNote,
               r.weekTypeLabel || "-",
               String(r.weeks),
-              (formatEngineWageCell(r.startISO, r.brut) || formatMoney(r.brut)),
+              formatMoney(r.brut),
               String(r.katsayi),
               Number(r.fmHours || 0).toFixed(2),
               "225",
@@ -567,7 +552,7 @@ export default function Vardiya48FmPage() {
         rows: [
           ["Brüt Fazla Mesai", formatMoney(result.toplamFm)],
           ["SGK (%14)", `-${formatMoney(result.sgk)}`],
-          [kesintiEtiket.issizlik, `-${formatMoney(result.issizlik)}`],
+          ["İşsizlik (%1)", `-${formatMoney(result.issizlik)}`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`, `-${formatMoney(result.gelirVergisi)}`],
           ["Damga Vergisi", `-${formatMoney(result.damgaVergisi)}`],
           ["Net Fazla Mesai", formatMoney(result.netYillik)],
@@ -578,23 +563,18 @@ export default function Vardiya48FmPage() {
         title: "Mahsuplaşma",
         headers: ["Kalem", "Tutar"],
         rows: [
-          ["Toplam Brüt Alacak", formatMoney(result.toplamFm)],
-          ["1/3 Hakkaniyet İndirimi", `-${formatMoney(result.hakkaniyetIndirimi)}`],
-          ["Mahsuplaşma Tutarı", `-${formatMoney(result.mahsupTutari)}`],
-          ["Son Brüt Alacak", formatMoney(result.sonNet)],
-          ...equityNetPreviewRows({
-            format: formatMoney,
-            kesinti: equityNet,
-            sgkLabel: "SGK (%14)",
-            issizlikLabel: kesintiEtiket.issizlik,
-            damgaLabel: "Damga",
-          }),
+          ["Toplam Fazla Mesai (Brüt)", formatMoney(result.toplamFm)],
+          [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${formatMoney(result.hakkaniyetIndirimi)}`],
+          ...(result.mahsupTutari > 0
+            ? [["Mahsuplaşma Miktarı", `-${formatMoney(result.mahsupTutari)}`]]
+            : []),
+          ["Son Net Alacak", formatMoney(result.sonNet)],
         ],
       },
       ],
       form.exclusions,
     );
-  }, [form.iseGiris, form.istenCikis, displayRows, result, equityNet]);
+  }, [form.iseGiris, form.istenCikis, form.hakkaniyetOrani, displayRows, result]);
 
   return (
     <div className={`${styles.page} ${formSwap ? styles.formSwap : ""}`} data-page="fazla-mesai-vardiya-48">
@@ -844,7 +824,7 @@ export default function Vardiya48FmPage() {
               <span>−{formatMoney(result.sgk)} ₺</span>
             </div>
             <div>
-              <span>{kesintiEtiket.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span>−{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div>
@@ -867,8 +847,9 @@ export default function Vardiya48FmPage() {
             <h3>Hakkaniyet indirimi / mahsuplaşma</h3>
           </header>
           <p className={styles.panelHint}>
-            1/3 hakkaniyet indirimi ve mahsuplaşma brütten düşülür. Kalan son brüt, bu sayfanın brütten nete
-            kesintileriyle nete çevrilir.
+            Son net alacak, brüt fazla mesai üzerinden {hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi
+            ve (varsa) mahsuplaşma düşülerek
+            hesaplanır. Brütten nete bölümündeki vergi kesintileri ayrıdır.
           </p>
           <div className={styles.totalsGrid}>
             <div>
@@ -876,13 +857,19 @@ export default function Vardiya48FmPage() {
               <span>{formatMoney(result.toplamFm)} ₺</span>
             </div>
             <div>
-              <span>1/3 hakkaniyet indirimi</span>
+              <HakkaniyetOraniSecimi
+                value={form.hakkaniyetOrani}
+                onChange={(v) => setField("hakkaniyetOrani", v)}
+                metin="hakkaniyet indirimi"
+              />
               <span>−{formatMoney(result.hakkaniyetIndirimi)} ₺</span>
             </div>
-            <div>
-              <span>Mahsuplaşma tutarı</span>
-              <span>−{formatMoney(result.mahsupTutari)} ₺</span>
-            </div>
+            {result.mahsupTutari > 0 ? (
+              <div>
+                <span>Mahsuplaşma</span>
+                <span>−{formatMoney(result.mahsupTutari)} ₺</span>
+              </div>
+            ) : null}
             <div>
               <span>Mahsuplaşma miktarı</span>
               <div className={styles.mahsupRow}>
@@ -899,19 +886,9 @@ export default function Vardiya48FmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Brüt Alacak</span>
+              <span>Son net alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} className={styles.sonNet} />
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass=""
-              netClass={styles.totalsHighlight}
-              sgkLabel="SGK (%14)"
-              issizlikLabel={kesintiEtiket.issizlik}
-              damgaLabel="Damga"
-              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
-            />
           </div>
         </article>
 

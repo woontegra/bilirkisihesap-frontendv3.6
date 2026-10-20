@@ -5,6 +5,12 @@
 
 import { newLocalId, type SavedIhbarCase } from "../lib/caseStorage";
 import type { ExtraItem, IhbarResultSnapshot } from "../lib/types";
+import { normalizeEklentiGunEsasi, type EklentiGunEsasi } from "../../shared/eklentiGunEsasi";
+import {
+  eklentiDokumleriAnahtari,
+  normalizeEklentiDokumleri,
+  type EklentiDokumleri,
+} from "../../shared/eklentiDokumu";
 
 export type { ExtraItem };
 
@@ -18,6 +24,8 @@ export type IhbarBasinForm = {
   yol: string;
   yemek: string;
   extras: ExtraItem[];
+  eklentiGunEsasi: EklentiGunEsasi;
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type SavedCase = SavedIhbarCase<IhbarBasinForm, IhbarResultSnapshot>;
@@ -33,6 +41,7 @@ export function createEmptyForm(): IhbarBasinForm {
     yol: "",
     yemek: "",
     extras: [],
+    eklentiGunEsasi: 360,
   };
 }
 
@@ -55,6 +64,8 @@ export function normalizeForm(raw: Partial<IhbarBasinForm> | undefined | null): 
           value: String(x?.value ?? ""),
         }))
       : [],
+    eklentiGunEsasi: normalizeEklentiGunEsasi(raw.eklentiGunEsasi),
+    eklentiDokumleri: normalizeEklentiDokumleri(raw.eklentiDokumleri),
   };
 }
 
@@ -79,5 +90,7 @@ export function snapshotKey(form: IhbarBasinForm): string {
     y: form.yol,
     m: form.yemek,
     e: form.extras.map((x) => [x.label, x.value]),
+    g: form.eklentiGunEsasi,
+    d: eklentiDokumleriAnahtari(form.eklentiDokumleri, form.extras),
   });
 }

@@ -23,7 +23,7 @@ export const calculationVideoLinks = {
   "kidem-is-kanunu": {
     title: "Kıdem Tazminatı — İş Kanununa Göre",
     routes: ["/kidem-tazminati/30isci"],
-    youtubeUrl: "",
+    youtubeUrl: "https://www.youtube.com/watch?v=ttjK3GX-mR8",
   },
   "kidem-borclar-kanunu": {
     title: "Kıdem Tazminatı — Borçlar Kanununa Göre",

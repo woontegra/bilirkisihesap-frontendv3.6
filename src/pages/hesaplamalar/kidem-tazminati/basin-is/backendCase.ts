@@ -6,6 +6,8 @@ import { BASIN_CASES_KEY } from "./storage";
 
 import type { SavedCaseRecord } from "@/api/savedCases";
 import { type CalcSaveResult } from "../../shared/calcBackendCrud";
+import { normalizeEklentiGunEsasi } from "../../shared/eklentiGunEsasi";
+import { normalizeEklentiDokumleri } from "../../shared/eklentiDokumu";
 import { createKidemCrud, KIDEM_BASIN_TYPE } from "../shared/kidemCaseCrud";
 import { formatKidemMoneyFields } from "../shared/formatKidemMoneyFields";
 import { extractKidemBrutNet, recordUpdatedAt } from "../shared/kidemRecordMapper";
@@ -99,6 +101,8 @@ export function mapBasinFormFromBackend(
       diger: str(form.diger),
       extras: mapExtras(form.extras),
       notes: str(form.notes),
+      eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+      eklentiDokumleri: normalizeEklentiDokumleri(form.eklentiDokumleri),
     });
   } catch {
     return null;

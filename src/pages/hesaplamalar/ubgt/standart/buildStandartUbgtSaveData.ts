@@ -1,6 +1,7 @@
 /**
  * Standart UBGT — V3 `UbgtStandartPage` kayıt şekline uyumlu payload.
  */
+import { normalizeHakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import type { CalcSaveResult } from "../../shared/calcBackendCrud";
 import type { UbgtForm } from "../model";
 import type { CetvelDisplayRow } from "../ubgtCetvelRows";
@@ -20,8 +21,6 @@ export type StandartUbgtSaveExtras = {
   };
   excludedWeekdayHolidays: unknown[];
   katsayi: number;
-  sonBrutAlacak?: number;
-  sonNetAlacak?: number;
 };
 
 function mapPeriodRow(row: CetvelDisplayRow) {
@@ -65,9 +64,6 @@ export function buildStandartUbgtSaveData(
     hakkaniyet: netConversion?.hakkaniyet ?? 0,
     settleAmount: netConversion?.settleAmount ?? 0,
     sonuc: Math.max(0, totalNet - (netConversion?.hakkaniyet ?? 0)),
-    ...(result.sonBrutAlacak != null
-      ? { sonBrutAlacak: result.sonBrutAlacak, sonNetAlacak: result.sonNetAlacak }
-      : {}),
     mahsuplasamaData: form.mahsuplasamaData,
   };
 
@@ -95,6 +91,7 @@ export function buildStandartUbgtSaveData(
   const v3Form = {
     ...form,
     mode: "standart" as const,
+    hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
     workerPeriods: form.dateRanges,
     selectedHolidays: form.selectedHolidayIds,
     excludedDays: form.ubgtExcludedDays,

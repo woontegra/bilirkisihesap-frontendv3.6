@@ -3,7 +3,6 @@
  * Başka hesaplama modülünden import yok.
  */
 
-import { engineAsgariPeriodsInRange } from "../../shared/historical/asgariUcret";
 import { countAnnualLeaveCalendarDaysInWindow, ubgExtraBalanceDaysInWindow } from "./annualLeaveCalendarDays";
 import { formatDateTR } from "./money";
 import type { ExcludedDay } from "./types";
@@ -75,7 +74,7 @@ export const MIN_WAGE_TABLE: MinWageEntry[] = [
   { start: "2007-07-01", end: "2007-12-31", wage: 585.0 },
   { start: "2008-01-01", end: "2008-06-30", wage: 608.4 },
   { start: "2008-07-01", end: "2008-12-31", wage: 638.7 },
-  { start: "2009-01-01", end: "2009-06-30", wage: 666.0 },
+  { start: "2009-01-01", end: "2009-06-30", wage: 693.0 },
   { start: "2009-07-01", end: "2009-12-31", wage: 693.0 },
   { start: "2010-01-01", end: "2010-06-30", wage: 729.0 },
   { start: "2010-07-01", end: "2010-12-31", wage: 760.5 },
@@ -226,27 +225,16 @@ export function generateHaftaTatiliPeriods(
   const we = new Date(workerEnd);
   const periods: Array<{ start: string; end: string; wage: number }> = [];
 
-  // 2005 öncesi onaylı asgari ücret. Hafta sayısı ayrıca calculateWeekCount ile hesaplanır.
-  // 2005 sonrası satırlar aşağıdaki MIN_WAGE_TABLE döngüsünde kalır.
-  if (workerStart <= "2004-12-31") {
-    const preEnd = workerEnd < "2005-01-01" ? workerEnd : "2004-12-31";
-    if (workerStart <= preEnd) {
-      for (const period of engineAsgariPeriodsInRange(workerStart, preEnd)) {
-        periods.push({ start: period.start, end: period.end, wage: period.brut });
-      }
-    }
-  }
-
   MIN_WAGE_TABLE.forEach((wp) => {
     const wps = new Date(wp.start);
     const wpe = new Date(wp.end);
     const effStart = ws > wps ? ws : wps;
     const effEnd = we < wpe ? we : wpe;
-    if (!Number.isNaN(effStart.getTime()) && !Number.isNaN(effEnd.getTime()) && effStart <= effEnd) {
+    if (effStart <= effEnd) {
       periods.push({
         start: effStart.toISOString().split("T")[0],
-        wage: wp.wage,
         end: effEnd.toISOString().split("T")[0],
+        wage: wp.wage,
       });
     }
   });

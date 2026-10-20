@@ -1,0 +1,566 @@
+{
+  "standart|": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 37768.22666666667,
+    "mahsupTutari": 0,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "standart|5.000,50": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 32767.72666666667,
+    "mahsupTutari": 5000.5,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "standart|99999999": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "tanikli-standart|": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 37768.22666666667,
+    "mahsupTutari": 0,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "tanikli-standart|5.000,50": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 32767.72666666667,
+    "mahsupTutari": 5000.5,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "tanikli-standart|99999999": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 3,
+    "rowFm": [
+      15964.42,
+      18364.32,
+      22323.6
+    ]
+  },
+  "haftalik-karma|": {
+    "total": 47210.28,
+    "hakkaniyet": 15736.76,
+    "net": 31473.519999999997,
+    "mahsupTutari": 0,
+    "sgk": 6609.44,
+    "issizlik": 472.1,
+    "gelirVergisi": 6825.75,
+    "damgaVergisi": 358.33,
+    "netYillik": 32944.66,
+    "rowCount": 3,
+    "rowFm": [
+      13303.68,
+      15303.6,
+      18603
+    ]
+  },
+  "haftalik-karma|5.000,50": {
+    "total": 47210.28,
+    "hakkaniyet": 15736.76,
+    "net": 26473.019999999997,
+    "mahsupTutari": 5000.5,
+    "sgk": 6609.44,
+    "issizlik": 472.1,
+    "gelirVergisi": 6825.75,
+    "damgaVergisi": 358.33,
+    "netYillik": 32944.66,
+    "rowCount": 3,
+    "rowFm": [
+      13303.68,
+      15303.6,
+      18603
+    ]
+  },
+  "haftalik-karma|99999999": {
+    "total": 47210.28,
+    "hakkaniyet": 15736.76,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 6609.44,
+    "issizlik": 472.1,
+    "gelirVergisi": 6825.75,
+    "damgaVergisi": 358.33,
+    "netYillik": 32944.66,
+    "rowCount": 3,
+    "rowFm": [
+      13303.68,
+      15303.6,
+      18603
+    ]
+  },
+  "donemsel|": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 37768.22666666667,
+    "mahsupTutari": 0,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "donemsel|5.000,50": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 32767.72666666667,
+    "mahsupTutari": 5000.5,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "donemsel|99999999": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "donemsel-haftalik|": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 37768.22666666667,
+    "mahsupTutari": 0,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "donemsel-haftalik|5.000,50": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 32767.72666666667,
+    "mahsupTutari": 5000.5,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "donemsel-haftalik|99999999": {
+    "total": 56652.34,
+    "hakkaniyet": 18884.11333333333,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 7931.33,
+    "issizlik": 566.52,
+    "gelirVergisi": 8430.9,
+    "damgaVergisi": 429.99,
+    "netYillik": 39293.6,
+    "rowCount": 9,
+    "rowFm": [
+      2660.74,
+      10642.94,
+      2660.74,
+      3060.72,
+      12242.88,
+      3060.72,
+      3720.6,
+      14882.4,
+      3720.6
+    ]
+  },
+  "yeralti-isci|": {
+    "total": 166180.18,
+    "hakkaniyet": 55393.39,
+    "net": 110786.79,
+    "mahsupTutari": 0,
+    "sgk": 23265.23,
+    "issizlik": 1661.8,
+    "gelirVergisi": 33228.35,
+    "damgaVergisi": 1261.31,
+    "netYillik": 106763.49,
+    "rowCount": 3,
+    "rowFm": [
+      46828.95,
+      53868.67,
+      65482.56
+    ]
+  },
+  "yeralti-isci|5.000,50": {
+    "total": 166180.18,
+    "hakkaniyet": 55393.39,
+    "net": 105786.29,
+    "mahsupTutari": 5000.5,
+    "sgk": 23265.23,
+    "issizlik": 1661.8,
+    "gelirVergisi": 33228.35,
+    "damgaVergisi": 1261.31,
+    "netYillik": 106763.49,
+    "rowCount": 3,
+    "rowFm": [
+      46828.95,
+      53868.67,
+      65482.56
+    ]
+  },
+  "yeralti-isci|99999999": {
+    "total": 166180.18,
+    "hakkaniyet": 55393.39,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 23265.23,
+    "issizlik": 1661.8,
+    "gelirVergisi": 33228.35,
+    "damgaVergisi": 1261.31,
+    "netYillik": 106763.49,
+    "rowCount": 3,
+    "rowFm": [
+      46828.95,
+      53868.67,
+      65482.56
+    ]
+  },
+  "vardiya-24|": {
+    "total": 33047.189999999995,
+    "hakkaniyet": 11015.729999999998,
+    "net": 22031.46,
+    "mahsupTutari": 0,
+    "sgk": 4626.61,
+    "issizlik": 330.47,
+    "gelirVergisi": 4418.02,
+    "damgaVergisi": 250.83,
+    "netYillik": 23421.26,
+    "rowCount": 6,
+    "rowFm": [
+      5321.47,
+      3991.1,
+      6121.44,
+      4591.08,
+      7441.2,
+      5580.9
+    ]
+  },
+  "vardiya-24|5.000,50": {
+    "total": 33047.189999999995,
+    "hakkaniyet": 11015.729999999998,
+    "net": 17030.96,
+    "mahsupTutari": 5000.5,
+    "sgk": 4626.61,
+    "issizlik": 330.47,
+    "gelirVergisi": 4418.02,
+    "damgaVergisi": 250.83,
+    "netYillik": 23421.26,
+    "rowCount": 6,
+    "rowFm": [
+      5321.47,
+      3991.1,
+      6121.44,
+      4591.08,
+      7441.2,
+      5580.9
+    ]
+  },
+  "vardiya-24|99999999": {
+    "total": 33047.189999999995,
+    "hakkaniyet": 11015.729999999998,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 4626.61,
+    "issizlik": 330.47,
+    "gelirVergisi": 4418.02,
+    "damgaVergisi": 250.83,
+    "netYillik": 23421.26,
+    "rowCount": 6,
+    "rowFm": [
+      5321.47,
+      3991.1,
+      6121.44,
+      4591.08,
+      7441.2,
+      5580.9
+    ]
+  },
+  "vardiya-48|": {
+    "total": 23605.14,
+    "hakkaniyet": 7868.38,
+    "net": 15736.759999999998,
+    "mahsupTutari": 0,
+    "sgk": 3304.72,
+    "issizlik": 236.05,
+    "gelirVergisi": 3009.66,
+    "damgaVergisi": 179.16,
+    "netYillik": 16875.55,
+    "rowCount": 6,
+    "rowFm": [
+      3991.1,
+      2660.74,
+      4591.08,
+      3060.72,
+      5580.9,
+      3720.6
+    ]
+  },
+  "vardiya-48|5.000,50": {
+    "total": 23605.14,
+    "hakkaniyet": 7868.38,
+    "net": 10736.259999999998,
+    "mahsupTutari": 5000.5,
+    "sgk": 3304.72,
+    "issizlik": 236.05,
+    "gelirVergisi": 3009.66,
+    "damgaVergisi": 179.16,
+    "netYillik": 16875.55,
+    "rowCount": 6,
+    "rowFm": [
+      3991.1,
+      2660.74,
+      4591.08,
+      3060.72,
+      5580.9,
+      3720.6
+    ]
+  },
+  "vardiya-48|99999999": {
+    "total": 23605.14,
+    "hakkaniyet": 7868.38,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 3304.72,
+    "issizlik": 236.05,
+    "gelirVergisi": 3009.66,
+    "damgaVergisi": 179.16,
+    "netYillik": 16875.55,
+    "rowCount": 6,
+    "rowFm": [
+      3991.1,
+      2660.74,
+      4591.08,
+      3060.72,
+      5580.9,
+      3720.6
+    ]
+  },
+  "gemi-adami-gunluk|": {
+    "total": 51636.24,
+    "hakkaniyet": 17212.079999999998,
+    "net": 34424.16,
+    "mahsupTutari": 0,
+    "sgk": 7229.07,
+    "issizlik": 516.36,
+    "gelirVergisi": 7578.16,
+    "damgaVergisi": 391.92,
+    "netYillik": 35920.73,
+    "rowCount": 3,
+    "rowFm": [
+      14550.9,
+      16738.31,
+      20347.03
+    ]
+  },
+  "gemi-adami-gunluk|5.000,50": {
+    "total": 51636.24,
+    "hakkaniyet": 17212.079999999998,
+    "net": 29423.660000000003,
+    "mahsupTutari": 5000.5,
+    "sgk": 7229.07,
+    "issizlik": 516.36,
+    "gelirVergisi": 7578.16,
+    "damgaVergisi": 391.92,
+    "netYillik": 35920.73,
+    "rowCount": 3,
+    "rowFm": [
+      14550.9,
+      16738.31,
+      20347.03
+    ]
+  },
+  "gemi-adami-gunluk|99999999": {
+    "total": 51636.24,
+    "hakkaniyet": 17212.079999999998,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 7229.07,
+    "issizlik": 516.36,
+    "gelirVergisi": 7578.16,
+    "damgaVergisi": 391.92,
+    "netYillik": 35920.73,
+    "rowCount": 3,
+    "rowFm": [
+      14550.9,
+      16738.31,
+      20347.03
+    ]
+  },
+  "gemi-adami-7-24|": {
+    "total": 86060.41,
+    "hakkaniyet": 28686.8,
+    "net": 57373.61,
+    "mahsupTutari": 0,
+    "sgk": 12048.46,
+    "issizlik": 860.6,
+    "gelirVergisi": 14840.86,
+    "damgaVergisi": 653.2,
+    "netYillik": 57657.29,
+    "rowCount": 3,
+    "rowFm": [
+      24251.5,
+      27897.19,
+      33911.72
+    ]
+  },
+  "gemi-adami-7-24|5.000,50": {
+    "total": 86060.41,
+    "hakkaniyet": 28686.8,
+    "net": 52373.11,
+    "mahsupTutari": 5000.5,
+    "sgk": 12048.46,
+    "issizlik": 860.6,
+    "gelirVergisi": 14840.86,
+    "damgaVergisi": 653.2,
+    "netYillik": 57657.29,
+    "rowCount": 3,
+    "rowFm": [
+      24251.5,
+      27897.19,
+      33911.72
+    ]
+  },
+  "gemi-adami-7-24|99999999": {
+    "total": 86060.41,
+    "hakkaniyet": 28686.8,
+    "net": 0,
+    "mahsupTutari": 99999999,
+    "sgk": 12048.46,
+    "issizlik": 860.6,
+    "gelirVergisi": 14840.86,
+    "damgaVergisi": 653.2,
+    "netYillik": 57657.29,
+    "rowCount": 3,
+    "rowFm": [
+      24251.5,
+      27897.19,
+      33911.72
+    ]
+  }
+}

@@ -94,10 +94,7 @@ import ResetPasswordPage from "@/pages/reset-password/ResetPasswordPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import { AdminOnly } from "@/routes/AdminOnly";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
-import { SubscriptionGate } from "@/routes/SubscriptionGate";
-import { LicenseAccessProvider } from "@/context/LicenseAccessContext";
 import { AppShell } from "@/shell/AppShell";
-import SubscriptionExpiredPage from "@/pages/subscription-expired/SubscriptionExpiredPage";
 
 export default function App() {
   return (
@@ -107,9 +104,6 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<LicenseAccessProvider />}>
-          <Route path="subscription-expired" element={<SubscriptionExpiredPage />} />
-          <Route element={<SubscriptionGate />}>
         <Route
           element={
             <DashboardProvider>
@@ -217,8 +211,6 @@ export default function App() {
           </Route>
 
           <Route path="*" element={<PlaceholderPage />} />
-        </Route>
-          </Route>
         </Route>
       </Route>
     </Routes>

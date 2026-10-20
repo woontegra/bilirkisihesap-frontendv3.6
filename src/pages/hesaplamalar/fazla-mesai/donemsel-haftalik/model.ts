@@ -3,6 +3,7 @@
  */
 
 import { DEFAULT_SUMMER_MONTHS, DEFAULT_WINTER_MONTHS } from "./constants";
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
 
 export function newLocalId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -73,9 +74,6 @@ export type RowOverride = {
   endISO?: string;
   hidden?: boolean;
   brutManual?: boolean;
-  historicalBrut?: number;
-  currencyEra?: "TRL" | "TRY";
-  conversionDivisor?: 1 | 1000000;
   originalWeekCount?: number;
 };
 
@@ -120,6 +118,7 @@ export type DonemselHaftalikFormSnapshot = {
   mode270: Mode270;
   zamanasimi: ZamanasimiInfo;
   mahsup: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   notes: string;
   rowOverrides: Record<string, RowOverride>;
   manualRows: PeriodRow[];
@@ -213,6 +212,7 @@ export function createEmptyDonemselHaftalikForm(): DonemselHaftalikFormSnapshot 
     mode270: "none",
     zamanasimi: null,
     mahsup: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     notes: "",
     rowOverrides: {},
     manualRows: [],

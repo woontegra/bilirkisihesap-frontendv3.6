@@ -3,6 +3,8 @@
  * Bu modül izole çalışır: başka kıdem alt türleriyle hesaplama motoru paylaşmaz.
  */
 
+import type { EklentiDokumleri } from "../../shared/eklentiDokumu";
+
 export type ExtraItem = {
   id: string;
   name: string;
@@ -31,6 +33,10 @@ export type BasinFormSnapshot = {
   diger: string;
   extras: ExtraItem[];
   notes: string;
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: 360 | 365;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type SavedCase = {
@@ -66,5 +72,6 @@ export function emptyForm(): BasinFormSnapshot {
     diger: "",
     extras: [],
     notes: "",
+    eklentiGunEsasi: 360,
   };
 }

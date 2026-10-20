@@ -51,8 +51,6 @@ export type IsAramaResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   net: number;
 };
 

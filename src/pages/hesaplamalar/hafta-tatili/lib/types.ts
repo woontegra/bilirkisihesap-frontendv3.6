@@ -39,6 +39,4 @@ export type NetBreakdown = {
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
   netAmount: number;
-  damgaOran?: number;
-  issizlikOran?: number;
 };

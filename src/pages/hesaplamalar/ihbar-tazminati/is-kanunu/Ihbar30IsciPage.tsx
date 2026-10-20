@@ -1,5 +1,3 @@
-import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
-import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 
 import { Briefcase } from "lucide-react";
@@ -15,6 +13,7 @@ import { ihbar30Backend } from "../lib/ihbarBackendInstances";
 import { makeIhbarBackendConfig } from "../lib/makeIhbarBackendConfig";
 
 import { IhbarPageView, type WageFieldKey } from "../lib/IhbarPageView";
+import { eklentiDokumuYaz } from "../../shared/eklentiDokumu";
 
 import { useIhbarCaseBackend } from "../lib/useIhbarCaseBackend";
 
@@ -128,7 +127,7 @@ export default function Ihbar30IsciPage() {
 
 
 
-  const result = useFormCalcMemo(() => computeIhbar30IsciResult(form), [form]);
+  const result = useMemo(() => computeIhbar30IsciResult(form), [form]);
 
   const dirty = snapshotKey(form) !== baseline;
 
@@ -380,7 +379,7 @@ export default function Ihbar30IsciPage() {
 
         ["Gelir Vergisi", `-${formatMoney(result.gelirVergisi)} ₺`],
 
-        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
+        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
 
         ["Net İhbar Tazminatı", `${formatMoney(result.net)} ₺`],
 
@@ -453,6 +452,18 @@ export default function Ihbar30IsciPage() {
 
         onRemoveExtra={onRemoveExtra}
 
+        eklentiGunEsasi={form.eklentiGunEsasi}
+
+        eklentiDokumleri={form.eklentiDokumleri}
+
+        onEklentiDokumUygula={(key, dokum) =>
+          setForm((prev) => ({
+            ...prev,
+            eklentiGunEsasi: dokum.gunEsasi,
+            eklentiDokumleri: eklentiDokumuYaz(prev.eklentiDokumleri, key, dokum),
+          }))
+        }
+
         removingExtraIds={removingExtraIds}
 
         toplamBrut={result.toplamBrut}
@@ -468,7 +479,6 @@ export default function Ihbar30IsciPage() {
         gelirVergisiDilimleri={result.gelirVergisiDilimleri}
 
         damgaVergisi={result.damgaVergisi}
-        damgaOran={result.damgaOran}
 
         net={result.net}
 

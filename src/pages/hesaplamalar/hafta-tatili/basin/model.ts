@@ -1,3 +1,4 @@
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import { newLocalId } from "../lib/money";
 import type { DateRange, ExcludedDay, TableRow } from "../lib/types";
 
@@ -8,6 +9,7 @@ export type BasinForm = {
   selectedHolidayIds: string[];
   rows: TableRow[];
   settleAmount: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   globalCoefficient: number;
   geceCalisan: boolean;
 };
@@ -16,7 +18,6 @@ export type BasinResult = {
   rows: TableRow[];
   totalBrut: number;
   year: number;
-  accrualIso?: string;
   net: import("../lib/types").NetBreakdown;
   hakkaniyet: number;
   mahsupSonuc: number;
@@ -46,6 +47,7 @@ export function createEmptyForm(): BasinForm {
     selectedHolidayIds: [],
     rows: [],
     settleAmount: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     globalCoefficient: 1,
     geceCalisan: false,
   };
@@ -59,6 +61,7 @@ export function snapshotKey(form: BasinForm): string {
     sh: form.selectedHolidayIds,
     rows: form.rows,
     st: form.settleAmount,
+    ho: form.hakkaniyetOrani,
     gc: form.globalCoefficient,
     gc2: form.geceCalisan,
   });

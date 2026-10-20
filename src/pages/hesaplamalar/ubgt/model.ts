@@ -1,3 +1,4 @@
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../fazla-mesai/shared/hakkaniyetOrani";
 import type { UbgtDateRangeInput } from "./lib/dateSegmentation";
 import type { UbgtDayEntry, UbgtExcludedDay } from "./lib/holidays";
 import type { UbgtNetResult, UbgtPeriodRow } from "./engine";
@@ -47,6 +48,7 @@ export type UbgtForm = {
   excludedWeekdays: number[];
   year: number;
   settleAmount: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   mahsuplasamaData: UbgtMahsuplasamaMatrix;
   periodOverrides: Record<string, PeriodOverride>;
   /** V3 ubgtRows: motor dışı manuel dönem satırları. */
@@ -96,6 +98,7 @@ export function createEmptyForm(mode: UbgtForm["mode"] = "standart"): UbgtForm {
     excludedWeekdays: [],
     year: new Date().getFullYear(),
     settleAmount: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     mahsuplasamaData: {},
     periodOverrides: {},
     manualPeriodRows: [],

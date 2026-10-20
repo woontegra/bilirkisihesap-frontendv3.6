@@ -65,8 +65,6 @@ check("blocked activate", isBlockedPath("/activate/TOKEN"), true);
 check("blocked aktivasyon", isBlockedPath("/aktivasyon"), true);
 check("blocked admin", isBlockedPath("/admin/users"), true);
 check("blocked admin root", isBlockedPath("/admin"), true);
-check("blocked subscription expired", isBlockedPath("/subscription-expired"), true);
-check("blocked professional license activation", isBlockedPath("/professional-license-activation"), true);
 
 check("tracked dashboard", isTrackedPath("/dashboard"), true);
 check("tracked kotu niyet", isTrackedPath("/kotu-niyet-tazminati"), true);
@@ -83,8 +81,6 @@ check("not tracked register", isTrackedPath("/register"), false);
 check("not tracked reset", isTrackedPath("/reset-password"), false);
 check("not tracked activate", isTrackedPath("/activate"), false);
 check("not tracked admin", isTrackedPath("/admin/analytics"), false);
-check("not tracked subscription expired", isTrackedPath("/subscription-expired"), false);
-check("not tracked professional license activation", isTrackedPath("/professional-license-activation"), false);
 
 for (const prefix of TRACKED_PREFIXES) {
   check(`allow calc prefix ${prefix}`, isTrackedPath(prefix), true);

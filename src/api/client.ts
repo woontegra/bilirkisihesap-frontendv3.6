@@ -6,11 +6,12 @@ import {
   isTokenExpired,
   refreshAccessToken,
 } from "@/auth/session";
-import { API_BASE_URL } from "@/config/apiBase";
 import {
-  isLicenseDeniedCode,
-  LICENSE_DENIED_EVENT,
-} from "@/license/access";
+  SUBSCRIPTION_EXPIRED,
+  parseSubscriptionDeniedPayload,
+  stashSubscriptionLoginCode,
+} from "@/auth/subscriptionLogin";
+import { API_BASE_URL } from "@/config/apiBase";
 
 export { API_BASE_URL };
 
@@ -142,26 +143,46 @@ export async function apiClient<T>(path: string, options: RequestOptions = {}): 
   const data = await parseBody(response);
 
   if (!response.ok && response.status === 403 && !options.skipAuth) {
-    const payload = typeof data === "object" && data ? (data as { error?: unknown; code?: unknown; licenseStatus?: unknown }) : null;
-    const licenseCode = String(payload?.code ?? payload?.error ?? payload?.licenseStatus ?? "");
-    if (isLicenseDeniedCode(licenseCode)) {
-      window.dispatchEvent(new CustomEvent(LICENSE_DENIED_EVENT, { detail: { code: licenseCode.toUpperCase() } }));
+    const licenseCode =
+      typeof data === "object" && data
+        ? String((data as { error?: unknown; code?: unknown }).error ?? (data as { code?: unknown }).code ?? "")
+        : "";
+    const subscriptionCode = parseSubscriptionDeniedPayload(data);
+    if (subscriptionCode === SUBSCRIPTION_EXPIRED) {
+      stashSubscriptionLoginCode(SUBSCRIPTION_EXPIRED);
+      clearSession();
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+      throw new ApiError(messageForStatusBody(data, response.status), 403);
+    } else if (licenseCode === "DEMO_EXPIRED") {
+      window.dispatchEvent(new CustomEvent("demo-expired"));
     } else if (licenseCode === "DEVICE_LIMIT_EXCEEDED") {
       window.dispatchEvent(new CustomEvent("device-limit-exceeded"));
+    } else if (licenseCode === "activation_required") {
+      if (!window.location.pathname.startsWith("/professional-license-activation")) {
+        window.location.href = "/professional-license-activation";
+      }
+    } else if (licenseCode === "expired" || licenseCode === "INACTIVE") {
+      window.location.href = "/professional-license-activation?expired=true";
     }
   }
 
   if (!response.ok) {
-    const message =
-      typeof data === "object" && data && "message" in data
-        ? String((data as { message: unknown }).message)
-        : typeof data === "object" && data && "error" in data
-          ? String((data as { error: unknown }).error)
-          : `İstek başarısız (${response.status})`;
-    throw new ApiError(message, response.status);
+    throw new ApiError(messageForStatusBody(data, response.status), response.status);
   }
 
   return data as T;
+}
+
+function messageForStatusBody(data: unknown, status: number): string {
+  if (typeof data === "object" && data && "message" in data) {
+    return String((data as { message: unknown }).message);
+  }
+  if (typeof data === "object" && data && "error" in data) {
+    return String((data as { error: unknown }).error);
+  }
+  return `İstek başarısız (${status})`;
 }
 
 /** Ticket endpointleri için x-user-id başlığı ekler. */

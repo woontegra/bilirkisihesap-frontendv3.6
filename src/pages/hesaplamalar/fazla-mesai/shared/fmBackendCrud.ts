@@ -16,10 +16,6 @@ export type FmSaveResult = {
   toplamFm: number;
   sonNet: number;
   rowCount: number;
-  /** Geriye uyumlu opsiyonel alan. Eski kayıtlarda yoktur. */
-  sonBrutAlacak?: number;
-  /** Geriye uyumlu opsiyonel alan. Eski kayıtlarda yoktur. */
-  sonNetAlacak?: number;
 };
 
 export type FmSavedCaseListItem = {
@@ -92,8 +88,6 @@ export function buildFmBaseSavePayload(opts: {
     ...extra,
     brut_total: result.toplamFm,
     net_total: result.sonNet,
-    ...(result.sonBrutAlacak != null ? { sonBrutAlacak: result.sonBrutAlacak } : {}),
-    ...(result.sonNetAlacak != null ? { sonNetAlacak: result.sonNetAlacak } : {}),
     ise_giris: iseGiris ?? null,
     isten_cikis: istenCikis ?? null,
     totals: { toplam: result.toplamFm },

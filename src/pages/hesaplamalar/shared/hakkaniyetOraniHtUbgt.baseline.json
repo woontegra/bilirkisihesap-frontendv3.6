@@ -1,0 +1,2345 @@
+{
+  "ht-standart|": {
+    "brut": 6355.3,
+    "hakkaniyet": 2118.43,
+    "mahsupSonucu": 4236.87,
+    "net": {
+      "ssk": 889.74,
+      "issizlik": 63.55,
+      "gelirVergisi": 810.3,
+      "damgaVergisi": 48.24,
+      "netAmount": 4543.47
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "14",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "1.790,88 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "14",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "2.060,10 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "14",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "2.504,32 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "6.355,30 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−889,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−810,30 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−48,24 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "4.543,47 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−2.118,43 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "0,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "4.236,87 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "0a6d59c3943df0ae4a68f55e9d2cf9e610ba856e1429fcfccb0122687d14b608"
+  },
+  "ht-standart|5.000,50": {
+    "brut": 6355.3,
+    "hakkaniyet": 2118.43,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 889.74,
+      "issizlik": 63.55,
+      "gelirVergisi": 810.3,
+      "damgaVergisi": 48.24,
+      "netAmount": 4543.47
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "14",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "1.790,88 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "14",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "2.060,10 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "14",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "2.504,32 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "6.355,30 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−889,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−810,30 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−48,24 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "4.543,47 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−2.118,43 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−5.000,50 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "4ef72238fa30a7583ea3f4c1d137c03fef90b70f9687581603c00f1afa0b9a7c"
+  },
+  "ht-standart|99999999": {
+    "brut": 6355.3,
+    "hakkaniyet": 2118.43,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 889.74,
+      "issizlik": 63.55,
+      "gelirVergisi": 810.3,
+      "damgaVergisi": 48.24,
+      "netAmount": 4543.47
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "14",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "1.790,88 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "14",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "2.060,10 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "14",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "2.504,32 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "6.355,30 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−889,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−810,30 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−48,24 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "4.543,47 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "6.355,30 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−2.118,43 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−99.999.999,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "cd5334cddf0d65b1bceff5a89384b79730d7026ff33f6f58c7bd15944663436c"
+  },
+  "ht-gemi|": {
+    "brut": 29138.48,
+    "hakkaniyet": 9712.83,
+    "mahsupSonucu": 19425.65,
+    "net": {
+      "ssk": 4079.39,
+      "issizlik": 291.38,
+      "gelirVergisi": 3753.54,
+      "damgaVergisi": 221.16,
+      "netAmount": 20793.01
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.2500",
+            "106,60 ₺",
+            "159,90 ₺",
+            "8.314,80 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.2500",
+            "122,63 ₺",
+            "183,94 ₺",
+            "9.197,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.2500",
+            "149,06 ₺",
+            "223,59 ₺",
+            "11.626,68 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "29.138,48 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−4.079,39 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−3.753,54 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−221,16 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "20.793,01 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−9.712,83 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "0,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "19.425,65 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "f6fad3e1e341e8902d48104fa0358d2af7468c83260465b92686337fe960b07e"
+  },
+  "ht-gemi|5.000,50": {
+    "brut": 29138.48,
+    "hakkaniyet": 9712.83,
+    "mahsupSonucu": 14425.15,
+    "net": {
+      "ssk": 4079.39,
+      "issizlik": 291.38,
+      "gelirVergisi": 3753.54,
+      "damgaVergisi": 221.16,
+      "netAmount": 20793.01
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.2500",
+            "106,60 ₺",
+            "159,90 ₺",
+            "8.314,80 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.2500",
+            "122,63 ₺",
+            "183,94 ₺",
+            "9.197,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.2500",
+            "149,06 ₺",
+            "223,59 ₺",
+            "11.626,68 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "29.138,48 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−4.079,39 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−3.753,54 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−221,16 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "20.793,01 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−9.712,83 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−5.000,50 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "14.425,15 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "a886b49fa703a7c02d62755ee4b2c4c5f26d4987d95d2a57f5d24487a7dcd064"
+  },
+  "ht-gemi|99999999": {
+    "brut": 29138.48,
+    "hakkaniyet": 9712.83,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 4079.39,
+      "issizlik": 291.38,
+      "gelirVergisi": 3753.54,
+      "damgaVergisi": 221.16,
+      "netAmount": 20793.01
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.2500",
+            "106,60 ₺",
+            "159,90 ₺",
+            "8.314,80 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.2500",
+            "122,63 ₺",
+            "183,94 ₺",
+            "9.197,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.2500",
+            "149,06 ₺",
+            "223,59 ₺",
+            "11.626,68 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "29.138,48 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−4.079,39 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−3.753,54 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−221,16 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "20.793,01 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "29.138,48 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−9.712,83 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−99.999.999,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "fc862178135b97a4c0e675a28528f761d278cbae70327a20c0174d672f701adf"
+  },
+  "ht-basin|": {
+    "brut": 46622.2,
+    "hakkaniyet": 15540.73,
+    "mahsupSonucu": 31081.47,
+    "net": {
+      "ssk": 6527.11,
+      "issizlik": 466.22,
+      "gelirVergisi": 6725.77,
+      "damgaVergisi": 353.86,
+      "netAmount": 32549.24
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ],
+          [
+            "Sürekli Gece Çalışanı",
+            "Evet (Haftada 2 gün)"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı ×2",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "13.303,68 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "14.715,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "18.603,52 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "46.622,20 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−6.527,11 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−6.725,77 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−353,86 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "32.549,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−15.540,73 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "0,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "31.081,47 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "4ff0a0c248c50041841cebcd985890163005d488578518453a0adef148593ec4"
+  },
+  "ht-basin|5.000,50": {
+    "brut": 46622.2,
+    "hakkaniyet": 15540.73,
+    "mahsupSonucu": 26080.97,
+    "net": {
+      "ssk": 6527.11,
+      "issizlik": 466.22,
+      "gelirVergisi": 6725.77,
+      "damgaVergisi": 353.86,
+      "netAmount": 32549.24
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ],
+          [
+            "Sürekli Gece Çalışanı",
+            "Evet (Haftada 2 gün)"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı ×2",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "13.303,68 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "14.715,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "18.603,52 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "46.622,20 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−6.527,11 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−6.725,77 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−353,86 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "32.549,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−15.540,73 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−5.000,50 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "26.080,97 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "c65f350c1246f7652450da9c4310551d6b13aab2050a6cec3c7d2c839b7956e0"
+  },
+  "ht-basin|99999999": {
+    "brut": 46622.2,
+    "hakkaniyet": 15540.73,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 6527.11,
+      "issizlik": 466.22,
+      "gelirVergisi": 6725.77,
+      "damgaVergisi": 353.86,
+      "netAmount": 32549.24
+    },
+    "rowCount": 3,
+    "totalDays": 0,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış",
+            "31.12.2021"
+          ],
+          [
+            "Sürekli Gece Çalışanı",
+            "Evet (Haftada 2 gün)"
+          ]
+        ]
+      },
+      {
+        "id": "dislanabilir-gunler",
+        "title": "Dışlanabilir Günler",
+        "headers": [
+          "Tür",
+          "Başlangıç",
+          "Bitiş",
+          "Gün"
+        ],
+        "rows": [
+          [
+            "Yıllık İzin",
+            "01.07.2020",
+            "14.07.2020",
+            "14"
+          ]
+        ]
+      },
+      {
+        "id": "hafta-tatili-cetvel",
+        "title": "Hafta Tatili Hesaplama Detayı",
+        "headers": [
+          "Tarih (Ücret Dönemi)",
+          "Hafta",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Brüt",
+          "Günlük %50 Zamlı ×2",
+          "Hafta Tatili Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "52",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "127,92 ₺",
+            "13.303,68 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "50",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "147,15 ₺",
+            "14.715,00 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "52",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "178,88 ₺",
+            "18.603,52 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "46.622,20 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%14)",
+            "−6.527,11 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15, %20)",
+            "−6.725,77 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−353,86 ₺"
+          ],
+          [
+            "Net Hafta Tatili Alacağı",
+            "32.549,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net Hafta Tatili Alacağı",
+            "46.622,20 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−15.540,73 ₺"
+          ],
+          [
+            "Mahsuplaşma Miktarı",
+            "−99.999.999,00 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "64cb6a33d223838ead9087e804759dcacd9333a2b11db25ec561cdeb85665508"
+  },
+  "ubgt-standart|": {
+    "brut": 3631.56,
+    "hakkaniyet": 1210.52,
+    "mahsupSonucu": 1385.7199999999998,
+    "net": {
+      "ssk": 508.42,
+      "issizlik": 36.32,
+      "gelirVergisi": 463.02,
+      "damgaVergisi": 27.56,
+      "netAmount": 2596.24
+    },
+    "rowCount": 3,
+    "totalDays": 36,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş Tarihi",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış Tarihi",
+            "31.12.2021"
+          ],
+          [
+            "Seçilen Tatil Sayısı",
+            "12 adet"
+          ],
+          [
+            "Toplam UBGT Günü",
+            "36 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT Hesaplama Cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Ücret",
+          "UBGT Günleri",
+          "UBGT Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "12",
+            "1.023,36 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "12",
+            "1.177,20 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "12",
+            "1.431,00 ₺"
+          ],
+          [
+            "Toplam UBGT Ücreti:",
+            "",
+            "",
+            "",
+            "",
+            "3.631,56 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT Alacağı",
+            "3.631,56 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%15)",
+            "−544,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−463,02 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−27,56 ₺"
+          ],
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−1.210,52 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "1.385,72 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "d5b2dd4eeb239d48ebde31c4c7e08d979e5fc073fe707f861f2259d1b1ca5f95"
+  },
+  "ubgt-standart|5.000,50": {
+    "brut": 3631.56,
+    "hakkaniyet": 1210.52,
+    "mahsupSonucu": 1385.7199999999998,
+    "net": {
+      "ssk": 508.42,
+      "issizlik": 36.32,
+      "gelirVergisi": 463.02,
+      "damgaVergisi": 27.56,
+      "netAmount": 2596.24
+    },
+    "rowCount": 3,
+    "totalDays": 36,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş Tarihi",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış Tarihi",
+            "31.12.2021"
+          ],
+          [
+            "Seçilen Tatil Sayısı",
+            "12 adet"
+          ],
+          [
+            "Toplam UBGT Günü",
+            "36 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT Hesaplama Cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Ücret",
+          "UBGT Günleri",
+          "UBGT Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "12",
+            "1.023,36 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "12",
+            "1.177,20 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "12",
+            "1.431,00 ₺"
+          ],
+          [
+            "Toplam UBGT Ücreti:",
+            "",
+            "",
+            "",
+            "",
+            "3.631,56 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT Alacağı",
+            "3.631,56 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%15)",
+            "−544,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−463,02 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−27,56 ₺"
+          ],
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−1.210,52 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "1.385,72 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "52f356f41eed6d4f516f28bb9c1e2debbed73d681acc4e4ac9763e5b46ae6820"
+  },
+  "ubgt-standart|99999999": {
+    "brut": 3631.56,
+    "hakkaniyet": 1210.52,
+    "mahsupSonucu": 1385.7199999999998,
+    "net": {
+      "ssk": 508.42,
+      "issizlik": 36.32,
+      "gelirVergisi": 463.02,
+      "damgaVergisi": 27.56,
+      "netAmount": 2596.24
+    },
+    "rowCount": 3,
+    "totalDays": 36,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "İşe Giriş Tarihi",
+            "01.01.2019"
+          ],
+          [
+            "İşten Çıkış Tarihi",
+            "31.12.2021"
+          ],
+          [
+            "Seçilen Tatil Sayısı",
+            "12 adet"
+          ],
+          [
+            "Toplam UBGT Günü",
+            "36 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT Hesaplama Cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük Ücret",
+          "UBGT Günleri",
+          "UBGT Ücreti"
+        ],
+        "rows": [
+          [
+            "01.01.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "12",
+            "1.023,36 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "12",
+            "1.177,20 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "12",
+            "1.431,00 ₺"
+          ],
+          [
+            "Toplam UBGT Ücreti:",
+            "",
+            "",
+            "",
+            "",
+            "3.631,56 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten Net'e Çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT Alacağı",
+            "3.631,56 ₺"
+          ],
+          [
+            "SGK İşçi Primi (%15)",
+            "−544,74 ₺"
+          ],
+          [
+            "Gelir Vergisi (%15)",
+            "−463,02 ₺"
+          ],
+          [
+            "Damga Vergisi (Binde 7,59)",
+            "−27,56 ₺"
+          ],
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Net UBGT Alacağı",
+            "2.596,24 ₺"
+          ],
+          [
+            "1/3 Hakkaniyet İndirimi",
+            "−1.210,52 ₺"
+          ],
+          [
+            "Mahsuplaşma Sonucu",
+            "1.385,72 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "b7ce0c593e93b683b1d42282b5776219e72889c00b14617e6e777a04f787b63e"
+  },
+  "ubgt-bilirkisi|": {
+    "brut": 1342.59,
+    "hakkaniyet": 447.53,
+    "mahsupSonucu": 895.06,
+    "net": {
+      "ssk": 187.96,
+      "issizlik": 13.43,
+      "gelirVergisi": 171.18,
+      "damgaVergisi": 10.19,
+      "netAmount": 959.83
+    },
+    "rowCount": 3,
+    "totalDays": 13,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "Davacı dönemleri",
+            "01.01.2019 → 31.12.2021"
+          ],
+          [
+            "Tanık sayısı",
+            "1"
+          ],
+          [
+            "Toplam UBGT günü",
+            "13 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT hesaplama cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük ücret",
+          "UBGT günleri",
+          "UBGT ücreti"
+        ],
+        "rows": [
+          [
+            "01.06.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "3",
+            "255,84 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "5",
+            "490,50 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "5",
+            "596,25 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "1.342,59 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten net'e çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "SGK işçi primi (%15)",
+            "−201,39 ₺"
+          ],
+          [
+            "Gelir vergisi (%15)",
+            "−171,18 ₺"
+          ],
+          [
+            "Damga vergisi (binde 7,59)",
+            "−10,19 ₺"
+          ],
+          [
+            "Net UBGT alacağı",
+            "959,83 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "1/3 hakkaniyet indirimi",
+            "−447,53 ₺"
+          ],
+          [
+            "Mahsuplaşma miktarı",
+            "0,00 ₺"
+          ],
+          [
+            "Mahsuplaşma sonucu",
+            "895,06 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "02140620645c27542951d866649386d2a43d26c544725ada51a988952de9bd3e"
+  },
+  "ubgt-bilirkisi|5.000,50": {
+    "brut": 1342.59,
+    "hakkaniyet": 447.53,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 187.96,
+      "issizlik": 13.43,
+      "gelirVergisi": 171.18,
+      "damgaVergisi": 10.19,
+      "netAmount": 959.83
+    },
+    "rowCount": 3,
+    "totalDays": 13,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "Davacı dönemleri",
+            "01.01.2019 → 31.12.2021"
+          ],
+          [
+            "Tanık sayısı",
+            "1"
+          ],
+          [
+            "Toplam UBGT günü",
+            "13 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT hesaplama cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük ücret",
+          "UBGT günleri",
+          "UBGT ücreti"
+        ],
+        "rows": [
+          [
+            "01.06.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "3",
+            "255,84 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "5",
+            "490,50 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "5",
+            "596,25 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "1.342,59 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten net'e çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "SGK işçi primi (%15)",
+            "−201,39 ₺"
+          ],
+          [
+            "Gelir vergisi (%15)",
+            "−171,18 ₺"
+          ],
+          [
+            "Damga vergisi (binde 7,59)",
+            "−10,19 ₺"
+          ],
+          [
+            "Net UBGT alacağı",
+            "959,83 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "1/3 hakkaniyet indirimi",
+            "−447,53 ₺"
+          ],
+          [
+            "Mahsuplaşma miktarı",
+            "−5.000,50 ₺"
+          ],
+          [
+            "Mahsuplaşma sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "b26847f639094532c2f17b4666223be1a61debb93faff3de802a605f29e758dc"
+  },
+  "ubgt-bilirkisi|99999999": {
+    "brut": 1342.59,
+    "hakkaniyet": 447.53,
+    "mahsupSonucu": 0,
+    "net": {
+      "ssk": 187.96,
+      "issizlik": 13.43,
+      "gelirVergisi": 171.18,
+      "damgaVergisi": 10.19,
+      "netAmount": 959.83
+    },
+    "rowCount": 3,
+    "totalDays": 13,
+    "preview": [
+      {
+        "id": "genel-bilgiler",
+        "title": "Genel Bilgiler",
+        "headers": [
+          "Alan",
+          "Değer"
+        ],
+        "rows": [
+          [
+            "Davacı dönemleri",
+            "01.01.2019 → 31.12.2021"
+          ],
+          [
+            "Tanık sayısı",
+            "1"
+          ],
+          [
+            "Toplam UBGT günü",
+            "13 gün"
+          ]
+        ]
+      },
+      {
+        "id": "ubgt-hesaplama-cetveli",
+        "title": "UBGT hesaplama cetveli",
+        "headers": [
+          "Dönem",
+          "Ücret (BRÜT)",
+          "Katsayı",
+          "Günlük ücret",
+          "UBGT günleri",
+          "UBGT ücreti"
+        ],
+        "rows": [
+          [
+            "01.06.2019 - 31.12.2019",
+            "2.558,40 ₺",
+            "1.0000",
+            "85,28 ₺",
+            "3",
+            "255,84 ₺"
+          ],
+          [
+            "01.01.2020 - 31.12.2020",
+            "2.943,00 ₺",
+            "1.0000",
+            "98,10 ₺",
+            "5",
+            "490,50 ₺"
+          ],
+          [
+            "01.01.2021 - 31.12.2021",
+            "3.577,50 ₺",
+            "1.0000",
+            "119,25 ₺",
+            "5",
+            "596,25 ₺"
+          ],
+          [
+            "Toplam",
+            "",
+            "",
+            "",
+            "",
+            "1.342,59 ₺"
+          ]
+        ],
+        "lastRowTone": "blue"
+      },
+      {
+        "id": "brutten-nete",
+        "title": "Brüt'ten net'e çeviri",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "SGK işçi primi (%15)",
+            "−201,39 ₺"
+          ],
+          [
+            "Gelir vergisi (%15)",
+            "−171,18 ₺"
+          ],
+          [
+            "Damga vergisi (binde 7,59)",
+            "−10,19 ₺"
+          ],
+          [
+            "Net UBGT alacağı",
+            "959,83 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      },
+      {
+        "id": "mahsuplasma",
+        "title": "Mahsuplaşma",
+        "headers": [
+          "Kalem",
+          "Tutar"
+        ],
+        "rows": [
+          [
+            "Brüt UBGT alacağı",
+            "1.342,59 ₺"
+          ],
+          [
+            "1/3 hakkaniyet indirimi",
+            "−447,53 ₺"
+          ],
+          [
+            "Mahsuplaşma miktarı",
+            "−99.999.999,00 ₺"
+          ],
+          [
+            "Mahsuplaşma sonucu",
+            "0,00 ₺"
+          ]
+        ],
+        "lastRowTone": "green"
+      }
+    ],
+    "saveHash": "a864844f2ac05e9a5787d75aae37d9717f0e1533162d43423ad8042fa69c4a8c"
+  }
+}

@@ -11,20 +11,14 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { fetchAuthMe } from "@/api/profile";
+import { isAuthenticated, loginWithPassword } from "@/auth/session";
 import {
-  decodeAccessTokenClaims,
-  isAuthenticated,
-  loginWithPassword,
-  logout,
-} from "@/auth/session";
-import {
-  licenseDecisionFromMe,
-  postLoginPath,
-  readLicenseAccessSnapshot,
-  writeLicenseAccessSnapshot,
-} from "@/license/access";
-import { LicenseLoadingScreen } from "@/license/LicenseLoadingScreen";
+  LoginSubscriptionError,
+  buildSubscriptionRenewUrl,
+  buildSubscriptionSupportUrl,
+  consumeSubscriptionLoginCode,
+  messageForSubscriptionCode,
+} from "@/auth/subscriptionLogin";
 import { usePanelBranding } from "@/context/PanelBrandingContext";
 import { PANEL_FALLBACK_LOGO_URL } from "@/types/panelBranding";
 import styles from "./LoginPage.module.css";
@@ -35,10 +29,6 @@ const SUCCESS_REDIRECT_MS = 2200;
 
 type SuccessTransition = {
   userName: string;
-  role?: string | null;
-  licenseActive?: boolean | null;
-  licenseAccessCode?: string | null;
-  licenseStatus?: string | null;
 };
 
 function resolveWelcomeName(name?: string | null, email?: string): string {
@@ -86,12 +76,12 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [subscriptionBlock, setSubscriptionBlock] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoVisible, setLogoVisible] = useState(true);
   const [loginLogoAttempt, setLoginLogoAttempt] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [successTransition, setSuccessTransition] = useState<SuccessTransition | null>(null);
-  const [checkingLicense, setCheckingLicense] = useState(false);
 
   const rotatingWord = useRotatingWord(HERO_WORDS);
   const emailId = useId();
@@ -123,6 +113,11 @@ export default function LoginPage() {
       setEmail(remembered);
       setRememberMe(true);
     }
+    const stashed = consumeSubscriptionLoginCode();
+    if (stashed) {
+      setSubscriptionBlock(stashed);
+      setError(messageForSubscriptionCode(stashed));
+    }
     const frame = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(frame);
   }, []);
@@ -146,35 +141,19 @@ export default function LoginPage() {
   useEffect(() => {
     if (!successTransition) return;
     const timer = window.setTimeout(() => {
-      const target = postLoginPath({
-        role: successTransition.role,
-        licenseActive: successTransition.licenseActive,
-        licenseAccessCode: successTransition.licenseAccessCode,
-        licenseStatus: successTransition.licenseStatus,
-      });
-      navigate(target, { replace: true });
+      navigate("/dashboard", { replace: true });
     }, SUCCESS_REDIRECT_MS);
     return () => window.clearTimeout(timer);
   }, [navigate, successTransition]);
 
-  if (isAuthenticated() && !successTransition && !checkingLicense) {
-    const userId = decodeAccessTokenClaims()?.userId ?? null;
-    const snap = readLicenseAccessSnapshot(userId);
-    if (snap) {
-      const target = postLoginPath({
-        role: snap.isAdmin ? "admin" : "user",
-        licenseActive: snap.allowed,
-        licenseAccessCode: snap.code,
-        licenseStatus: snap.code,
-      });
-      return <Navigate to={target} replace />;
-    }
+  if (isAuthenticated() && !successTransition) {
     return <Navigate to="/dashboard" replace />;
   }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    setSubscriptionBlock(null);
     setLoading(true);
     try {
       const payload = await loginWithPassword(email.trim(), password);
@@ -183,79 +162,19 @@ export default function LoginPage() {
       } else {
         localStorage.removeItem("remember_email");
       }
-
-      setLoading(false);
-      setCheckingLicense(true);
-
-      let role = payload.user.role;
-      let licenseActive = payload.licenseActive ?? null;
-      let licenseAccessCode = payload.licenseAccessCode ?? null;
-      let licenseStatus = payload.licenseStatus ?? null;
-      let licenseType = payload.licenseType ?? null;
-      let subscriptionEndsAt = payload.subscriptionEndsAt ?? null;
-      let userId = Number(payload.user.id);
-
-      try {
-        const me = await fetchAuthMe({ force: true });
-        role = me.role ?? role;
-        licenseActive = me.licenseActive ?? licenseActive;
-        licenseAccessCode = me.licenseAccessCode ?? licenseAccessCode;
-        licenseStatus = me.licenseStatus ?? licenseStatus;
-        licenseType = me.licenseType ?? licenseType;
-        subscriptionEndsAt = me.subscriptionEndsAt ?? subscriptionEndsAt;
-        userId = Number(me.id ?? userId);
-      } catch {
-        // Giriş yanıtındaki lisans alanları yeterli değilse oturumu kapat.
-        if (licenseActive == null && !licenseAccessCode && !licenseStatus && String(role || "").toLowerCase() !== "admin") {
-          logout();
-          setCheckingLicense(false);
-          setError("Abonelik durumu doğrulanamadı. Lütfen tekrar giriş yapın.");
-          return;
-        }
-      }
-
-      const decision = licenseDecisionFromMe(
-        {
-          id: userId,
-          role,
-          licenseActive,
-          licenseAccessCode,
-          licenseStatus,
-          licenseType,
-          subscriptionEndsAt,
-        },
-        userId,
-      );
-      if (decision.userId) {
-        writeLicenseAccessSnapshot({
-          userId: decision.userId,
-          allowed: decision.allowed,
-          isAdmin: decision.isAdmin,
-          code: decision.code,
-          licenseType: decision.licenseType,
-          subscriptionType: decision.subscriptionType,
-          expiresAt: decision.expiresAt,
-        });
-      }
-
-      setCheckingLicense(false);
       setSuccessTransition({
         userName: resolveWelcomeName(payload.user.name, payload.user.email),
-        role,
-        licenseActive,
-        licenseAccessCode,
-        licenseStatus,
       });
     } catch (err) {
-      setCheckingLicense(false);
-      setError(err instanceof Error ? err.message : "Giriş başarısız");
+      if (err instanceof LoginSubscriptionError) {
+        setSubscriptionBlock(err.code);
+        setError(err.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Giriş başarısız");
+      }
     } finally {
       setLoading(false);
     }
-  }
-
-  if (checkingLicense) {
-    return <LicenseLoadingScreen />;
   }
 
   return (
@@ -464,6 +383,27 @@ export default function LoginPage() {
                   <p className={styles.error} role="alert">
                     {error}
                   </p>
+                ) : null}
+
+                {subscriptionBlock ? (
+                  <div className={styles.subscriptionActions} role="group" aria-label="Abonelik seçenekleri">
+                    <a
+                      className={styles.subscriptionPrimary}
+                      href={buildSubscriptionRenewUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Aboneliği Yenile
+                    </a>
+                    <a
+                      className={styles.subscriptionSecondary}
+                      href={buildSubscriptionSupportUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Destek
+                    </a>
+                  </div>
                 ) : null}
 
                 <button type="submit" className={styles.submit} disabled={loading}>

@@ -10,6 +10,7 @@ import {
   createFmBackendCrud,
   type FmSaveResult,
 } from "../shared/fmBackendCrud";
+import { normalizeHakkaniyetOrani } from "../shared/hakkaniyetOrani";
 import {
   createDefaultSummerPattern,
   createDefaultWinterPattern,
@@ -248,6 +249,7 @@ export function mapDonemselHaftalikFormFromBackend(
           : "none",
       zamanasimi: normalizeZamanasimi(raw.zamanasimi ?? payload.zamanasimi),
       mahsup: str(raw.mahsup ?? raw.mahsuplasmaMiktari ?? payload.mahsuplasmaMiktari),
+      hakkaniyetOrani: normalizeHakkaniyetOrani(raw.hakkaniyetOrani),
       notes: str(raw.notes),
       rowOverrides: normalizeRowOverrides(raw.rowOverrides ?? payload.rowOverrides),
       manualRows: normalizeManualRows(raw.manualRows ?? payload.manualRows),
@@ -283,6 +285,7 @@ export function buildDonemselHaftalikSaveData(
     katSayi: form.katSayi,
     mode270: form.mode270,
     mahsuplasmaMiktari: form.mahsup,
+    hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
     zamanasimi: form.zamanasimi,
     exclusions: form.exclusions,
     manualRows: form.manualRows,

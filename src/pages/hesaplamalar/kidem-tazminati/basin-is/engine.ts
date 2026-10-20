@@ -4,9 +4,8 @@
  * differenceInYears/Months/Days davranışı elle üretilir (v1 ile bire bir uyum).
  */
 
-import { stampRateForDate } from "../../shared/historical/laborNet";
 import type { ExtraItem } from "./model";
-import { INCOME_TAX_BRACKETS, type TaxBracket } from "./taxData";
+import { DAMGA_ORAN, INCOME_TAX_BRACKETS, type TaxBracket } from "./taxData";
 
 /* ── Para yardımcıları ── */
 
@@ -191,20 +190,18 @@ export type BrutNetResult = {
   gelirVergisiUygulanacak: boolean;
   matrah: number;
   gelirVergisi: number;
-  damgaOran: number;
   damgaVergisi: number;
   net: number;
 };
 
-export function deriveBrutNet(brut: number, ciplakBrut: number, exitYear: number, exitIso?: string | null): BrutNetResult {
+export function deriveBrutNet(brut: number, ciplakBrut: number, exitYear: number): BrutNetResult {
   const esikDeger = ciplakBrut * 24;
   const gelirVergisiUygulanacak = brut > esikDeger && esikDeger > 0;
   const matrah = gelirVergisiUygulanacak ? Math.max(0, brut - esikDeger) : 0;
   const gelirVergisi = gelirVergisiUygulanacak ? round2(calculateIncomeTaxForYear(exitYear, matrah)) : 0;
-  const damgaOran = stampRateForDate(exitIso);
-  const damgaVergisi = round2(brut * damgaOran);
+  const damgaVergisi = round2(brut * DAMGA_ORAN);
   const net = round2(brut - damgaVergisi - gelirVergisi);
-  return { brut: round2(brut), esikDeger: round2(esikDeger), gelirVergisiUygulanacak, matrah: round2(matrah), gelirVergisi, damgaOran, damgaVergisi, net };
+  return { brut: round2(brut), esikDeger: round2(esikDeger), gelirVergisiUygulanacak, matrah: round2(matrah), gelirVergisi, damgaVergisi, net };
 }
 
 export function resolveExitYear(istenCikis: string): number {
@@ -214,10 +211,10 @@ export function resolveExitYear(istenCikis: string): number {
   return y;
 }
 
-/** Eklenti hesaplama: 12 aylık toplam / 360 × 30 (V3 ile aynı formül). */
-export function computeEklentiResult(months: string[]): number {
+/** Eklenti hesaplama: 12 aylık toplam / gün esası × 30 — gün esası 360 (varsayılan, V3 ile aynı) veya 365. */
+export function computeEklentiResult(months: string[], gunEsasi: 360 | 365 = 360): number {
   const sum = months.reduce((acc, v) => acc + parseNum(v), 0);
-  return (sum / 360) * 30;
+  return (sum / gunEsasi) * 30;
 }
 
 export function formatYilAyGun(t: YilAyGun): string {

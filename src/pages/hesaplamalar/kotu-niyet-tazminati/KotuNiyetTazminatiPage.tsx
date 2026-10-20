@@ -1,4 +1,3 @@
-import { damgaLabelForRate } from "../shared/historical/laborNet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -583,7 +582,7 @@ export default function KotuNiyetTazminatiPage() {
         headers: ["Kalem", "Tutar"],
         rows: [
           ["Brüt Kötü Niyet Tazminatı", `${formatMoney(result.brutAmount)} ₺`],
-          [damgaLabelForRate(result.damgaOran, "binde"), `−${formatMoney(result.damgaVergisi)} ₺`],
+          ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.damgaVergisi)} ₺`],
           ["Net Kötü Niyet Tazminatı", `${formatMoney(result.netAmount)} ₺`],
         ],
         lastRowTone: "green",

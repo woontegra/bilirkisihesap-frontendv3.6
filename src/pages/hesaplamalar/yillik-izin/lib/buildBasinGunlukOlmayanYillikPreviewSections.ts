@@ -1,4 +1,3 @@
-import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
 import { formatDateTR } from "./dates";
 import { formatMoney, parseNum } from "./money";
@@ -99,9 +98,9 @@ export function buildBasinGunlukOlmayanYillikPreviewSections(opts: {
       rows: [
         ["Brüt Yıllık İzin Alacağı", `${formatMoney(result.brutIzin)} ₺`],
         ["SGK İşçi Primi (%14)", `-${formatMoney(result.sgk)} ₺`],
-        [issizlikLabelForRate(result.issizlikOran, "İşsizlik Sigortası Primi (%1)"), `-${formatMoney(result.issizlik)} ₺`],
+        ["İşsizlik Sigortası Primi (%1)", `-${formatMoney(result.issizlik)} ₺`],
         [gvLabel, `-${formatMoney(result.gelirVergisi)} ₺`],
-        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
+        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
         ["Net Yıllık İzin Alacağı", `${formatMoney(result.netIzin)} ₺`],
       ],
       lastRowTone: "green",

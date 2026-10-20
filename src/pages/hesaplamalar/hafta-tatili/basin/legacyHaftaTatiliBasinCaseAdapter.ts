@@ -41,6 +41,7 @@ export function mapLegacyBasinHaftaTatiliCase(
       selectedHolidayIds: mapped.selectedHolidayIds,
       rows: mapped.rows,
       settleAmount: mapped.settleAmount,
+      hakkaniyetOrani: mapped.hakkaniyetOrani,
       globalCoefficient: mapped.globalCoefficient,
       geceCalisan,
     };
@@ -52,6 +53,7 @@ export function mapLegacyBasinHaftaTatiliCase(
       selectedHolidayIds: mapped.selectedHolidayIds,
       rows: mapped.rows,
       settleAmount: mapped.settleAmount,
+      hakkaniyetOrani: mapped.hakkaniyetOrani,
       globalCoefficient: mapped.globalCoefficient,
       geceCalisan: false,
     };

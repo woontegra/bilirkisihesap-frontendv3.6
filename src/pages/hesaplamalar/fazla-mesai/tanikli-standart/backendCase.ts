@@ -9,6 +9,7 @@ import {
   createFmBackendCrud,
   type FmSaveResult,
 } from "../shared/fmBackendCrud";
+import { normalizeHakkaniyetOrani } from "../shared/hakkaniyetOrani";
 import {
   createEmptyWitness,
   EXCLUSION_TYPES,
@@ -213,6 +214,7 @@ export function mapTanikliFormFromBackend(
       katSayi: str(form.katSayi ?? "1") || "1",
       mode270: form.mode270 === "simple" || form.mode270 === "detailed" ? form.mode270 : "none",
       mahsup: str(form.mahsup ?? form.mahsuplasmaMiktari),
+      hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
       notes: str(form.notes),
       zamanasimi: normalizeZamanasimi(form.zamanasimi),
       rowOverrides: normalizeRowOverrides(form.rowOverrides ?? payload.rowOverrides),
@@ -251,6 +253,7 @@ export function buildTanikliSaveData(
     mode270: form.mode270,
     katSayi: form.katSayi,
     mahsuplasmaMiktari: form.mahsup,
+    hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
     zamanasimi: form.zamanasimi,
     exclusions: form.exclusions,
     rowOverrides: form.rowOverrides,

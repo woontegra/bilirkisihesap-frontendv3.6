@@ -1,4 +1,3 @@
-import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Yeraltı İşçisi Fazla Mesai — sayfa. Tasarım V3.5 (standart FM deseni); alanlar
  * ve metinler V3 "Yeraltı İşçileri Fazla Mesai" ile eşdeğerdir. Hesaplama %100
@@ -25,12 +24,11 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
-import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput, DraftTimeInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -59,14 +57,11 @@ import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import {
   createManualRow,
-  fmTaxYear,
   formatMoney,
   isValidRange,
-  netFromGrossFm,
   parseKatsayi,
   sanitizeMoneyTyping,
 } from "./engine";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   computeYeraltiResultV3,
   logYeraltiFmV3EngineCheck,
@@ -82,6 +77,8 @@ import {
   type YeraltiFormSnapshot,
 } from "./model";
 import { isCetvelRowVisible } from "../cetvelDisplay";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./YeraltiFmPage.module.css";
 
 const PAGE_TITLE = "Yeraltı İşçileri Fazla Mesai Hesaplama";
@@ -252,13 +249,6 @@ export default function YeraltiFmPage() {
   }, [form.davaciDateIn, form.davaciDateOut]);
 
   const result = useDeferredFormMemo(form, computeYeraltiResultV3);
-  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
-    [result.sonNet, form.davaciDateOut],
-  );
-  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.davaciDateOut)),
-    [result.rows, form.davaciDateOut],
-  );
-
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -501,13 +491,7 @@ export default function YeraltiFmPage() {
       const saved = await saveYeraltiFmCase(
         name,
         form,
-        {
-          toplamFm: result.totalFm,
-          sonNet: result.sonNet,
-          rowCount: result.rows.length,
-          sonBrutAlacak: result.sonNet,
-          sonNetAlacak: equityNet.net,
-        },
+        { toplamFm: result.totalFm, sonNet: result.sonNet, rowCount: result.rows.length },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -584,9 +568,9 @@ export default function YeraltiFmPage() {
       title: "Fazla Mesai Hesaplama Cetveli (Yeraltı)",
       headers: ["Dönem", "Hafta", "Ücret (2×AU)", "Katsayı", "FM Saat", "187,5", "2", "Fazla Mesai"],
       rows: visibleRows.map((r) => [
-        formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.note),
+        `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.note ? ` ${r.note}` : ""}`,
         String(r.weeks),
-        (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
+        money(r.brut),
         String(r.katsayi),
         r.fmHours.toFixed(2).replace(".", ","),
         "187,5",
@@ -603,9 +587,9 @@ export default function YeraltiFmPage() {
       rows: [
         ["Brüt Fazla Mesai", money(result.totalFm)],
         ["SGK (%14)", `-${money(result.sgk)}`],
-        [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
+        ["İşsizlik (%1)", `-${money(result.issizlik)}`],
         [`Gelir Vergisi ${result.gelirVergisiDilimleri}`.trim(), `-${money(result.gelirVergisi)}`],
-        [kesintiEtiket.damga, `-${money(result.damgaVergisi)}`],
+        ["Damga Vergisi (Binde 7,59)", `-${money(result.damgaVergisi)}`],
         ["Net Fazla Mesai", money(result.netYillik)],
       ],
       lastRowTone: "green",
@@ -616,23 +600,16 @@ export default function YeraltiFmPage() {
       title: "Mahsuplaşma",
       headers: ["Kalem", "Tutar"],
       rows: [
-        ["Toplam Brüt Alacak", money(result.totalFm)],
-        ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetIndirimi)}`],
-        ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
-        ["Son Brüt Alacak", money(result.sonNet)],
-        ...equityNetPreviewRows({
-          format: money,
-          kesinti: equityNet,
-          sgkLabel: "SGK (%14)",
-          issizlikLabel: kesintiEtiket.issizlik,
-          damgaLabel: kesintiEtiket.damga,
-        }),
+        ["Toplam Fazla Mesai (Brüt)", money(result.totalFm)],
+        [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
+        ...(result.mahsupTutari > 0 ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][]) : []),
+        ["Son Net Alacak", money(result.sonNet)],
       ],
       lastRowTone: "green",
     });
 
     return insertExclusionsPreviewSection(sections, form.exclusions);
-  }, [form, result, equityNet]);
+  }, [form, result]);
 
   return (
     <div className={styles.page} aria-busy={caseLoading || undefined}>
@@ -980,7 +957,7 @@ export default function YeraltiFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.sgk)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>{kesintiEtiket.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span className={styles.deduction}>-{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div className={styles.line}>
@@ -988,7 +965,7 @@ export default function YeraltiFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.gelirVergisi)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>{kesintiEtiket.damga}</span>
+              <span>Damga Vergisi (Binde 7,59)</span>
               <span className={styles.deduction}>-{formatMoney(result.damgaVergisi)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
@@ -1008,7 +985,11 @@ export default function YeraltiFmPage() {
               <span>{formatMoney(result.totalFm)} ₺</span>
             </div>
             <div className={styles.line}>
-              <span>1/3 Hakkaniyet</span>
+              <HakkaniyetOraniSecimi
+                value={form.hakkaniyetOrani}
+                onChange={(v) => setField("hakkaniyetOrani", v)}
+                metin="Hakkaniyet"
+              />
               <span className={styles.deduction}>-{formatMoney(result.hakkaniyetIndirimi)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.mahsupLine}`}>
@@ -1037,20 +1018,9 @@ export default function YeraltiFmPage() {
               </div>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son Brüt Alacak</span>
+              <span>Son Net</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} />
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass={styles.line}
-              deductClass={styles.deduction}
-              netClass={styles.netLine}
-              sgkLabel="SGK (%14)"
-              issizlikLabel={kesintiEtiket.issizlik}
-              damgaLabel={kesintiEtiket.damga}
-              renderNet={(text) => <FlashValue value={text} />}
-            />
           </div>
         </article>
 

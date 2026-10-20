@@ -1,5 +1,3 @@
-import { eraForIso, formatHistoricalTrl, formatTrlWageHint, formatTryWageInput, parseTurkishAmount, scaleTableBrut } from "../../shared/historical/currencyEra";
-import { getAsgariUcretRowByDate } from "../../shared/historical/asgariUcret";
 /**
  * 24 Saat Vardiya — Fazla mesai cetveli (V3 sütunları).
  * Satır sonunda yalnız + ve −.
@@ -129,30 +127,10 @@ export function CetvelTable({
                     <td>
                       <CetvelBrutInput
                         className={styles.cellInput}
-                        value={eraForIso(r.startISO) === "TRL" ? (ov.historicalBrut ?? getAsgariUcretRowByDate(r.startISO)?.brut ?? r.brut) : r.brut}
+                        value={r.brut}
                         ariaLabel="Brüt Ücret"
-                        onCommitBrut={(typed) => {
-                          const scaled = scaleTableBrut(r.startISO, typed);
-                          onOverrideChange(r.id, {
-                            ...ov,
-                            brut: scaled.normalizedGross,
-                            historicalBrut: scaled.historicalGross,
-                            currencyEra: scaled.currencyEra,
-                            conversionDivisor: scaled.conversionDivisor,
-                            brutManual: true,
-                          });
-                        }}
-                        formatValue={eraForIso(r.startISO) === "TRL" ? formatHistoricalTrl : formatTryWageInput}
-                        parseValue={parseTurkishAmount}
-                        liveGroup={eraForIso(r.startISO) === "TRL" ? "TRL" : "TRY"}
+                        onCommitBrut={(brut) => onOverrideChange(r.id, { ...ov, brut })}
                       />
-                      {eraForIso(r.startISO) === "TRL" ? (
-                        <div className={styles.rowNote}>
-                          {formatHistoricalTrl(ov.historicalBrut ?? getAsgariUcretRowByDate(r.startISO)?.brut ?? r.brut)} Eski TL
-                          <br />
-                          {formatTrlWageHint(r.brut)}
-                        </div>
-                      ) : null}
                     </td>
                     <td>225</td>
                     <td>1,5</td>

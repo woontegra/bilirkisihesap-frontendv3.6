@@ -33,16 +33,7 @@ export function computeYillikBasinGunlukOlmayanResult(form: YillikBasinGunlukOlm
     calcWorkPeriodBilirKisi(effectiveBaslangic, form.endDate).label || "—";
 
   let brutIzin = 0;
-  let net: {
-    sgk: number;
-    issizlik: number;
-    gelirVergisi: number;
-    gelirVergisiDilimleri: string;
-    damgaVergisi: number;
-    netIzin: number;
-    damgaOran?: number;
-    issizlikOran?: number;
-  } = {
+  let net = {
     sgk: 0,
     issizlik: 0,
     gelirVergisi: 0,
@@ -53,7 +44,7 @@ export function computeYillikBasinGunlukOlmayanResult(form: YillikBasinGunlukOlm
 
   if (brutVal > 0 && remainingDays >= 0) {
     brutIzin = round2(calculateBrutIzin(brutVal, remainingDays));
-    net = calculateNetIzin(brutIzin, form.endDate || exitYear, "forYear");
+    net = calculateNetIzin(brutIzin, exitYear, "forYear");
   }
 
   let asgariUcretHatasi: string | null = null;

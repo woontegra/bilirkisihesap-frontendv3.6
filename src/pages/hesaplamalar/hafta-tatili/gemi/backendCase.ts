@@ -60,8 +60,6 @@ export function buildHtGemiSaveResult(opts: {
   };
   globalCoefficient: number;
   rowOverrides?: Record<string, unknown>;
-  sonBrutAlacak?: number;
-  sonNetAlacak?: number;
 }): CalcSaveResult {
   return {
     brut: opts.totalBrut,
@@ -82,9 +80,6 @@ export function buildHtGemiSaveResult(opts: {
       hakkaniyet: opts.hakkaniyet,
       settleAmount: opts.settleAmount,
     },
-    ...(opts.sonBrutAlacak != null
-      ? { sonBrutAlacak: opts.sonBrutAlacak, sonNetAlacak: opts.sonNetAlacak }
-      : {}),
   };
 }
 

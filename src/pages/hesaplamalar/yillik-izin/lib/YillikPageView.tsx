@@ -1,4 +1,3 @@
-import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 /**
  * Yıllık Ücretli İzin — standart varyantlar için paylaşılan sunum bileşeni.
  * Yalnızca yillik-izin modülü içinde paylaşılır; iş mantığı içermez.
@@ -208,8 +207,6 @@ export type YillikPageViewProps = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   netIzin: number;
   /** V3 employerPayment — davalı mahsup ödemesi */
   employerPayment?: string;
@@ -702,7 +699,7 @@ export function YillikPageView(props: YillikPageViewProps) {
                   </strong>
                 </div>
                 <div className={styles.line}>
-                  <span>{issizlikLabelForRate(props.issizlikOran, "İşsizlik (%1)")}</span>
+                  <span>İşsizlik (%1)</span>
                   <strong className={styles.deduction}>
                     −<FlashValue value={formatMoney(props.issizlik)} /> ₺
                   </strong>
@@ -716,7 +713,7 @@ export function YillikPageView(props: YillikPageViewProps) {
                   </strong>
                 </div>
                 <div className={styles.line}>
-                  <span>{damgaLabelForRate(props.damgaOran, "permille")}</span>
+                  <span>Damga vergisi (‰7,59)</span>
                   <strong className={styles.deduction}>
                     −<FlashValue value={formatMoney(props.damgaVergisi)} /> ₺
                   </strong>

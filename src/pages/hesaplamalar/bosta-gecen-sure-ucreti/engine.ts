@@ -12,12 +12,13 @@
  *   year = form endDate yılı veya mevcut yıl
  */
 
-import { ratesForAccrual, wageTaxKeepingModernTable } from "../shared/historical/laborNet";
 import { calculateIncomeTaxForYear, calculateIncomeTaxWithBrackets } from "./incomeTax";
 import type { BostaForm, BostaResult, ExtraItem } from "./model";
 
 export const DAMGA_ORAN = 0.00759;
 export const BOSTA_CARPAN = 4;
+const SGK_ORAN = 0.14;
+const ISSIZLIK_ORAN = 0.01;
 
 export function round2(n: number): number {
   return Math.round((n || 0) * 100) / 100;
@@ -47,13 +48,8 @@ export function clampYear(value: string): string {
   return parts.join("-");
 }
 
-/** Son tahakkuk yılı. Tarih yoksa mevcut yıl. */
-export function resolveTaxYear(endDateISO?: string): number {
-  const day = String(endDateISO ?? "").slice(0, 10);
-  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
-    const year = Number(day.slice(0, 4));
-    if (year >= 1996 && year <= 2030) return year;
-  }
+/** Gelir vergisi yılı: mevcut yıl (V3 formda tarih alanı yok). */
+export function resolveTaxYear(_endDateISO?: string): number {
   return new Date().getFullYear();
 }
 
@@ -94,22 +90,16 @@ const EMPTY_RESULT: BostaResult = {
 export function computeBostaGecenSure(form: BostaForm): BostaResult {
   const toplamBrut = calculateToplamBrut(form);
   const year = resolveTaxYear(form.endDate);
-  const accrual = /^\d{4}-\d{2}-\d{2}$/.test(String(form.endDate ?? "").slice(0, 10)) ? form.endDate : year;
 
   if (!(toplamBrut > 0)) return { ...EMPTY_RESULT, year };
 
   const brutAmount = round2(toplamBrut * BOSTA_CARPAN);
-  const rates = ratesForAccrual(accrual);
-  const sgk = round2(brutAmount * rates.sgkOran);
-  const issizlik = round2(brutAmount * rates.issizlikOran);
+  const sgk = round2(brutAmount * SGK_ORAN);
+  const issizlik = round2(brutAmount * ISSIZLIK_ORAN);
   const gelirVergisiMatrahi = brutAmount - sgk - issizlik;
-  const gv = wageTaxKeepingModernTable(rates.tahakkukTarihi, gelirVergisiMatrahi, (taxYear, income) => ({
-    tax: calculateIncomeTaxForYear(taxYear, income),
-    summary: calculateIncomeTaxWithBrackets(taxYear, income).summary,
-  }));
-  const gelirVergisi = round2(gv.tax);
-  const gelirVergisiDilimleri = gv.summary;
-  const damgaVergisi = round2(brutAmount * rates.damgaOran);
+  const gelirVergisi = round2(calculateIncomeTaxForYear(year, gelirVergisiMatrahi));
+  const gelirVergisiDilimleri = calculateIncomeTaxWithBrackets(year, gelirVergisiMatrahi).summary;
+  const damgaVergisi = round2(brutAmount * DAMGA_ORAN);
   const netAmount = round2(brutAmount - sgk - issizlik - gelirVergisi - damgaVergisi);
 
   return {
@@ -122,7 +112,5 @@ export function computeBostaGecenSure(form: BostaForm): BostaResult {
     gelirVergisiDilimleri,
     damgaVergisi,
     netAmount,
-    damgaOran: rates.damgaOran,
-    issizlikOran: rates.issizlikOran,
   };
 }

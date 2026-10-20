@@ -1,10 +1,5 @@
 import { apiClient, apiClientAsUser } from "@/api/client";
-import {
-  applyAuthMeResponse,
-  decodeAccessTokenClaims,
-  readAuthMeCache,
-  writeAuthMeCache,
-} from "@/auth/session";
+import { applyAuthMeResponse } from "@/auth/session";
 
 /* ── User profile ─────────────────────────────────────────────── */
 
@@ -44,9 +39,6 @@ export type AuthMe = {
   subscriptionEndsAt?: string | null;
   createdAt?: string | null;
   licenseType?: string | null;
-  licenseActive?: boolean;
-  licenseAccessCode?: string | null;
-  licenseStatus?: string | null;
   profilePicture?: string | null;
   profilePictureUrl?: string | null;
   emailNotifications?: boolean;
@@ -199,37 +191,17 @@ export async function updateBillingProfile(
   return parseBillingProfile(data);
 }
 
-let authMeInflight: { userId: number | null; promise: Promise<AuthMe> } | null = null;
-
-export async function fetchAuthMe(options?: { force?: boolean }): Promise<AuthMe> {
-  const userId = decodeAccessTokenClaims()?.userId ?? null;
-  if (!options?.force && userId) {
-    const cached = readAuthMeCache(userId);
-    if (cached) return cached as AuthMe;
-  }
-  if (authMeInflight && authMeInflight.userId === userId) {
-    return authMeInflight.promise;
-  }
-  const promise = (async () => {
-    const me = await apiClient<AuthMe>("/api/auth/me");
-    applyAuthMeResponse(me);
-    const resolvedId = Number(me.id ?? userId);
-    if (Number.isFinite(resolvedId) && resolvedId > 0) {
-      writeAuthMeCache(resolvedId, me as Record<string, unknown>);
-    }
-    return me;
-  })().finally(() => {
-    if (authMeInflight?.promise === promise) authMeInflight = null;
-  });
-  authMeInflight = { userId, promise };
-  return promise;
+export async function fetchAuthMe(): Promise<AuthMe> {
+  const me = await apiClient<AuthMe>("/api/auth/me");
+  applyAuthMeResponse(me);
+  return me;
 }
 
 export async function changePassword(body: {
   oldPassword?: string;
   newPassword: string;
-}): Promise<{ success?: boolean; mustChangePassword?: boolean }> {
-  return apiClient<{ success?: boolean; mustChangePassword?: boolean }>("/api/auth/change-password", {
+}): Promise<void> {
+  await apiClient("/api/auth/change-password", {
     method: "POST",
     body,
   });
@@ -552,33 +524,6 @@ export function parseRenewalRedirect(payload: unknown): string {
   }
   if (!url.searchParams.get("renew")) {
     throw new Error("Yenileme anahtarı alınamadı.");
-  }
-  const identityKeys = [
-    "customer",
-    "customercode",
-    "customer_code",
-    "customernumber",
-    "customer_number",
-    "email",
-    "userid",
-    "user_id",
-    "user",
-    "tenantid",
-    "tenant_id",
-    "tenant",
-    "token",
-    "access_token",
-    "refresh_token",
-    "jwt",
-    "name",
-    "ad",
-    "soyad",
-    "fullname",
-  ];
-  for (const key of url.searchParams.keys()) {
-    if (identityKeys.includes(key.toLowerCase())) {
-      throw new Error("Yenileme yönlendirme adresi kimlik bilgisi içeremez.");
-    }
   }
   return url.toString();
 }

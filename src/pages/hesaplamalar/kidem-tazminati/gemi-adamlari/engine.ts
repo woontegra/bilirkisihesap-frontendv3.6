@@ -4,10 +4,9 @@
  * yöntemini kullanır (bitiş tarihine +1 gün eklenmez).
  */
 
-import { stampRateForDate } from "../../shared/historical/laborNet";
 import type { ExtraItem, GemiFormSnapshot, GemiResultSummary } from "./model";
 import { findGemiTavan } from "./tavanData";
-import { GEMI_INCOME_TAX_BRACKETS, type GemiTaxBracket } from "./taxData";
+import { GEMI_DAMGA_ORANI, GEMI_INCOME_TAX_BRACKETS, type GemiTaxBracket } from "./taxData";
 
 /* ── Para yardımcıları ── */
 
@@ -59,10 +58,10 @@ export function computeWorkDuration(startISO: string, endISO: string): WorkDurat
 
 /* ── Eklenti (son 12 ay toplamından günlük paya indirgeme) ── */
 
-/** Eklenti hesaplama: (12 aylık toplam / 360) × 30 — V3 EklentiModal ile aynı */
-export function computeEklentiResult(months: string[]): number {
+/** Eklenti hesaplama: (12 aylık toplam / gün esası) × 30 — gün esası 360 (varsayılan, V3 EklentiModal ile aynı) veya 365 */
+export function computeEklentiResult(months: string[], gunEsasi: 360 | 365 = 360): number {
   const sum = months.reduce((acc, v) => acc + parseNum(v), 0);
-  return (sum / 360) * 30;
+  return (sum / gunEsasi) * 30;
 }
 
 /** V3: yıl===0 ve yıl×365+ay×30+gün < 365 ise kıdem hakkı doğmaz */
@@ -119,8 +118,8 @@ export function calculateBrutKidem(kullanilacakBrut: number, duration: WorkDurat
   );
 }
 
-export function calculateDamgaVergisi(brutKidem: number, exitIso?: string | null): number {
-  return brutKidem * stampRateForDate(exitIso);
+export function calculateDamgaVergisi(brutKidem: number): number {
+  return brutKidem * GEMI_DAMGA_ORANI;
 }
 
 /** Muafiyet = 24 × çıplak brüt (yalnızca çıplak ücret; diğer kalemler dahil edilmez) */
@@ -184,8 +183,7 @@ export function deriveGemiResult(form: GemiFormSnapshot): GemiResultSummary {
   const { kullanilacakBrut, tavanUygulandi } = resolveKullanilacakBrut(toplamAylikBrut, form.endDate);
   const duration = computeWorkDuration(form.startDate, form.endDate);
   const brutKidem = round2(calculateBrutKidem(kullanilacakBrut, duration));
-  const damgaOran = stampRateForDate(form.endDate);
-  const damgaVergisi = round2(calculateDamgaVergisi(brutKidem, form.endDate));
+  const damgaVergisi = round2(calculateDamgaVergisi(brutKidem));
   const ciplakBrut = parseNum(form.ciplakBrut);
   const muafiyetTutari = round2(calculateMuafiyetTutari(ciplakBrut));
   const exitYear = form.endDate ? new Date(form.endDate).getFullYear() : new Date().getFullYear();
@@ -197,7 +195,6 @@ export function deriveGemiResult(form: GemiFormSnapshot): GemiResultSummary {
     kullanilacakBrut: round2(kullanilacakBrut),
     tavanUygulandi,
     brutKidem,
-    damgaOran,
     damgaVergisi,
     muafiyetTutari,
     gelirVergisiMatrahi: round2(matrah),

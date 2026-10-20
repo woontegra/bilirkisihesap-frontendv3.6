@@ -23,6 +23,7 @@ export function mapLegacyGemiHaftaTatiliCase(
     selectedHolidayIds: mapped.selectedHolidayIds,
     rows: mapped.rows,
     settleAmount: mapped.settleAmount,
+    hakkaniyetOrani: mapped.hakkaniyetOrani,
     globalCoefficient: mapped.globalCoefficient,
   };
 }

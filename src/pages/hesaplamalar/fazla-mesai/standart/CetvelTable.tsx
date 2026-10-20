@@ -8,14 +8,6 @@ import { formatMoney } from "./engine";
 import type { PeriodRow, RowOverride } from "./model";
 import { isCetvelRowVisible } from "../cetvelDisplay";
 import { CetvelBrutInput } from "../shared/CetvelBrutInput";
-import {
-  eraForIso,
-  formatHistoricalTrl,
-  formatTrlWageHint,
-  parseTurkishAmount,
-  scaleTableBrut,
-  STANDART_FM_MIN_ISO,
-} from "./trlScale";
 import styles from "./StandartFmPage.module.css";
 
 export function CetvelTable({
@@ -65,26 +57,6 @@ export function CetvelTable({
             ) : (
               visibleRows.map((r, idx) => {
                 const ov = rowOverrides[r.id];
-                const trl = r.currencyEra === "TRL" && r.historicalBrut != null && !r.scaleMismatch;
-                const commitDate = (field: "startISO" | "endISO", value: string) => {
-                  const next: RowOverride = { ...ov, [field]: value || undefined };
-                  const startISO = field === "startISO" ? value : r.startISO;
-                  const era = startISO ? eraForIso(startISO) : null;
-                  if (ov?.brutManual && ov.currencyEra && era && ov.currencyEra !== era) {
-                    next.scaleMismatch = true;
-                    delete next.brut;
-                  } else if (
-                    ov?.brutManual &&
-                    ov.currencyEra &&
-                    era &&
-                    ov.currencyEra === era &&
-                    ov.historicalBrut != null
-                  ) {
-                    next.scaleMismatch = false;
-                    next.brut = scaleTableBrut(startISO, ov.historicalBrut).normalizedGross;
-                  }
-                  onOverrideChange(r.id, next);
-                };
                 return (
                   <tr
                     key={r.id}
@@ -96,18 +68,20 @@ export function CetvelTable({
                         <input
                           type="date"
                           className={styles.cellInput}
-                          min={STANDART_FM_MIN_ISO}
                           value={r.startISO}
-                          onChange={(e) => commitDate("startISO", e.target.value)}
+                          onChange={(e) =>
+                            onOverrideChange(r.id, { ...ov, startISO: e.target.value || undefined })
+                          }
                           aria-label="Başlangıç tarihi"
                         />
                         <span className={styles.dateSep}>–</span>
                         <input
                           type="date"
                           className={styles.cellInput}
-                          min={STANDART_FM_MIN_ISO}
                           value={r.endISO}
-                          onChange={(e) => commitDate("endISO", e.target.value)}
+                          onChange={(e) =>
+                            onOverrideChange(r.id, { ...ov, endISO: e.target.value || undefined })
+                          }
                           aria-label="Bitiş tarihi"
                         />
                       </div>
@@ -128,36 +102,10 @@ export function CetvelTable({
                     </td>
                     <td>
                       <CetvelBrutInput
-                        className={trl ? `${styles.cellInput} ${styles.cellInputEra}` : styles.cellInput}
-                        value={trl ? (r.historicalBrut as number) : r.brut}
-                        ariaLabel={trl ? "Brüt Ücret (Eski TL)" : "Ücret"}
-                        formatValue={trl ? formatHistoricalTrl : undefined}
-                        parseValue={trl ? parseTurkishAmount : undefined}
-                        onCommitBrut={(typed) => {
-                          const scaled = scaleTableBrut(r.startISO, typed);
-                          onOverrideChange(r.id, {
-                            ...ov,
-                            brut: scaled.normalizedGross,
-                            historicalBrut: scaled.historicalGross,
-                            currencyEra: scaled.currencyEra,
-                            conversionDivisor: scaled.conversionDivisor,
-                            brutManual: true,
-                            scaleMismatch: false,
-                          });
-                        }}
+                        className={styles.cellInput}
+                        value={r.brut}
+                        onCommitBrut={(brut) => onOverrideChange(r.id, { ...ov, brut })}
                       />
-                      {trl ? (
-                        <div className={styles.rowNote}>
-                          {formatHistoricalTrl(r.historicalBrut as number)} Eski TL
-                          <br />
-                          {formatTrlWageHint(r.brut)}
-                        </div>
-                      ) : null}
-                      {r.scaleMismatch ? (
-                        <div className={styles.rowNote}>
-                          Ücret ölçeği belirsiz. Otomatik dönüşüm yapılmadı. Tutarı yeniden girin.
-                        </div>
-                      ) : null}
                     </td>
                     <td>{r.katsayi}</td>
                     <td>

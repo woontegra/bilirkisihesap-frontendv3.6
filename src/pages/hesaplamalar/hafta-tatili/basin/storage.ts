@@ -1,3 +1,4 @@
+import { normalizeHakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import type { DateRange, ExcludedDay, TableRow } from "../lib/types";
 import { newLocalId } from "../lib/money";
 import { createEmptyForm, type BasinForm, type SavedCase } from "./model";
@@ -64,6 +65,7 @@ function normalizeForm(raw: Partial<BasinForm> | undefined | null): BasinForm {
     selectedHolidayIds: Array.isArray(raw.selectedHolidayIds) ? raw.selectedHolidayIds.map(String) : [],
     rows: normalizeRows(raw.rows),
     settleAmount: String(raw.settleAmount ?? ""),
+    hakkaniyetOrani: normalizeHakkaniyetOrani(raw.hakkaniyetOrani),
     globalCoefficient: Number(raw.globalCoefficient) || 1,
     geceCalisan: !!raw.geceCalisan,
   };

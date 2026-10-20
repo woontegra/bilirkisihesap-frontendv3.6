@@ -1,7 +1,6 @@
 // @ts-nocheck
 import type { FazlaMesaiRowBase } from "../fazlaMesaiShared";
-import { getAsgariUcretRowByDate } from "../asgariUcretler";
-import { manualWageClashes, scaleTableBrut } from "../../../trlScale";
+import { getAsgariUcretByDate } from "../fazlaMesaiShared";
 import { fmAsgariManualBrutOverrideKeyForStartISO, FM_ASGARI_MANUAL_BRUT_PREFIX } from "./fmAsgariManualBrutKeys";
 import { isFmLeaveDeductionRow } from "./fmLeaveDeductionRow";
 import { findAsgariPeriodForStartISO, periodStorageKey } from "../manualWageTemplateStorage";
@@ -65,15 +64,10 @@ export function reduceRowOverridesWithManualBrut(
       .trim()
       .slice(0, 10);
     if (iso.length >= 10) {
-      const wageRow = getAsgariUcretRowByDate(iso);
-      if (wageRow) {
-        const scaled = scaleTableBrut(iso, wageRow.brut);
-        next.brut = scaled.normalizedGross;
-        next.historicalBrut = scaled.historicalGross;
-        next.currencyEra = scaled.currencyEra;
-        next.conversionDivisor = scaled.conversionDivisor;
+      const brut = getAsgariUcretByDate(iso);
+      if (brut != null) {
+        next.brut = brut;
         next.brutManual = false;
-        next.scaleMismatch = false;
       }
     }
   }
@@ -126,26 +120,10 @@ export function applyResolvedManualBrutToRows(
   return rows.map((row) => {
     const cur = overrides[row.id] as RowOv | undefined;
     if (cur?.brutManual && typeof cur.brut === "number" && cur.brut > 0) {
-      if (manualWageClashes(cur, row.startISO)) {
-        return { ...row, scaleMismatch: true };
-      }
-      return {
-        ...row,
-        brut: cur.brut,
-        wage: cur.brut,
-        brutManual: true,
-        ...(cur.currencyEra
-          ? {
-              currencyEra: cur.currencyEra,
-              historicalBrut: cur.historicalBrut ?? cur.brut,
-              conversionDivisor: cur.conversionDivisor ?? (cur.currencyEra === "TRL" ? 1000000 : 1),
-            }
-          : {}),
-      };
+      return { ...row, brut: cur.brut, wage: cur.brut, brutManual: true };
     }
     const start = String(row.startISO || "").slice(0, 10);
-    const wageRow = start ? getAsgariUcretRowByDate(start) : null;
-    const defaultBrut = row.brut ?? (wageRow ? scaleTableBrut(start, wageRow.brut).normalizedGross : 0);
+    const defaultBrut = row.brut ?? (start ? getAsgariUcretByDate(start) || 0 : 0);
     const resolved = resolveStoredManualBrutForStartISO(start, overrides, defaultBrut);
     if (!resolved.brutManual) {
       return row;

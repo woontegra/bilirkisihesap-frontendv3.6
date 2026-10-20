@@ -6,7 +6,6 @@
  *   DAMGA_ORAN = 0.00759; mahsup Math.max(0, net − ödenen).
  */
 
-import { stampRateForDate } from "../shared/historical/laborNet";
 import { getAsgariUcretByDate } from "./asgariUcret";
 import type { CoefRow, HaksizFesihForm, HaksizFesihResult, WorkPeriod } from "./model";
 import { normalizeNetAyKatsayi } from "./model";
@@ -115,9 +114,8 @@ export function computeHaksizFesih(form: HaksizFesihForm): HaksizFesihResult {
   const fromSelection = selectedCoef > 0 ? selectedCoef : brutVal > 0 ? brutVal * netAy : 0;
   const brutForNet = inputVal > 0 ? inputVal : fromSelection;
 
-  const damgaOran = stampRateForDate(form.endDate);
-  const damgaVergisi = Number.isFinite(brutForNet) ? brutForNet * damgaOran : 0;
-  const netTazminat = Number.isFinite(brutForNet) ? brutForNet * (1 - damgaOran) : 0;
+  const damgaVergisi = Number.isFinite(brutForNet) ? brutForNet * DAMGA_ORAN : 0;
+  const netTazminat = Number.isFinite(brutForNet) ? brutForNet * (1 - DAMGA_ORAN) : 0;
   const odenenVal = parseNum(form.odenenTutar);
   const mahsupSonrasiNet = Math.max(0, netTazminat - odenenVal);
 
@@ -141,7 +139,6 @@ export function computeHaksizFesih(form: HaksizFesihForm): HaksizFesihResult {
     brutVal,
     brutForNet: Number.isFinite(brutForNet) ? brutForNet : 0,
     damgaVergisi: Number.isFinite(damgaVergisi) ? damgaVergisi : 0,
-    damgaOran,
     netTazminat: Number.isFinite(netTazminat) ? netTazminat : 0,
     odenenVal,
     mahsupSonrasiNet: Number.isFinite(mahsupSonrasiNet) ? mahsupSonrasiNet : 0,

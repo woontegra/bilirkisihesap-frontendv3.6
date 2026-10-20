@@ -80,7 +80,7 @@ export const ADMIN_TOOL_CARDS: AdminToolCardConfig[] = [
   },
   {
     id: "backups",
-    title: "Yedek Yönetimi",
+    title: "Müşteri Yedekleri",
     description: "Gerçek müşteri yedeklerini gör ve geri yükle",
     icon: Archive,
     route: "/admin/yedekler",

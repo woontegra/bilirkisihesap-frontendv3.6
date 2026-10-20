@@ -4,6 +4,8 @@
  * hiçbir tip/kod paylaşımı yoktur. Hesaplama ve depolama %100 lokaldir.
  */
 
+import type { EklentiDokumleri } from "../../shared/eklentiDokumu";
+
 export type ExtraItem = {
   id: string;
   name: string;
@@ -38,6 +40,10 @@ export type MevsimlikFormSnapshot = {
   diger: string;
   extras: ExtraItem[];
   notes: string;
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: 360 | 365;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type MevsimlikResultSummary = {
@@ -54,7 +60,6 @@ export type MevsimlikResultSummary = {
   ayTutar: number;
   gunTutar: number;
   brutKidem: number;
-  damgaOran: number;
   damgaVergisi: number;
   netKidem: number;
 };
@@ -94,5 +99,6 @@ export function createEmptyMevsimlikForm(): MevsimlikFormSnapshot {
     diger: "",
     extras: [],
     notes: "",
+    eklentiGunEsasi: 360,
   };
 }

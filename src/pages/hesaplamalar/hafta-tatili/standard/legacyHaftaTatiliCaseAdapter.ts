@@ -2,6 +2,7 @@
  * V3 `hafta_tatili_standart` kayıtları → V3.5 StandardForm.
  */
 import type { SavedCaseRecord } from "@/api/savedCases";
+import { normalizeHakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import { unwrapCalcData } from "../../shared/calcBackendCrud";
 import { newLocalId } from "../lib/money";
 import type { ExcludedDay, TableRow } from "../lib/types";
@@ -173,6 +174,7 @@ export function mapLegacyStandardHaftaTatiliCase(
           : [],
       rows,
       settleAmount,
+      hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
       globalCoefficient: katsayi,
     };
   } catch (e) {

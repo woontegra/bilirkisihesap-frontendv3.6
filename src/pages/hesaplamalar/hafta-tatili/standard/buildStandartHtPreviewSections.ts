@@ -1,11 +1,21 @@
-import { damgaLabelForRate, issizlikLabelForRate } from "../../shared/historical/laborNet";
 import type { PreviewSection } from "@/components/calculation-preview";
-import { equityNetPreviewRows } from "../../shared/EquityNetLines";
-import { boundedIso, formatDateTR, formatMoney } from "../lib/money";
-import { calculateNetFromBrut, parseSettleAmount } from "../lib/net";
+import { hakkaniyetOraniEtiketi } from "../../fazla-mesai/shared/hakkaniyetOrani";
+import { formatDateTR, formatMoney } from "../lib/money";
 import type { ExcludedDay } from "../lib/types";
 import type { StandardForm } from "./model";
 import type { StandardResult } from "./model";
+
+function parseSettleNum(settleAmount: string): number {
+  return (
+    Number(
+      String(settleAmount ?? "")
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .replace("₺", "")
+        .trim(),
+    ) || 0
+  );
+}
 
 export function buildStandartHtPreviewSections(opts: {
   form: StandardForm;
@@ -17,9 +27,11 @@ export function buildStandartHtPreviewSections(opts: {
 
   const valid = form.dateRanges.filter((r) => r.start && r.end);
   if (valid.length > 0) {
+    const starts = valid.map((r) => new Date(r.start).getTime());
+    const ends = valid.map((r) => new Date(r.end).getTime());
     const infoRows: string[][] = [
-      ["İşe Giriş", formatDateTR(boundedIso(valid.map((r) => r.start), "min"))],
-      ["İşten Çıkış", formatDateTR(boundedIso(valid.map((r) => r.end), "max"))],
+      ["İşe Giriş", formatDateTR(new Date(Math.min(...starts)).toISOString().slice(0, 10))],
+      ["İşten Çıkış", formatDateTR(new Date(Math.max(...ends)).toISOString().slice(0, 10))],
     ];
     if (form.expiryStart) {
       infoRows.push(["Zamanaşımı Başlangıcı", formatDateTR(form.expiryStart)]);
@@ -75,9 +87,6 @@ export function buildStandartHtPreviewSections(opts: {
     });
   }
 
-  const mahsupNum = parseSettleAmount(form.settleAmount);
-  const sonBrut = result.mahsupSonuc;
-  const equityRaw = calculateNetFromBrut(sonBrut, result.accrualIso || result.year);
   sections.push({
     id: "brutten-nete",
     title: "Brüt'ten Net'e Çeviri",
@@ -85,40 +94,30 @@ export function buildStandartHtPreviewSections(opts: {
     rows: [
       ["Brüt Hafta Tatili Alacağı", `${formatMoney(result.totalBrut)} ₺`],
       ["SGK İşçi Primi (%14)", `−${formatMoney(result.net.ssk)} ₺`],
-      [issizlikLabelForRate(result.net.issizlikOran, "İşsizlik (%1)"), `−${formatMoney(result.net.issizlik)} ₺`],
       [
         `Gelir Vergisi${result.net.gelirVergisiDilimleri ? ` ${result.net.gelirVergisiDilimleri}` : ""}`,
         `−${formatMoney(result.net.gelirVergisi)} ₺`,
       ],
-      [damgaLabelForRate(result.net.damgaOran, "binde"), `−${formatMoney(result.net.damgaVergisi)} ₺`],
+      ["Damga Vergisi (Binde 7,59)", `−${formatMoney(result.net.damgaVergisi)} ₺`],
       ["Net Hafta Tatili Alacağı", `${formatMoney(result.net.netAmount)} ₺`],
     ],
     lastRowTone: "green",
   });
+
+  const mahsupNum = parseSettleNum(form.settleAmount);
+  const mahsupSonuc = Math.max(0, result.totalBrut - result.hakkaniyet - mahsupNum);
   sections.push({
     id: "mahsuplasma",
-    title: "Hakkaniyet İndirimi / Mahsuplaşma",
+    title: "Mahsuplaşma",
     headers: ["Kalem", "Tutar"],
     rows: [
-      ["Toplam Brüt Alacak", `${formatMoney(result.totalBrut)} ₺`],
-      ["1/3 Hakkaniyet İndirimi", `−${formatMoney(result.hakkaniyet)} ₺`],
-      ["Mahsuplaşma Tutarı", `−${formatMoney(mahsupNum)} ₺`],
-      ["Son Brüt Alacak", `${formatMoney(sonBrut)} ₺`],
-      ...equityNetPreviewRows({
-        format: (n) => `${formatMoney(n)} ₺`,
-        kesinti: {
-          sgk: equityRaw.ssk,
-          issizlik: equityRaw.issizlik,
-          gelirVergisi: equityRaw.gelirVergisi,
-          gelirVergisiDilimleri: equityRaw.gelirVergisiDilimleri,
-          damgaVergisi: equityRaw.damgaVergisi,
-          net: equityRaw.netAmount,
-        },
-        sgkLabel: "SGK (%14)",
-        issizlikLabel: issizlikLabelForRate(equityRaw.issizlikOran, "İşsizlik (%1)"),
-        damgaLabel: damgaLabelForRate(equityRaw.damgaOran, "permille"),
-        gelirPrefix: "Gelir vergisi",
-      }),
+      ["Net Hafta Tatili Alacağı", `${formatMoney(result.totalBrut)} ₺`],
+      [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `−${formatMoney(result.hakkaniyet)} ₺`],
+      [
+        "Mahsuplaşma Miktarı",
+        mahsupNum > 0 ? `−${formatMoney(mahsupNum)} ₺` : `${formatMoney(0)} ₺`,
+      ],
+      ["Mahsuplaşma Sonucu", `${formatMoney(mahsupSonuc)} ₺`],
     ],
     lastRowTone: "green",
   });

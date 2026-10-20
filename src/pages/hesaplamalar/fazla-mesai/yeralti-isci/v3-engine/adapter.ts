@@ -8,7 +8,7 @@ import { computeTotalsForPipeline, runYeraltiV3Pipeline } from "./pipeline";
 /** Yeraltı İşçisi FM — V3 motor zinciri. */
 export function computeYeraltiResultV3(form: YeraltiFormSnapshot): YeraltiResult {
   const pipeline = runYeraltiV3Pipeline(form);
-  const totals = computeTotalsForPipeline(pipeline.rows, pipeline.exitYear, form.mahsup);
+  const totals = computeTotalsForPipeline(pipeline.rows, pipeline.exitYear, form.mahsup, form.hakkaniyetOrani);
 
   return {
     dailyHours: pipeline.dailyHours,

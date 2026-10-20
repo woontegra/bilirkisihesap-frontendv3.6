@@ -947,7 +947,12 @@
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
+.resultTable:has(td.moneyCell) thead th:nth-last-child(2) {
+  text-align: right;
+}
+
 .moneyCell {
+  text-align: right;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -999,6 +1004,12 @@
 .rowRemoveBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* Geçici: satır sonundaki + / − butonları gizli. */
+.rowAddBtn,
+.rowRemoveBtn {
+  display: none;
 }
 
 .dateCell {

@@ -1,4 +1,3 @@
-import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Clock3 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { YillikPageView } from "../lib/YillikPageView";
@@ -65,7 +64,7 @@ export default function YillikKismiPage() {
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
   const syncedForm = useMemo(() => withSyncedSpan(form), [form]);
-  const result = useFormCalcMemo(() => computeYillikKismiResult(syncedForm), [syncedForm]);
+  const result = useMemo(() => computeYillikKismiResult(syncedForm), [syncedForm]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
@@ -208,11 +207,9 @@ export default function YillikKismiPage() {
       brutIzin={result.brutIzin}
       sgk={result.sgk}
       issizlik={result.issizlik}
-        issizlikOran={result.issizlikOran}
       gelirVergisi={result.gelirVergisi}
       gelirVergisiDilimleri={result.gelirVergisiDilimleri}
       damgaVergisi={result.damgaVergisi}
-        damgaOran={result.damgaOran}
       netIzin={result.netIzin}
       employerPayment={form.employerPayment ?? ""}
       onEmployerPaymentChange={(v) => patch("employerPayment", v)}

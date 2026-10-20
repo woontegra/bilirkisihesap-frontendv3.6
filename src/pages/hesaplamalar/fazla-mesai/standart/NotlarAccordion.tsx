@@ -3,6 +3,7 @@
  */
 
 import { ChevronDown, FileText } from "lucide-react";
+import { hakkaniyetOraniEtiketi, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
 import styles from "./StandartFmPage.module.css";
 
 function Section({ icon, children }: { icon: string; children: React.ReactNode }) {
@@ -16,7 +17,7 @@ function Section({ icon, children }: { icon: string; children: React.ReactNode }
   );
 }
 
-export function NotlarAccordion() {
+export function NotlarAccordion({ hakkaniyetOrani }: { hakkaniyetOrani?: HakkaniyetOrani }) {
   return (
     <details className={styles.notlarAccordion}>
       <summary className={styles.notlarSummary}>
@@ -85,7 +86,8 @@ export function NotlarAccordion() {
           270/52 hafta = 5,2 fazla çalışma saati haftalık fazla çalışma saatinden düşülmek suretiyle uygulanmaktadır.
         </Section>
         <Section icon="📚">
-          Hakkaniyet indirimi yönünden, ilgili yargı kararları doğrultusunda belirlenen 1/3 oranındaki indirim, sistem
+          Hakkaniyet indirimi yönünden, ilgili yargı kararları doğrultusunda belirlenen{" "}
+          {hakkaniyetOraniEtiketi(hakkaniyetOrani)} oranındaki indirim, sistem
           tarafından otomatik olarak uygulanabilmektedir.
         </Section>
         <Section icon="🔁">

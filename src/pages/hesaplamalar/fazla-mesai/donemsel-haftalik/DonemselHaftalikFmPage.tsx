@@ -1,4 +1,3 @@
-import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Dönemsel Haftalık Fazla Mesai — V3.5 sayfa (V3 işlev paritesi).
  */
@@ -21,12 +20,11 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
-import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -58,11 +56,8 @@ import {
 } from "./engine";
 import {
   computeDonemselHaftalikResultV3,
-  fmTaxYear,
   logDonemselHaftalikFmV3EngineCheck,
-  netFromGrossFm,
 } from "./v3-engine/adapter";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyDonemselHaftalikForm,
   createEmptyWitness,
@@ -82,6 +77,8 @@ import { ZamanasimiPickerModal } from "./ZamanasimiPickerModal";
 import { ZamanasimiCetvelBanner } from "../shared/ZamanasimiCetvelBanner";
 import { insertExclusionsPreviewSection } from "../shared/exclusionsPreview";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./DonemselHaftalikFmPage.module.css";
 
 const PAGE_TITLE = "Dönemsel Haftalık Fazla Mesai Hesaplama";
@@ -625,13 +622,6 @@ export default function DonemselHaftalikFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.dateIn, form.dateOut), [form.dateIn, form.dateOut]);
   const result = useDeferredFormMemo(form, computeDonemselHaftalikResultV3);
-  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.mahsupSonrasiNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
-    [result.mahsupSonrasiNet, form.dateOut],
-  );
-  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.dateOut)),
-    [result.rows, form.dateOut],
-  );
-
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -864,13 +854,7 @@ export default function DonemselHaftalikFmPage() {
       const saved = await saveDonemselHaftalikFmCase(
         name,
         form,
-        {
-          toplamFm: result.toplamFm,
-          sonNet: result.mahsupSonrasiNet,
-          rowCount: result.rows.length,
-          sonBrutAlacak: result.mahsupSonrasiNet,
-          sonNetAlacak: equityNet.net,
-        },
+        { toplamFm: result.toplamFm, sonNet: result.mahsupSonrasiNet, rowCount: result.rows.length },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -946,9 +930,9 @@ export default function DonemselHaftalikFmPage() {
         title: "Fazla Mesai Hesaplama Cetveli",
         headers: ["Tarih Aralığı", "Hafta", "Ücret", "Kat Sayı", "FM Saat", "225", "1,5", "Fazla Mesai"],
         rows: result.rows.map((r) => [
-          formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.yillikIzinAciklama),
+          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${r.yillikIzinAciklama ? ` ${r.yillikIzinAciklama}` : ""}`,
           String(r.weeks),
-          (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
+          money(r.brut),
           String(r.katsayi),
           r.fmHours.toFixed(2),
           "225",
@@ -964,9 +948,9 @@ export default function DonemselHaftalikFmPage() {
         rows: [
           ["Brüt Fazla Mesai", money(result.toplamFm)],
           ["SGK (%14)", `-${money(result.sgk)}`],
-          [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
+          ["İşsizlik (%1)", `-${money(result.issizlik)}`],
           [`Gelir Vergisi ${result.gelirVergisiDilimleri}`.trim(), `-${money(result.gelirVergisi)}`],
-          [kesintiEtiket.damga, `-${money(result.damgaVergisi)}`],
+          ["Damga Vergisi (Binde 7,59)", `-${money(result.damgaVergisi)}`],
           ["Net Fazla Mesai", money(result.netYillik)],
         ],
         lastRowTone: "green",
@@ -976,24 +960,19 @@ export default function DonemselHaftalikFmPage() {
         title: "Hakkaniyet İndirimi / Mahsuplaşma",
         headers: ["Kalem", "Tutar"],
         rows: [
-          ["Toplam Brüt Alacak", money(result.toplamFm)],
-          ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetOneri)}`],
-          ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
-          ["Son Brüt Alacak", money(result.mahsupSonrasiNet)],
-          ...equityNetPreviewRows({
-            format: money,
-            kesinti: equityNet,
-            sgkLabel: "SGK (%14)",
-            issizlikLabel: kesintiEtiket.issizlik,
-            damgaLabel: kesintiEtiket.damga,
-          }),
+          ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
+          [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetOneri)}`],
+          ...(result.mahsupTutari > 0
+            ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][])
+            : []),
+          ["Son Net Alacak", money(result.mahsupSonrasiNet)],
         ],
         lastRowTone: "green",
       },
       ],
       form.exclusions,
     );
-  }, [form, result, equityNet]);
+  }, [form, result]);
 
   return (
     <div className={styles.page} aria-busy={caseLoading || undefined}>
@@ -1330,7 +1309,7 @@ export default function DonemselHaftalikFmPage() {
               <span>−{formatMoney(result.sgk)} ₺</span>
             </div>
             <div>
-              <span>{kesintiEtiket.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span>−{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div>
@@ -1338,7 +1317,7 @@ export default function DonemselHaftalikFmPage() {
               <span>−{formatMoney(result.gelirVergisi)} ₺</span>
             </div>
             <div>
-              <span>{kesintiEtiket.damga}</span>
+              <span>Damga Vergisi (Binde 7,59)</span>
               <span>−{formatMoney(result.damgaVergisi)} ₺</span>
             </div>
             <div className={styles.totalsHighlight}>
@@ -1358,7 +1337,7 @@ export default function DonemselHaftalikFmPage() {
               <span>{formatMoney(result.toplamFm)} ₺</span>
             </div>
             <div>
-              <span>1/3 Hakkaniyet İndirimi</span>
+              <HakkaniyetOraniSecimi value={form.hakkaniyetOrani} onChange={(v) => setField("hakkaniyetOrani", v)} />
               <span>−{formatMoney(result.hakkaniyetOneri)} ₺</span>
             </div>
             <div>
@@ -1377,20 +1356,9 @@ export default function DonemselHaftalikFmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Brüt Alacak</span>
+              <span>Son Net Alacak</span>
               <FlashValue value={`${formatMoney(result.mahsupSonrasiNet)} ₺`} className={styles.sonNet} />
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass={styles.line}
-              deductClass={styles.deduction}
-              netClass={styles.netLine}
-              sgkLabel="SGK (%14)"
-              issizlikLabel={kesintiEtiket.issizlik}
-              damgaLabel={kesintiEtiket.damga}
-              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
-            />
           </div>
         </article>
       </div>

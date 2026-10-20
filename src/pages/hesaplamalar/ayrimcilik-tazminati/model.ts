@@ -23,7 +23,6 @@ export type AyrimcilikResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
   netTazminat: number;
   workPeriod: WorkPeriod | null;
   asgariUcretHatasi: string | null;

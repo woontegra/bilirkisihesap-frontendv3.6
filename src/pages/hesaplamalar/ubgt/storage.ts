@@ -2,6 +2,7 @@
  * UBGT — versiyonlu lokal depo (API yok).
  */
 
+import { normalizeHakkaniyetOrani } from "../fazla-mesai/shared/hakkaniyetOrani";
 import { STORAGE_KEY, createEmptyForm, newLocalId, type SavedCase, type UbgtForm, type UbgtResults } from "./model";
 
 type CasesPayload = { version: 1; cases: SavedCase[] };
@@ -47,6 +48,7 @@ function normalizeForm(raw: Partial<UbgtForm> | undefined | null, mode: UbgtForm
     excludedWeekdays: Array.isArray(raw.excludedWeekdays) ? raw.excludedWeekdays.map(Number) : [],
     year: Number(raw.year) || empty.year,
     settleAmount: String(raw.settleAmount ?? ""),
+    hakkaniyetOrani: normalizeHakkaniyetOrani(raw.hakkaniyetOrani),
     mahsuplasamaData:
       raw.mahsuplasamaData && typeof raw.mahsuplasamaData === "object" ? { ...raw.mahsuplasamaData } : {},
     periodOverrides:

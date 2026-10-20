@@ -100,20 +100,6 @@
   cursor: wait;
 }
 
-.btnUdf {
-  border-color: #d97706;
-  color: #92400e;
-}
-
-.btnUdf:hover {
-  background: #fffbeb;
-}
-
-.btnUdf:disabled {
-  opacity: 0.65;
-  cursor: wait;
-}
-
 .btnClose {
   border-color: #9ca3af;
   color: #374151;
@@ -200,21 +186,11 @@
   white-space: nowrap;
 }
 
-.table th.alignLeft,
-.table td.alignLeft {
-  text-align: left;
-}
-
-.table th.alignCenter,
-.table td.alignCenter {
-  text-align: center;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-
-.table th.alignRight,
-.table td.alignRight {
+.table th:last-child,
+.table td:last-child {
+  width: 38%;
   text-align: right;
-  font-variant-numeric: tabular-nums lining-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .table .rowBlue td {

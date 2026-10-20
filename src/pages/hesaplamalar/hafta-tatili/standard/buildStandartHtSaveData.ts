@@ -1,6 +1,7 @@
 /**
  * Standart Hafta Tatili — V3 `prepareHaftaTatiliStandardSave` uyumlu payload.
  */
+import { normalizeHakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import type { CalcSaveResult } from "../../shared/calcBackendCrud";
 import type { TableRow } from "../lib/types";
 import type { StandardForm } from "./model";
@@ -84,9 +85,6 @@ export function buildStandartHtSaveData(
     hakkaniyet: netConversion?.hakkaniyet ?? 0,
     settleAmount: netConversion?.settleAmount ?? form.settleAmount ?? "",
     sonuc: Math.max(0, (netConversion?.brut ?? totalBrut) - (netConversion?.hakkaniyet ?? 0)),
-    ...(result.sonBrutAlacak != null
-      ? { sonBrutAlacak: result.sonBrutAlacak, sonNetAlacak: result.sonNetAlacak }
-      : {}),
   };
 
   const haftaTatiliData = {
@@ -126,6 +124,7 @@ export function buildStandartHtSaveData(
     calculatedHaftaTatiliDays: totalDays,
     settlement,
     settleAmount: form.settleAmount,
+    hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
   };
 
   if (result.rowOverrides && Object.keys(result.rowOverrides).length > 0) {

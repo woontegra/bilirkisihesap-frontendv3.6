@@ -16,22 +16,6 @@ export function formatNumberTr(n: number): string {
   return n.toLocaleString("tr-TR");
 }
 
-export function getAccountStatusLabel(raw?: string | null): string {
-  if (!raw) return "Hesap durumu yok";
-  const v = raw.toLowerCase();
-  if (v === "active" || v === "aktif") return "Hesap aktif";
-  if (v === "suspended" || v === "passive" || v === "pasif") return "Hesap askıda";
-  return raw;
-}
-
-export function getSubscriptionAccessTone(code?: string | null): "success" | "danger" | "warning" | "neutral" {
-  const v = String(code || "").toUpperCase();
-  if (v === "OK") return "success";
-  if (v === "DEMO_EXPIRED" || v === "LICENSE_EXPIRED") return "danger";
-  if (v === "LICENSE_INACTIVE" || v === "ACTIVE_PAID_LICENSE_REQUIRED") return "warning";
-  return "neutral";
-}
-
 export function getStatusLabel(raw?: string | null): string {
   if (!raw) return "—";
   const v = raw.toLowerCase();

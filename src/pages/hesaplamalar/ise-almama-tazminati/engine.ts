@@ -11,12 +11,10 @@
  *   Gelir vergisi / mahsup yok
  */
 
-import { stampRateForDate } from "../shared/historical/laborNet";
 import { getAsgariUcretByDate } from "./asgariUcret";
 import type { CoefRow, IseAlmamaForm, IseAlmamaResult, WorkPeriod } from "./model";
 
-/** Binde 7,59 — tarih yoksa kullanılan sabit. */
-
+/** Binde 7,59 — V3 sabiti. */
 export const DAMGA_ORAN = 0.00759;
 
 /** Backend `KATSAYILAR` ile birebir. */
@@ -134,9 +132,8 @@ export function computeIseAlmama(form: IseAlmamaForm): IseAlmamaResult {
     selectedCoef > 0 ? selectedCoef : brutVal > 0 ? round2(brutVal * netAy) : 0;
   const brutForNet = inputVal > 0 ? inputVal : fromSelection;
 
-  const damgaOran = stampRateForDate(form.endDate);
-  const damgaVergisi = Number.isFinite(brutForNet) ? brutForNet * damgaOran : 0;
-  const netTazminat = Number.isFinite(brutForNet) ? brutForNet * (1 - damgaOran) : 0;
+  const damgaVergisi = Number.isFinite(brutForNet) ? brutForNet * DAMGA_ORAN : 0;
+  const netTazminat = Number.isFinite(brutForNet) ? brutForNet * (1 - DAMGA_ORAN) : 0;
 
   let workPeriod: WorkPeriod | null = null;
   if (form.startDate && form.endDate) {
@@ -159,7 +156,6 @@ export function computeIseAlmama(form: IseAlmamaForm): IseAlmamaResult {
     selectedKatsayi: netAy,
     brutForNet: Number.isFinite(brutForNet) ? brutForNet : 0,
     damgaVergisi: Number.isFinite(damgaVergisi) ? damgaVergisi : 0,
-    damgaOran,
     netTazminat: Number.isFinite(netTazminat) ? netTazminat : 0,
     workPeriod,
     asgariUcretHatasi,

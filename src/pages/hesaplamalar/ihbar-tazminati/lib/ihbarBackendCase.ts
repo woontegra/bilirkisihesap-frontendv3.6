@@ -10,6 +10,12 @@ import {
   unwrapCalcData,
   type CalcSaveResult,
 } from "../../shared/calcBackendCrud";
+import { normalizeEklentiGunEsasi, type EklentiGunEsasi } from "../../shared/eklentiGunEsasi";
+import {
+  eklentiDokumleriniFormaYerlestir,
+  normalizeEklentiDokumleri,
+  type EklentiDokumleri,
+} from "../../shared/eklentiDokumu";
 import type { ExtraItem, IhbarResultSnapshot } from "./types";
 
 export const IHBAR_30ISCI_TYPE = "ihbar_30isci" as const;
@@ -29,6 +35,8 @@ export type IhbarStandardForm = {
   yol: string;
   yemek: string;
   extras: ExtraItem[];
+  eklentiGunEsasi: EklentiGunEsasi;
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type IhbarSavedCase<TForm> = {
@@ -102,6 +110,8 @@ function mapStandardFields(
     yol: str(form.yol),
     yemek: str(form.yemek),
     extras: Array.isArray(form.extras) ? (form.extras as ExtraItem[]) : [],
+    eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+    eklentiDokumleri: normalizeEklentiDokumleri(form.eklentiDokumleri),
   };
 }
 
@@ -145,17 +155,20 @@ export function createIhbarVariantBackendCase<TForm extends IhbarStandardForm>(o
     }
   }
 
+  function buildSaveData(form: TForm, result: CalcSaveResult): Record<string, unknown> {
+    return buildCalcSavePayload({
+      form: eklentiDokumleriniFormaYerlestir(extendV3Form ? extendV3Form(form) : toV3CompatibleForm(form)),
+      result,
+      iseGiris: form.startDate || null,
+      istenCikis: form.endDate || null,
+    });
+  }
+
   const caseCrud = createCalcBackendCrud({
     recordType,
     isRecordType: (type) => type === recordType,
     mapFormFromBackend,
-    buildSaveData: (form, result) =>
-      buildCalcSavePayload({
-        form: extendV3Form ? extendV3Form(form) : toV3CompatibleForm(form),
-        result,
-        iseGiris: form.startDate || null,
-        istenCikis: form.endDate || null,
-      }),
+    buildSaveData,
     localStorageKey,
   });
 
@@ -190,5 +203,5 @@ export function createIhbarVariantBackendCase<TForm extends IhbarStandardForm>(o
     return listCalcSavedCases(recordType, mapRecordToSavedCase);
   }
 
-  return { recordType, caseCrud, mapFormFromBackend, listCasesFromBackend, mapRecordToSavedCase };
+  return { recordType, caseCrud, mapFormFromBackend, buildSaveData, listCasesFromBackend, mapRecordToSavedCase };
 }

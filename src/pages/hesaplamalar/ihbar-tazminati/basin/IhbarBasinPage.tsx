@@ -1,5 +1,3 @@
-import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
-import { damgaLabelForRate } from "../../shared/historical/laborNet";
 import { useCallback, useMemo, useState } from "react";
 import { Newspaper } from "lucide-react";
 import type { PreviewSection } from "@/components/calculation-preview";
@@ -8,6 +6,7 @@ import { newLocalId } from "../lib/caseStorage";
 import { ihbarBasinBackend } from "../lib/ihbarBackendInstances";
 import { makeIhbarBackendConfig } from "../lib/makeIhbarBackendConfig";
 import { IhbarPageView, type WageFieldKey } from "../lib/IhbarPageView";
+import { eklentiDokumuYaz } from "../../shared/eklentiDokumu";
 import { useIhbarCaseBackend } from "../lib/useIhbarCaseBackend";
 import type { ExtraItem } from "../lib/types";
 import { clampYear, computeIhbarBasinResult, formatDateTR, formatMoney, isDateOrderInvalid, parseNum } from "./engine";
@@ -64,7 +63,7 @@ export default function IhbarBasinPage() {
     clearStorageError,
   } = useIhbarCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useFormCalcMemo(() => computeIhbarBasinResult(form), [form]);
+  const result = useMemo(() => computeIhbarBasinResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof IhbarBasinForm>(key: K, value: IhbarBasinForm[K]) => {
@@ -196,7 +195,7 @@ export default function IhbarBasinPage() {
       rows: [
         ["Brüt İhbar Tazminatı", `${formatMoney(result.brut)} ₺`],
         ["Gelir Vergisi", `-${formatMoney(result.gelirVergisi)} ₺`],
-        [damgaLabelForRate(result.damgaOran, "binde"), `-${formatMoney(result.damgaVergisi)} ₺`],
+        ["Damga Vergisi (Binde 7,59)", `-${formatMoney(result.damgaVergisi)} ₺`],
         ["Net İhbar Tazminatı", `${formatMoney(result.net)} ₺`],
       ],
       lastRowTone: "green",
@@ -241,6 +240,15 @@ export default function IhbarBasinPage() {
         onAddExtra={onAddExtra}
         onUpdateExtra={onUpdateExtra}
         onRemoveExtra={onRemoveExtra}
+        eklentiGunEsasi={form.eklentiGunEsasi}
+        eklentiDokumleri={form.eklentiDokumleri}
+        onEklentiDokumUygula={(key, dokum) =>
+          setForm((prev) => ({
+            ...prev,
+            eklentiGunEsasi: dokum.gunEsasi,
+            eklentiDokumleri: eklentiDokumuYaz(prev.eklentiDokumleri, key, dokum),
+          }))
+        }
         removingExtraIds={removingExtraIds}
         toplamBrut={result.toplamBrut}
         ihbarSuresiLabel={result.ihbarSuresiLabel}
@@ -249,7 +257,6 @@ export default function IhbarBasinPage() {
         gelirVergisi={result.gelirVergisi}
         gelirVergisiDilimleri={result.gelirVergisiDilimleri}
         damgaVergisi={result.damgaVergisi}
-        damgaOran={result.damgaOran}
         net={result.net}
         notes={NOTE_BLOCKS}
         activeName={activeName}

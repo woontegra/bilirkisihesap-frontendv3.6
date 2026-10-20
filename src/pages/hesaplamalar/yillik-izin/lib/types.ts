@@ -44,8 +44,6 @@ export type StandardComputeResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   netIzin: number;
   asgariUcretHatasi: string | null;
 };
@@ -67,8 +65,6 @@ export type YillikResultSnapshot = {
   issizlik: number;
   gelirVergisi: number;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   netIzin: number;
 };
 

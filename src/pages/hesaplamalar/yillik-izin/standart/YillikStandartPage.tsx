@@ -1,4 +1,3 @@
-import { useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
 import { Briefcase } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useToast } from "@/context/ToastContext";
@@ -63,7 +62,7 @@ export default function YillikStandartPage() {
     clearStorageError,
   } = useYillikCaseBackend(backendConfig, applyLoadedForm);
 
-  const result = useFormCalcMemo(() => computeYillikStandartResult(form), [form]);
+  const result = useMemo(() => computeYillikStandartResult(form), [form]);
   const dirty = snapshotKey(form) !== baseline;
 
   const patch = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
@@ -215,11 +214,9 @@ export default function YillikStandartPage() {
       brutIzin={result.brutIzin}
       sgk={result.sgk}
       issizlik={result.issizlik}
-        issizlikOran={result.issizlikOran}
       gelirVergisi={result.gelirVergisi}
       gelirVergisiDilimleri={result.gelirVergisiDilimleri}
       damgaVergisi={result.damgaVergisi}
-        damgaOran={result.damgaOran}
       netIzin={result.netIzin}
       employerPayment={form.employerPayment ?? ""}
       onEmployerPaymentChange={(v) => patch("employerPayment", v)}

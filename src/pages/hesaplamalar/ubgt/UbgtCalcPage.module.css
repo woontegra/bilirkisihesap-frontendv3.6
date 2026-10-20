@@ -1122,6 +1122,12 @@
   cursor: not-allowed;
 }
 
+/* Geçici: satır sonundaki + / − butonları gizli. */
+.rowAddBtn,
+.rowRemoveBtn {
+  display: none;
+}
+
 .dateCell {
   display: flex;
   align-items: center;

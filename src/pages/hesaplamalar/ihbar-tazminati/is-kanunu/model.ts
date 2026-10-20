@@ -5,6 +5,12 @@
 
 import { newLocalId, type SavedIhbarCase } from "../lib/caseStorage";
 import type { ExtraItem, IhbarResultSnapshot } from "../lib/types";
+import { normalizeEklentiGunEsasi, type EklentiGunEsasi } from "../../shared/eklentiGunEsasi";
+import {
+  eklentiDokumleriAnahtari,
+  normalizeEklentiDokumleri,
+  type EklentiDokumleri,
+} from "../../shared/eklentiDokumu";
 
 export type { ExtraItem };
 
@@ -17,12 +23,14 @@ export type Ihbar30IsciForm = {
   yol: string;
   yemek: string;
   extras: ExtraItem[];
+  eklentiGunEsasi: EklentiGunEsasi;
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type SavedCase = SavedIhbarCase<Ihbar30IsciForm, IhbarResultSnapshot>;
 
 export function createEmptyForm(): Ihbar30IsciForm {
-  return { startDate: "", endDate: "", brut: "", prim: "", ikramiye: "", yol: "", yemek: "", extras: [] };
+  return { startDate: "", endDate: "", brut: "", prim: "", ikramiye: "", yol: "", yemek: "", extras: [], eklentiGunEsasi: 360 };
 }
 
 export function normalizeForm(raw: Partial<Ihbar30IsciForm> | undefined | null): Ihbar30IsciForm {
@@ -43,6 +51,8 @@ export function normalizeForm(raw: Partial<Ihbar30IsciForm> | undefined | null):
           value: String(x?.value ?? ""),
         }))
       : [],
+    eklentiGunEsasi: normalizeEklentiGunEsasi(raw.eklentiGunEsasi),
+    eklentiDokumleri: normalizeEklentiDokumleri(raw.eklentiDokumleri),
   };
 }
 
@@ -66,5 +76,7 @@ export function snapshotKey(form: Ihbar30IsciForm): string {
     y: form.yol,
     m: form.yemek,
     e: form.extras.map((x) => [x.label, x.value]),
+    g: form.eklentiGunEsasi,
+    d: eklentiDokumleriAnahtari(form.eklentiDokumleri, form.extras),
   });
 }

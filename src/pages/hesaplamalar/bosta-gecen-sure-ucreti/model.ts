@@ -25,8 +25,6 @@ export type BostaResult = {
   gelirVergisi: number;
   gelirVergisiDilimleri: string;
   damgaVergisi: number;
-  damgaOran?: number;
-  issizlikOran?: number;
   netAmount: number;
 };
 

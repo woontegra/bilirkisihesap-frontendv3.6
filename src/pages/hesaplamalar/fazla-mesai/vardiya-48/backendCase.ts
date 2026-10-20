@@ -10,6 +10,7 @@ import {
   createFmBackendCrud,
   type FmSaveResult,
 } from "../shared/fmBackendCrud";
+import { normalizeHakkaniyetOrani } from "../shared/hakkaniyetOrani";
 import {
   createEmptyForm,
   createEmptyWitness,
@@ -205,6 +206,7 @@ export function mapVardiya48FormFromBackend(
       mode270: mapMode270(form.mode270 ?? payload.mode270),
       zamanasimi: mapZamanasimi(form.zamanasimi),
       mahsuplasmaMiktari: str(form.mahsuplasmaMiktari ?? form.mahsup),
+      hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
       notes: str(form.notes),
       rowOverrides: mapRowOverrides(form.rowOverrides ?? payload.rowOverrides),
       manualRows: mapManualRows(form.manualRows ?? payload.manualRows),
@@ -231,6 +233,7 @@ export function buildVardiya48SaveData(
     pageType: "vardiya-48",
     mahsuplasmaMiktari: form.mahsuplasmaMiktari,
     katSayi: form.katSayi,
+    hakkaniyetOrani: normalizeHakkaniyetOrani(form.hakkaniyetOrani),
   };
   return buildFmBaseSavePayload({
     form: formForV3,

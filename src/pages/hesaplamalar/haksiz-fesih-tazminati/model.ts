@@ -21,7 +21,6 @@ export type HaksizFesihResult = {
   brutVal: number;
   brutForNet: number;
   damgaVergisi: number;
-  damgaOran?: number;
   netTazminat: number;
   odenenVal: number;
   mahsupSonrasiNet: number;

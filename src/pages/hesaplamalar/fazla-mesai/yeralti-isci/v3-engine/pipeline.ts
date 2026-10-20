@@ -4,6 +4,7 @@
  */
 
 import { fmHoursAfterYargitay270Simple } from "../../shared/mode270Core";
+import type { HakkaniyetOrani } from "../../shared/hakkaniyetOrani";
 import {
   applyRowOverrides,
   applyYargitayRounding,
@@ -101,6 +102,7 @@ export function computeTotalsForPipeline(
   rows: FmRow[],
   exitYear: number,
   mahsupInput: string,
+  hakkaniyetOrani?: HakkaniyetOrani,
 ) {
-  return computeTotalsFromRows(rows, exitYear, mahsupInput);
+  return computeTotalsFromRows(rows, exitYear, mahsupInput, hakkaniyetOrani);
 }

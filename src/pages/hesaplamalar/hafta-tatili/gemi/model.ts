@@ -1,3 +1,4 @@
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import { newLocalId } from "../lib/money";
 import type { DateRange, ExcludedDay, TableRow } from "../lib/types";
 
@@ -8,6 +9,7 @@ export type GemiForm = {
   selectedHolidayIds: string[];
   rows: TableRow[];
   settleAmount: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   globalCoefficient: number;
 };
 
@@ -15,7 +17,6 @@ export type GemiResult = {
   rows: TableRow[];
   totalBrut: number;
   year: number;
-  accrualIso?: string;
   net: import("../lib/types").NetBreakdown;
   hakkaniyet: number;
   mahsupSonuc: number;
@@ -44,6 +45,7 @@ export function createEmptyForm(): GemiForm {
     selectedHolidayIds: [],
     rows: [],
     settleAmount: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     globalCoefficient: 1,
   };
 }
@@ -56,6 +58,7 @@ export function snapshotKey(form: GemiForm): string {
     sh: form.selectedHolidayIds,
     rows: form.rows,
     st: form.settleAmount,
+    ho: form.hakkaniyetOrani,
     gc: form.globalCoefficient,
   });
 }

@@ -3,6 +3,8 @@
  * İzolasyon: başka FM alt türüne import yok.
  */
 
+import { VARSAYILAN_HAKKANIYET_ORANI, type HakkaniyetOrani } from "../shared/hakkaniyetOrani";
+
 export type Mode270 = "none" | "simple" | "detailed";
 
 export type ExclusionType = "Yıllık İzin" | "Rapor" | "Diğer" | "UBGT" | "Puantaj/Bordro";
@@ -49,9 +51,6 @@ export type RowOverride = {
   endISO?: string;
   hidden?: boolean;
   brutManual?: boolean;
-  historicalBrut?: number;
-  currencyEra?: "TRL" | "TRY";
-  conversionDivisor?: 1 | 1000000;
 };
 
 export type PeriodRow = {
@@ -87,6 +86,7 @@ export type Vardiya48FormSnapshot = {
   /** Zamanaşımı — V3'te form.zamanasimi; ayrı state olarak da tutulabilir. */
   zamanasimi: ZamanasimiInfo;
   mahsuplasmaMiktari: string;
+  hakkaniyetOrani: HakkaniyetOrani;
   notes: string;
   rowOverrides: Record<string, RowOverride>;
   manualRows: PeriodRow[];
@@ -146,6 +146,7 @@ export function createEmptyForm(): Vardiya48FormSnapshot {
     mode270: "none",
     zamanasimi: null,
     mahsuplasmaMiktari: "",
+    hakkaniyetOrani: VARSAYILAN_HAKKANIYET_ORANI,
     notes: "",
     rowOverrides: {},
     manualRows: [],

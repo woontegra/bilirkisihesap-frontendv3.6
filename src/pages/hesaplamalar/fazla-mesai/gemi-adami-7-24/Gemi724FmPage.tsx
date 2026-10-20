@@ -1,4 +1,3 @@
-import { deductionLabels, formatEngineWageCell, lastClaimAccrualIso } from "../../shared/historical/laborNet";
 /**
  * Gemi Adamı 7/24 Fazla Mesai — V3.5 sayfa (V3 işlev paritesi, lokal motor).
  */
@@ -22,12 +21,11 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { CalculationPreviewModal, type PreviewSection } from "@/components/calculation-preview";
-import { formatPreviewPeriodCell } from "../shared/previewPeriodCell";
 import { DraftDateInput } from "@/components/form";
 import { GuidedTourHost, useGuidedTourController } from "@/components/guided-tour";
 import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 import { Button } from "@/components/ui/Button";
-import { useDeferredFormMemo, useFormCalcMemo } from "@/hooks/useDeferredFormMemo";
+import { useDeferredFormMemo } from "@/hooks/useDeferredFormMemo";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -53,15 +51,12 @@ import {
   computeGemi724Result,
   createManualPeriodRow,
   FIXED_FM_HOURS,
-  fmTaxYear,
   formatHours,
   formatMoney,
-  netFromGrossFm,
   parseKatsayi,
   sanitizeMoneyTyping,
   validateDateRange,
 } from "./engine";
-import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import {
   createEmptyForm,
   createEmptyWitness,
@@ -81,6 +76,8 @@ import { ZamanasimiCetvelBanner } from "../shared/ZamanasimiCetvelBanner";
 import { insertExclusionsPreviewSection } from "../shared/exclusionsPreview";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { NotlarAccordion } from "../standart/NotlarAccordion";
+import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
+import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
 import styles from "./Gemi724FmPage.module.css";
 
 const PAGE_TITLE = "Fazla Mesai — Gemi Adamı (7/24 Tam Mürettebat)";
@@ -229,13 +226,6 @@ export default function Gemi724FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeGemi724Result);
-  const equityNet = useFormCalcMemo(() => netFromGrossFm(Math.max(0, result.sonNet), lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
-    [result.sonNet, form.istenCikis],
-  );
-  const kesintiEtiket = useFormCalcMemo(() => deductionLabels(lastClaimAccrualIso(result.rows) || fmTaxYear(form.istenCikis)),
-    [result.rows, form.istenCikis],
-  );
-
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum !== 1;
 
@@ -466,13 +456,7 @@ export default function Gemi724FmPage() {
       const saved = await saveGemi724FmCase(
         name,
         form,
-        {
-          toplamFm: result.totalFm,
-          sonNet: result.sonNet,
-          rowCount: result.rows.length,
-          sonBrutAlacak: result.sonNet,
-          sonNetAlacak: equityNet.net,
-        },
+        { toplamFm: result.totalFm, sonNet: result.sonNet, rowCount: result.rows.length },
         currentRecordId,
       );
       setCurrentRecordId(String(saved.id));
@@ -543,10 +527,11 @@ export default function Gemi724FmPage() {
       title: "Fazla Mesai Cetveli (Gemi)",
       headers: ["Dönem", "Hafta", "Ücret", "Kat", "FM Saat", "240", "1,25", "FM"],
       rows: result.rows.map((r) => {
+        const note = r.yillikIzinAciklama ? ` ${r.yillikIzinAciklama}` : "";
         return [
-          formatPreviewPeriodCell(formatIsoDateRangeTR(r.startISO, r.endISO), r.yillikIzinAciklama),
+          `${formatIsoDateRangeTR(r.startISO, r.endISO)}${note}`,
           String(r.weeks),
-          (formatEngineWageCell(r.startISO, r.brut) || money(r.brut)),
+          money(r.brut),
           String(r.katsayi),
           formatHours(r.fmHours),
           "240",
@@ -563,7 +548,7 @@ export default function Gemi724FmPage() {
       rows: [
         ["Brüt Fazla Mesai", money(result.totalFm)],
         ["SGK (%14)", `-${money(result.sgk)}`],
-        [kesintiEtiket.issizlik, `-${money(result.issizlik)}`],
+        ["İşsizlik (%1)", `-${money(result.issizlik)}`],
         [`Gelir Vergisi ${result.gelirVergisiDilimleri}`, `-${money(result.gelirVergisi)}`],
         ["Damga Vergisi", `-${money(result.damgaVergisi)}`],
         ["Net Fazla Mesai", money(result.netYillik)],
@@ -576,23 +561,18 @@ export default function Gemi724FmPage() {
       title: "Mahsuplaşma",
       headers: ["Kalem", "Tutar"],
       rows: [
-        ["Toplam Brüt Alacak", money(result.totalFm)],
-        ["1/3 Hakkaniyet İndirimi", `-${money(result.hakkaniyetIndirimi)}`],
-        ["Mahsuplaşma Tutarı", `-${money(result.mahsupTutari)}`],
-        ["Son Brüt Alacak", money(result.sonNet)],
-        ...equityNetPreviewRows({
-          format: money,
-          kesinti: equityNet,
-          sgkLabel: "SGK (%14)",
-          issizlikLabel: kesintiEtiket.issizlik,
-          damgaLabel: kesintiEtiket.damga,
-        }),
+        ["Toplam Fazla Mesai (Brüt)", money(result.totalFm)],
+        [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
+        ...(result.mahsupTutari > 0
+          ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][])
+          : []),
+        ["Son Net Alacak", money(result.sonNet)],
       ],
       lastRowTone: "green",
     });
 
     return insertExclusionsPreviewSection(sections, form.exclusions);
-  }, [form, result, equityNet]);
+  }, [form, result]);
 
   return (
     <div className={styles.page}>
@@ -856,7 +836,7 @@ export default function Gemi724FmPage() {
               <span>−{formatMoney(result.sgk)} ₺</span>
             </div>
             <div>
-              <span>{kesintiEtiket.issizlik}</span>
+              <span>İşsizlik (%1)</span>
               <span>−{formatMoney(result.issizlik)} ₺</span>
             </div>
             <div>
@@ -864,7 +844,7 @@ export default function Gemi724FmPage() {
               <span>−{formatMoney(result.gelirVergisi)} ₺</span>
             </div>
             <div>
-              <span>{kesintiEtiket.damga}</span>
+              <span>Damga Vergisi (Binde 7,59)</span>
               <span>−{formatMoney(result.damgaVergisi)} ₺</span>
             </div>
             <div className={styles.totalsHighlight}>
@@ -884,7 +864,7 @@ export default function Gemi724FmPage() {
               <span>{formatMoney(result.totalFm)} ₺</span>
             </div>
             <div>
-              <span>1/3 Hakkaniyet İndirimi</span>
+              <HakkaniyetOraniSecimi value={form.hakkaniyetOrani} onChange={(v) => setField("hakkaniyetOrani", v)} />
               <span>−{formatMoney(result.hakkaniyetIndirimi)} ₺</span>
             </div>
             <div>
@@ -903,19 +883,9 @@ export default function Gemi724FmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Brüt Alacak</span>
+              <span>Son Net Alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} className={styles.sonNet} />
             </div>
-            <EquityNetLines
-              kesinti={equityNet}
-              formatMoney={formatMoney}
-              lineClass=""
-              netClass={styles.totalsHighlight}
-              sgkLabel="SGK (%14)"
-              issizlikLabel={kesintiEtiket.issizlik}
-              damgaLabel={kesintiEtiket.damga}
-              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
-            />
           </div>
         </article>
 
