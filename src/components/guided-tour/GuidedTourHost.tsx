@@ -13,7 +13,7 @@ import {
 } from "./geometry";
 import { hasForeignLayer, TOUR_ROOT_ATTR, useForeignLayerOpen } from "./layers";
 import { markAutoWelcomeSeen, shouldOfferWelcome } from "./storage";
-import { scheduleReadyCheck } from "./autoAdvance";
+import { isMoneyInput, MONEY_TYPING_IDLE_MS, scheduleReadyCheck } from "./autoAdvance";
 import type { GuidedTourDefinition, GuidedTourStep, GuidedTourStepMode } from "./types";
 import styles from "./GuidedTour.module.css";
 
@@ -475,12 +475,12 @@ export function GuidedTourHost({
       advanceToRef.current(stepIndex + 1);
     };
 
-    const schedule = () => {
+    const schedule = (waitMs: number) => {
       if (cancelled || advancingRef.current) return;
       if (indexRef.current !== stepIndex) return;
       clearTimers();
       scheduleReadyCheck({
-        delayMs,
+        delayMs: waitMs,
         isReady,
         onReady: tryAdvance,
         isCancelled: () =>
@@ -502,9 +502,10 @@ export function GuidedTourHost({
         return;
       }
       userEditedRef.current = true;
+      const waitMs = isMoneyInput(t) ? Math.max(delayMs, MONEY_TYPING_IDLE_MS) : delayMs;
       window.requestAnimationFrame(() => {
         if (cancelled) return;
-        schedule();
+        schedule(waitMs);
       });
     };
 

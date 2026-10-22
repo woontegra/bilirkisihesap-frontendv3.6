@@ -68,6 +68,21 @@ export function wageReadyIn(root: Element | null): boolean {
   return parseTourMoney(input?.value ?? "") > 0;
 }
 
+/**
+ * Para alanında yazarken otomatik geçiş için gereken duraklama. "35" de geçerli bir tutar olduğundan
+ * kısa debounce, "35.000" yazılırken (ör. nokta tuşu aranırken) erken ilerletir.
+ * Tab / Enter / odak kaybı bu süreyi beklemeden ilerletir.
+ */
+export const MONEY_TYPING_IDLE_MS = 2000;
+
+/** Metin türünde para alanı: decimal/numeric klavye veya tutar biçimli içerik (tarih/saat hariç). */
+export function isMoneyInput(el: unknown): boolean {
+  const input = el as { tagName?: string; type?: string; inputMode?: string; value?: string } | null;
+  if (!input || input.tagName !== "INPUT" || input.type !== "text") return false;
+  if (input.inputMode === "decimal" || input.inputMode === "numeric") return true;
+  return /^\d[\d.]*(,\d*)?$/.test(String(input.value ?? "").trim());
+}
+
 const TIME_RE = /^\d{2}:\d{2}$/;
 
 /** Valid HH:MM (00–23 / 00–59). Overnight pairs are allowed — no start≤end check. */

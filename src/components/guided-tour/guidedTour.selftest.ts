@@ -4,8 +4,10 @@
 import assert from "node:assert/strict";
 import {
   datesReadyIn,
+  isMoneyInput,
   isValidDatePair,
   isValidTimeValue,
+  MONEY_TYPING_IDLE_MS,
   parseTourMoney,
   scheduleReadyCheck,
   timesReadyIn,
@@ -58,6 +60,19 @@ assert.equal(parseTourMoney(""), 0);
 
 assert.equal(datesReadyIn(null), false);
 assert.equal(wageReadyIn(null), false);
+
+// Para alanı: yazarken uzun duraklama beklenir; tarih/saat ve diğer alanlar etkilenmez.
+const field = (type: string, inputMode: string, value: string) => ({ tagName: "INPUT", type, inputMode, value });
+assert.equal(isMoneyInput(field("text", "decimal", "35")), true);
+assert.equal(isMoneyInput(field("text", "", "35")), true, "inputMode olmayan ücret alanı (Bakiye)");
+assert.equal(isMoneyInput(field("text", "", "35.000,5")), true);
+assert.equal(isMoneyInput(field("date", "", "2024-06-30")), false);
+assert.equal(isMoneyInput(field("time", "", "08:00")), false);
+assert.equal(isMoneyInput(field("text", "", "2024-06-30")), false, "metin olarak tarih (WebKit yedeği)");
+assert.equal(isMoneyInput(field("text", "", "08:00")), false);
+assert.equal(isMoneyInput(field("text", "", "Ali")), false);
+assert.equal(isMoneyInput(null), false);
+assert.ok(MONEY_TYPING_IDLE_MS >= 1500);
 assert.equal(timesReadyIn(null), false);
 assert.equal(isValidTimeValue("08:30"), true);
 assert.equal(isValidTimeValue("24:00"), false);
