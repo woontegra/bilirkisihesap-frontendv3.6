@@ -9,6 +9,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/api/profile";
+import { markTicketNotificationsRead } from "@/api/notifications";
 import { FormField } from "@/components/admin/FormField";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
@@ -125,6 +126,12 @@ export default function TicketsTab() {
       setSubmitting(true);
       const updated = await updateTicketStatus(ticketId, status);
       toast.success("Durum güncellendi");
+      if (status === "resolved") {
+        const subject =
+          (updated && typeof updated === "object" && "subject" in updated ? updated.subject : undefined) ??
+          tickets.find((t) => t.id === ticketId)?.subject;
+        if (subject) void markTicketNotificationsRead(subject);
+      }
       await loadTickets();
       if (selected?.id === ticketId) {
         if (updated && typeof updated === "object" && "id" in updated) {

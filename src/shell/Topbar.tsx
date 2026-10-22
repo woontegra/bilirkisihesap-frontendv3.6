@@ -32,7 +32,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { fetchNotifications, markNotificationsRead } from "@/api/notifications";
+import {
+  fetchNotifications,
+  markNotificationsRead,
+  NOTIFICATIONS_CHANGED_EVENT,
+} from "@/api/notifications";
 
 import type { NotificationItem } from "@/api/types";
 
@@ -207,7 +211,13 @@ export function Topbar({
 
     }, 30_000);
 
-    return () => window.clearInterval(timer);
+    const onChanged = () => void loadNotifications();
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, onChanged);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, onChanged);
+    };
 
   }, [loadNotifications, source]);
 
