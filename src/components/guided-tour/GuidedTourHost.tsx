@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal, flushSync } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { trackYandexGoal } from "@/analytics/yandexMetrica";
 import {
   findTourTarget,
-  pickPlacement,
-  placeBubble,
+  isInsideTourTarget,
+  layoutBubble,
   readTargetRect,
   scrollTargetIntoView,
   type Placement,
   type Rect,
 } from "./geometry";
+import { hasForeignLayer, TOUR_ROOT_ATTR, useForeignLayerOpen } from "./layers";
 import { markAutoWelcomeSeen, shouldOfferWelcome } from "./storage";
 import { scheduleReadyCheck } from "./autoAdvance";
 import type { GuidedTourDefinition, GuidedTourStep, GuidedTourStepMode } from "./types";
@@ -36,9 +38,29 @@ type Props = {
   initialStepIndex?: number;
   /** Fired once when the tour becomes active (welcome Başlat or openTour). */
   onTourStarted?: () => void;
-  /** Hide spotlight while a page modal (e.g. preview) is open; tour stays active. */
+  /**
+   * Hide spotlight while a page modal (e.g. preview) is open; tour stays active.
+   * aria-modal modallar ve `data-tour-pause` panelleri ayrıca otomatik algılanır.
+   */
   paused?: boolean;
 };
+
+const MISSING_TARGET_HINT =
+  "Bu adımın alanı şu anda sayfada görünmüyor. Adımı atlayabilir veya kılavuzu kapatabilirsiniz.";
+
+function paddedRect(r: Rect): Rect {
+  return { top: r.top - 6, left: r.left - 6, width: r.width + 12, height: r.height + 12 };
+}
+
+function sameRect(a: Rect | null, b: Rect): boolean {
+  return (
+    !!a &&
+    Math.abs(a.top - b.top) < 0.5 &&
+    Math.abs(a.left - b.left) < 0.5 &&
+    Math.abs(a.width - b.width) < 0.5 &&
+    Math.abs(a.height - b.height) < 0.5
+  );
+}
 
 function visibleSteps(def: GuidedTourDefinition): GuidedTourStep[] {
   const ctx = { getTargetEl: findTourTarget };
@@ -64,7 +86,7 @@ export function GuidedTourHost({
   onDismiss,
   initialStepIndex = 0,
   onTourStarted,
-  paused = false,
+  paused: pausedProp = false,
 }: Props) {
   const steps = useMemo(() => visibleSteps(definition), [definition]);
   const [index, setIndex] = useState(0);
@@ -72,6 +94,12 @@ export function GuidedTourHost({
   const [placement, setPlacement] = useState<Placement>("bottom");
   const [bubblePos, setBubblePos] = useState({ top: 24, left: 24 });
   const [gateWarn, setGateWarn] = useState<string | null>(null);
+  const [targetMissing, setTargetMissing] = useState(false);
+  const [applyNonce, setApplyNonce] = useState(0);
+  const lastRectRef = useRef<Rect | null>(null);
+  const foreignLayerOpen = useForeignLayerOpen(active);
+  const paused = pausedProp || foreignLayerOpen;
+  const appliedStepRef = useRef<string | null>(null);
 
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const activeTargetRef = useRef<HTMLElement | null>(null);
@@ -253,8 +281,10 @@ export function GuidedTourHost({
     };
   }, [definition.id, offerWelcomeOnMount, onWelcomeOpenChange]);
 
-  /* Spotlight sync — skip while paused (preview modal open) */
+  /* Spotlight sync — skip while paused (page modal open) */
   useLayoutEffect(() => {
+    appliedStepRef.current = null;
+    setTargetMissing(false);
     if (!active || paused || !step) {
       clearActiveAttr();
       if (!active || paused) setRect(null);
@@ -262,92 +292,159 @@ export function GuidedTourHost({
     }
 
     let cancelled = false;
+    /** apply() ilk await'e kadar bu etkinin içinde eşzamanlı çalışır. */
+    let inEffect = true;
+    const markMissing = () => {
+      clearActiveAttr();
+      setRect(null);
+      setTargetMissing(true);
+    };
     const apply = async () => {
-      // Hedef henüz mount olmamış olabilir — birkaç kez dene; sessizce sonraki adıma atlama.
+      // Hedef henüz mount olmamış veya gizli olabilir — kısa süre bekle; bulunamazsa açıklama + Atla/Kapat.
       let el: HTMLElement | null = null;
-      for (let attempt = 0; attempt < 12; attempt += 1) {
+      for (let attempt = 0; attempt < 30; attempt += 1) {
         if (cancelled) return;
-        el = findTourTarget(step.target);
-        if (el) break;
+        const found = findTourTarget(step.target);
+        if (found && readTargetRect(found)) {
+          el = found;
+          break;
+        }
         await new Promise<void>((resolve) => {
-          window.setTimeout(resolve, 40);
+          window.setTimeout(resolve, 50);
         });
       }
-      if (!el || cancelled) return;
+      if (cancelled) return;
+      if (!el) {
+        markMissing();
+        return;
+      }
+      setTargetMissing(false);
+
+      // Kaydırmadan önce işaretle: konum takibi vurguyu kaydırma boyunca yeni hedefle taşır.
+      const mark = (target: HTMLElement, r: Rect) => {
+        if (activeTargetRef.current !== target) {
+          clearActiveAttr();
+          target.setAttribute("data-tour-active", "true");
+          activeTargetRef.current = target;
+        }
+        appliedStepRef.current = step.id;
+        const next = paddedRect(r);
+        lastRectRef.current = next;
+        // Etki dışında (bekleme/kaydırma sonrası) aynı karede çizilmeli; yoksa vurgu bir kare eski konumda kalır.
+        if (inEffect) setRect(next);
+        else flushSync(() => setRect(next));
+      };
+      const before = readTargetRect(el);
+      if (before) mark(el, before);
 
       await scrollTargetIntoView(el, step.scroll ?? "center");
       if (cancelled) return;
       el = findTourTarget(step.target);
-      if (!el) return;
-
-      clearActiveAttr();
-      el.setAttribute("data-tour-active", "true");
-      activeTargetRef.current = el;
-
       const r = readTargetRect(el);
-      if (!r) return;
-      const place = pickPlacement(r, step.placement ?? "auto", window.innerWidth, window.innerHeight);
-      setPlacement(place);
-      setRect({
-        top: r.top - 6,
-        left: r.left - 6,
-        width: r.width + 12,
-        height: r.height + 12,
-      });
+      if (!el || !r) {
+        markMissing();
+        return;
+      }
+      mark(el, r);
     };
 
     void apply();
+    inEffect = false;
     return () => {
       cancelled = true;
     };
-  }, [active, paused, step, clearActiveAttr]);
+  }, [active, paused, step, clearActiveAttr, applyNonce]);
 
-  useLayoutEffect(() => {
-    if (!active || paused || !rect || !bubbleRef.current) return;
-    const bubbleH = bubbleRef.current.getBoundingClientRect().height || 200;
-    const bubbleW = bubbleRef.current.getBoundingClientRect().width || 320;
-    setBubblePos(placeBubble(rect, placement, window.innerWidth, window.innerHeight, bubbleW, bubbleH));
-  }, [active, paused, rect, placement, step?.id, mode]);
-
+  /* Hedef sonradan görünür olursa adımı yeniden uygula. */
   useEffect(() => {
-    if (!active || paused || !step) return;
-    const update = () => {
-      const el = findTourTarget(step.target);
+    if (!active || paused || !step || !targetMissing) return;
+    const id = window.setInterval(() => {
+      if (readTargetRect(findTourTarget(step.target))) setApplyNonce((n) => n + 1);
+    }, 400);
+    return () => window.clearInterval(id);
+  }, [active, paused, step, targetMissing]);
+
+  /**
+   * Konum takibi: kaydırma, yeniden boyutlanma ve yerleşim kaymaları her karede izlenir.
+   * Hedef yeniden oluşturulursa (React remount) vurgu yeni öğeye taşınır.
+   */
+  useEffect(() => {
+    if (!active || paused || !step || targetMissing) return;
+    let raf = 0;
+    let cached: HTMLElement | null = null;
+    let lastVw = window.innerWidth;
+    let lastVh = window.innerHeight;
+    const tick = () => {
+      raf = window.requestAnimationFrame(tick);
+      if (appliedStepRef.current !== step.id) return;
+      if (!cached || !cached.isConnected) cached = findTourTarget(step.target);
+      const el = cached;
+      if (!el) return;
+      if (activeTargetRef.current !== el) {
+        clearActiveAttr();
+        el.setAttribute("data-tour-active", "true");
+        activeTargetRef.current = el;
+      }
       const r = readTargetRect(el);
       if (!r) return;
-      setRect({
-        top: r.top - 6,
-        left: r.left - 6,
-        width: r.width + 12,
-        height: r.height + 12,
-      });
+      const next = paddedRect(r);
+      const viewportChanged = lastVw !== window.innerWidth || lastVh !== window.innerHeight;
+      if (!viewportChanged && sameRect(lastRectRef.current, next)) return;
+      lastRectRef.current = next;
+      lastVw = window.innerWidth;
+      lastVh = window.innerHeight;
+      // Aynı karede çiz: vurgu ve balon kaydırma sırasında hedefin gerisinde kalmaz.
+      flushSync(() => setRect(next));
     };
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
-    const targetEl = findTourTarget(step.target);
-    let ro: ResizeObserver | null = null;
-    if (targetEl && typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(() => update());
-      ro.observe(targetEl);
-    }
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
-      ro?.disconnect();
-    };
-  }, [active, paused, step]);
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [active, paused, step, targetMissing, clearActiveAttr]);
 
+  /* Balon: hedefle çakışmayan, ekran içinde kalan konum. */
+  useLayoutEffect(() => {
+    if (!active || paused || !bubbleRef.current) return;
+    if (!rect && !targetMissing) return;
+    const box = bubbleRef.current.getBoundingClientRect();
+    const layout = layoutBubble(
+      targetMissing ? null : rect,
+      step?.placement ?? "auto",
+      window.innerWidth,
+      window.innerHeight,
+      box.width || 320,
+      box.height || 200,
+      placement,
+    );
+    setPlacement(layout.placement);
+    setBubblePos((prev) =>
+      Math.abs(prev.top - layout.top) < 0.5 && Math.abs(prev.left - layout.left) < 0.5
+        ? prev
+        : { top: layout.top, left: layout.left },
+    );
+  }, [active, paused, rect, placement, targetMissing, gateWarn, step?.id, step?.placement, mode]);
+
+  /**
+   * Escape — yalnızca en üstteki katman: açık bir modal/panel varsa tuş ona bırakılır
+   * (yakalama aşamasında, sayfa dinleyicilerinden önce karar verilir).
+   */
   useEffect(() => {
     if (!active && !welcomeOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (welcomeOpen) {
         e.preventDefault();
-        if (welcomeOpen) dismissWelcome();
-        else if (!paused) closeTour();
+        e.stopPropagation();
+        dismissWelcome();
+        return;
       }
+      if (paused || hasForeignLayer()) return;
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && focused.getAttribute("aria-expanded") === "true") return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeTour();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [active, welcomeOpen, paused, closeTour, dismissWelcome]);
 
   /**
@@ -394,9 +491,12 @@ export function GuidedTourHost({
       });
     };
 
+    const targetName = step.target;
+
     const onUserEdit = (e: Event) => {
       if (!e.isTrusted) return;
       if (indexRef.current !== stepIndex) return;
+      if (!isInsideTourTarget(e.target, targetName)) return;
       const t = e.target;
       if (t instanceof Element && !t.closest("input, textarea, select, [contenteditable=true]")) {
         return;
@@ -412,6 +512,7 @@ export function GuidedTourHost({
     const onCommit = (e: Event) => {
       if (!e.isTrusted) return;
       if (indexRef.current !== stepIndex) return;
+      if (!isInsideTourTarget(e.target, targetName)) return;
       const t = e.target;
       if (t instanceof Element && !t.closest("input, textarea, select, [contenteditable=true]")) {
         return;
@@ -425,23 +526,21 @@ export function GuidedTourHost({
       });
     };
 
-    const el = findTourTarget(step.target);
-    if (!el) return;
-
-    el.addEventListener("input", onUserEdit, true);
-    el.addEventListener("change", onUserEdit, true);
-    el.addEventListener("keyup", onUserEdit, true);
-    el.addEventListener("blur", onCommit, true);
-    el.addEventListener("keydown", onCommit, true);
+    // Belge düzeyinde dinle: hedef yeniden oluşturulsa veya geç mount olsa da bağ kopmaz.
+    document.addEventListener("input", onUserEdit, true);
+    document.addEventListener("change", onUserEdit, true);
+    document.addEventListener("keyup", onUserEdit, true);
+    document.addEventListener("blur", onCommit, true);
+    document.addEventListener("keydown", onCommit, true);
 
     return () => {
       cancelled = true;
       clearTimers();
-      el.removeEventListener("input", onUserEdit, true);
-      el.removeEventListener("change", onUserEdit, true);
-      el.removeEventListener("keyup", onUserEdit, true);
-      el.removeEventListener("blur", onCommit, true);
-      el.removeEventListener("keydown", onCommit, true);
+      document.removeEventListener("input", onUserEdit, true);
+      document.removeEventListener("change", onUserEdit, true);
+      document.removeEventListener("keyup", onUserEdit, true);
+      document.removeEventListener("blur", onCommit, true);
+      document.removeEventListener("keydown", onCommit, true);
     };
   }, [active, paused, mode, safeIndex, step?.id, step?.target, step?.autoAdvance, clearTimers]);
 
@@ -455,6 +554,25 @@ export function GuidedTourHost({
 
   const renderActions = () => {
     if (!step) return null;
+
+    if (targetMissing) {
+      return (
+        <div className={styles.actions}>
+          <Button variant="soft" size="sm" onClick={closeTour}>
+            Kılavuzu kapat
+          </Button>
+          <span className={styles.actionsSpacer} />
+          {safeIndex > 0 ? (
+            <Button variant="soft" size="sm" onClick={goPrev}>
+              Geri
+            </Button>
+          ) : null}
+          <Button variant="primary" size="sm" onClick={goNext}>
+            {isLast ? "Kılavuzu tamamla" : "Atla"}
+          </Button>
+        </div>
+      );
+    }
 
     if (mode === "optional") {
       const skipLabel = step.optionalSkipLabel ?? "Ek ödemem yok";
@@ -521,7 +639,7 @@ export function GuidedTourHost({
       );
     }
 
-    // auto: no İleri / Devam et / Atla — only close + back
+    // auto: İleri yok (form dolunca kendiliğinden ilerler); kilitlenmemek için Atla
     return (
       <div className={styles.actions}>
         <Button variant="soft" size="sm" onClick={closeTour}>
@@ -533,13 +651,19 @@ export function GuidedTourHost({
             Geri
           </Button>
         ) : null}
+        {step.skippable !== false && !isLast ? (
+          <Button variant="soft" size="sm" onClick={goNext}>
+            Atla
+          </Button>
+        ) : null}
       </div>
     );
   };
 
-  const showOverlay = active && !paused && step && rect;
+  const showBubble = Boolean(active && !paused && step && (rect || targetMissing));
+  const showSpotlight = showBubble && rect && !targetMissing;
 
-  return (
+  const layer = (
     <>
       {welcomeOpen ? (
         <div
@@ -565,8 +689,8 @@ export function GuidedTourHost({
         </div>
       ) : null}
 
-      {showOverlay ? (
-        <div className={styles.overlayRoot} aria-live="polite">
+      {showSpotlight && rect ? (
+        <div className={styles.overlayRoot} aria-hidden>
           <div
             className={styles.spotlight}
             style={{
@@ -575,32 +699,44 @@ export function GuidedTourHost({
               width: rect.width,
               height: rect.height,
             }}
-            aria-hidden
           />
-          <div
-            ref={bubbleRef}
-            className={styles.bubble}
-            role="dialog"
-            aria-modal="false"
-            aria-labelledby={`guided-tour-step-${step.id}`}
-            style={{ top: bubblePos.top, left: bubblePos.left }}
-          >
-            <h3 id={`guided-tour-step-${step.id}`} className={styles.bubbleTitle}>
-              {step.title}
-            </h3>
-            <p className={styles.bubbleBody}>{step.body}</p>
-            {gateWarn ? (
-              <p className={styles.gateWarn} role="alert">
-                {gateWarn}
-              </p>
-            ) : null}
-            <div className={styles.progress}>
-              {safeIndex + 1} / {steps.length}
-            </div>
-            {renderActions()}
+        </div>
+      ) : null}
+
+      {showBubble && step ? (
+        <div
+          ref={bubbleRef}
+          className={styles.bubble}
+          data-guided-tour-bubble=""
+          role="dialog"
+          aria-modal="false"
+          aria-live="polite"
+          aria-labelledby={`guided-tour-step-${step.id}`}
+          style={{ top: bubblePos.top, left: bubblePos.left }}
+        >
+          <h3 id={`guided-tour-step-${step.id}`} className={styles.bubbleTitle}>
+            {step.title}
+          </h3>
+          <p className={styles.bubbleBody}>{step.body}</p>
+          {targetMissing ? (
+            <p className={styles.gateWarn} role="status">
+              {MISSING_TARGET_HINT}
+            </p>
+          ) : null}
+          {gateWarn ? (
+            <p className={styles.gateWarn} role="alert">
+              {gateWarn}
+            </p>
+          ) : null}
+          <div className={styles.progress}>
+            {safeIndex + 1} / {steps.length}
           </div>
+          {renderActions()}
         </div>
       ) : null}
     </>
   );
+
+  if (typeof document === "undefined") return layer;
+  return createPortal(<div {...{ [TOUR_ROOT_ATTR]: "" }}>{layer}</div>, document.body);
 }

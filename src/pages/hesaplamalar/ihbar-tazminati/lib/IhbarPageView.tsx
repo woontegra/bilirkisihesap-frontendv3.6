@@ -284,6 +284,24 @@ export function IhbarPageView(props: IhbarPageViewProps) {
     hesapla: computeEklentiResult,
   });
   const eklentiFor = eklenti.hedef;
+  const eklentiDialogRef = useRef<HTMLDivElement | null>(null);
+  const eklentiAcik = eklenti.taslak !== null;
+  const eklentiKapat = eklenti.kapat;
+  useEffect(() => {
+    if (!eklentiAcik) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      // Yalnızca en üstteki modal kapanır (kılavuz katmanı sayılmaz).
+      const modals = [...document.querySelectorAll('[aria-modal="true"]')].filter(
+        (el) => !el.closest("[data-guided-tour-root]"),
+      );
+      if (modals[modals.length - 1] !== eklentiDialogRef.current) return;
+      e.preventDefault();
+      eklentiKapat();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [eklentiAcik, eklentiKapat]);
   const [extraSaveOpen, setExtraSaveOpen] = useState(false);
   const [extraImportOpen, setExtraImportOpen] = useState(false);
   const [savedExtraSets, setSavedExtraSets] = useState<LocalExtraSet[]>([]);
@@ -917,6 +935,7 @@ export function IhbarPageView(props: IhbarPageViewProps) {
       {eklenti.taslak ? (
         <div className={styles.modalOverlay} role="presentation" onClick={eklenti.kapat}>
           <div
+            ref={eklentiDialogRef}
             className={`${styles.modalCard} ${styles.modalWide}`}
             role="dialog"
             aria-modal="true"

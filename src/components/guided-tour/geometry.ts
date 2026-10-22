@@ -7,12 +7,22 @@ export function readTargetRect(el: HTMLElement | null): Rect | null {
   return { top: r.top, left: r.left, width: r.width, height: r.height };
 }
 
-export function findTourTarget(target: string): HTMLElement | null {
-  if (!target || typeof document === "undefined") return null;
+function tourTargetSelector(target: string): string {
   const escaped =
     typeof CSS !== "undefined" && typeof CSS.escape === "function" ? CSS.escape(target) : target.replace(/"/g, '\\"');
-  const el = document.querySelector(`[data-tour="${escaped}"]`);
+  return `[data-tour="${escaped}"]`;
+}
+
+export function findTourTarget(target: string): HTMLElement | null {
+  if (!target || typeof document === "undefined") return null;
+  const el = document.querySelector(tourTargetSelector(target));
   return el instanceof HTMLElement ? el : null;
+}
+
+/** Olay hedefi verilen kılavuz hedefinin içinde mi (hedef yeniden oluşturulmuş olsa da)? */
+export function isInsideTourTarget(node: EventTarget | null, target: string): boolean {
+  if (!target || !(node instanceof Element)) return false;
+  return node.closest(tourTargetSelector(target)) !== null;
 }
 
 const PAD = 8;
@@ -86,6 +96,93 @@ export function placeBubble(
   return { top, left };
 }
 
+function overlapArea(a: Rect, b: Rect): number {
+  const w = Math.min(a.left + a.width, b.left + b.width) - Math.max(a.left, b.left);
+  const h = Math.min(a.top + a.height, b.top + b.height) - Math.max(a.top, b.top);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+
+export type BubbleLayout = { top: number; left: number; placement: Placement };
+
+/**
+ * Balon konumu: tercih edilen yön → mevcut yön → diğer yönler; hedefle çakışmayan ilk aday seçilir.
+ * Hiçbiri sığmıyorsa (hedef ekrandan büyük) ekran köşelerinden hedefin görünen kısmıyla en az çakışan seçilir.
+ * Sonuç her zaman ekran içindedir.
+ */
+export function layoutBubble(
+  target: Rect | null,
+  preferred: Placement | "auto",
+  vw: number,
+  vh: number,
+  bubbleW: number,
+  bubbleH: number,
+  current?: Placement,
+): BubbleLayout {
+  const bw = Math.min(bubbleW, Math.max(0, vw - PAD * 2));
+  const bh = Math.min(bubbleH, Math.max(0, vh - PAD * 2));
+  if (!target) {
+    return { top: Math.max(PAD, (vh - bh) / 2), left: Math.max(PAD, (vw - bw) / 2), placement: current ?? "bottom" };
+  }
+  const visible: Rect = {
+    top: Math.max(0, target.top),
+    left: Math.max(0, target.left),
+    width: Math.max(0, Math.min(vw, target.left + target.width) - Math.max(0, target.left)),
+    height: Math.max(0, Math.min(vh, target.top + target.height) - Math.max(0, target.top)),
+  };
+  const order: Placement[] = [];
+  const push = (p: Placement | undefined) => {
+    if (p && !order.includes(p)) order.push(p);
+  };
+  if (preferred !== "auto") push(preferred);
+  push(current);
+  for (const p of ["bottom", "top", "right", "left"] as Placement[]) push(p);
+
+  const candidates: BubbleLayout[] = order.map((p) => ({ ...placeBubble(target, p, vw, vh, bw, bh), placement: p }));
+  const fitting = candidates.find((c) => overlapArea({ top: c.top, left: c.left, width: bw, height: bh }, visible) === 0);
+  if (fitting) return fitting;
+
+  const corners: BubbleLayout[] = [
+    { top: vh - bh - PAD, left: vw - bw - PAD, placement: "bottom" },
+    { top: PAD, left: vw - bw - PAD, placement: "top" },
+    { top: vh - bh - PAD, left: PAD, placement: "bottom" },
+    { top: PAD, left: PAD, placement: "top" },
+  ];
+  let best = candidates[0]!;
+  let bestArea = Number.POSITIVE_INFINITY;
+  for (const c of [...candidates, ...corners]) {
+    const area = overlapArea({ top: c.top, left: c.left, width: bw, height: bh }, visible);
+    if (area < bestArea) {
+      best = c;
+      bestArea = area;
+    }
+  }
+  return best;
+}
+
+function sameRect(a: DOMRect, b: DOMRect): boolean {
+  return Math.abs(a.top - b.top) < 0.5 && Math.abs(a.left - b.left) < 0.5;
+}
+
+/** Hedef konumu (yumuşak kaydırma dahil) oturana kadar bekler; en fazla `maxMs`. */
+export function waitForStablePosition(el: HTMLElement, maxMs = 900): Promise<void> {
+  return new Promise((resolve) => {
+    const started = performance.now();
+    let last = el.getBoundingClientRect();
+    let stableFrames = 0;
+    const tick = () => {
+      const now = el.getBoundingClientRect();
+      stableFrames = sameRect(now, last) ? stableFrames + 1 : 0;
+      last = now;
+      if (stableFrames >= 4 || performance.now() - started > maxMs) {
+        resolve();
+        return;
+      }
+      window.requestAnimationFrame(tick);
+    };
+    window.requestAnimationFrame(tick);
+  });
+}
+
 /** Scroll target into view if needed; returns a promise that settles after scroll. */
 export function scrollTargetIntoView(
   el: HTMLElement,
@@ -113,6 +210,6 @@ export function scrollTargetIntoView(
       block: mode === "nearest" ? "nearest" : "center",
       inline: "nearest",
     });
-    window.setTimeout(resolve, mode === "nearest" ? 220 : 380);
+    void waitForStablePosition(el, 900).then(resolve);
   });
 }

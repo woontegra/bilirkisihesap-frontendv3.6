@@ -423,6 +423,7 @@ export default function ChatWidget() {
                 className={`${styles.panel} ${isOnline ? styles.panelOnline : styles.panelOffline}`}
                 role="dialog"
                 aria-label={headerCopy.title}
+                data-tour-pause=""
               >
                 <header className={`${styles.header} ${isOnline ? styles.headerOnline : styles.headerOffline}`}>
                   <div className={styles.headerMain}>

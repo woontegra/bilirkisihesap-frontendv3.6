@@ -459,7 +459,7 @@ export function Topbar({
 
           {notifOpen ? (
 
-            <div className={styles.notifPanel} role="dialog" aria-label="Bildirimler">
+            <div className={styles.notifPanel} role="dialog" aria-label="Bildirimler" data-tour-pause="">
 
               <div className={styles.notifHead}>Bildirimler</div>
 
@@ -593,7 +593,7 @@ export function Topbar({
 
           {menuOpen ? (
 
-            <div className={styles.menu} role="menu">
+            <div className={styles.menu} role="menu" data-tour-pause="">
 
               <div className={styles.menuHead}>
 
