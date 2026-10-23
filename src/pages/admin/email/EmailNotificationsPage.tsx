@@ -63,6 +63,28 @@ const RECIPIENT_TYPES = [
   { value: "smmm_chambers", label: "SMMM Odaları" },
 ];
 
+type SurveyAudience = "not_sent" | "sent" | "all";
+
+const SURVEY_AUDIENCE_OPTIONS: { value: SurveyAudience; label: string }[] = [
+  { value: "not_sent", label: "Henüz anket gönderilmeyenler" },
+  { value: "sent", label: "Daha önce anket gönderilenler" },
+  { value: "all", label: "Tüm müşteriler" },
+];
+
+type SurveyAudiencePreview = {
+  audience: SurveyAudience;
+  unique: number;
+  duplicatesMerged: number;
+  selected: number;
+  excluded: number;
+  unsubscribed: number;
+};
+
+function surveyExcludedLabel(audience: SurveyAudience): string {
+  if (audience === "all") return "filtre uygulanmadı";
+  return audience === "sent" ? "henüz anket gönderilmemiş" : "daha önce anket gönderilmiş";
+}
+
 function trackingStatusLabel(status: string): string {
   if (status === "SENT") return "Gönderildi";
   if (status === "FAILED") return "Hatalı";
@@ -79,6 +101,9 @@ export default function EmailNotificationsPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [formData, setFormData] = useState<EmailFormData>(DEFAULT_FORM);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
+  const [surveyAudience, setSurveyAudience] = useState<SurveyAudience>("not_sent");
+  const [surveyPreview, setSurveyPreview] = useState<SurveyAudiencePreview | null>(null);
+  const [surveyPreviewLoading, setSurveyPreviewLoading] = useState(false);
   const [sendResult, setSendResult] = useState<{
     sent?: number;
     total?: number;
@@ -334,6 +359,64 @@ export default function EmailNotificationsPage() {
     [barsForSend, includeSecondaryEmail],
   );
 
+  const isSurveyTemplate = appliedTemplateId === "satisfaction_survey";
+  const surveyPreviewKey = useMemo(
+    () =>
+      isSurveyTemplate
+        ? JSON.stringify({
+            recipientType: formData.recipientType,
+            customEmails: formData.recipientType === "custom" ? (customParsed?.valid ?? []) : [],
+            surveyAudience,
+            includeSecondaryEmail,
+            barSelectionMode,
+            barAssociationIds: selectedBarIds,
+            smmmSelectionMode,
+            smmmChamberIds: selectedSmmmIds,
+            includeSmmmSecondaryEmail,
+          })
+        : null,
+    [
+      isSurveyTemplate,
+      formData.recipientType,
+      customParsed,
+      surveyAudience,
+      includeSecondaryEmail,
+      barSelectionMode,
+      selectedBarIds,
+      smmmSelectionMode,
+      selectedSmmmIds,
+      includeSmmmSecondaryEmail,
+    ],
+  );
+
+  useEffect(() => {
+    if (!surveyPreviewKey) {
+      setSurveyPreview(null);
+      return;
+    }
+    let cancelled = false;
+    setSurveyPreviewLoading(true);
+    const timer = window.setTimeout(() => {
+      apiClient<{ success: boolean } & SurveyAudiencePreview>(
+        "/api/email-notifications/survey-audience-preview",
+        { method: "POST", body: JSON.parse(surveyPreviewKey) as Record<string, unknown> },
+      )
+        .then((data) => {
+          if (!cancelled) setSurveyPreview(data.success ? data : null);
+        })
+        .catch(() => {
+          if (!cancelled) setSurveyPreview(null);
+        })
+        .finally(() => {
+          if (!cancelled) setSurveyPreviewLoading(false);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [surveyPreviewKey]);
+
   const applyTemplate = (template: (typeof EMAIL_TEMPLATES)[0]) => {
     setAppliedTemplateId(template.templateId ?? null);
     const useBranded =
@@ -364,6 +447,10 @@ export default function EmailNotificationsPage() {
       toast.error("Özel email listesi için en az bir email adresi girin");
       return;
     }
+    if (isSurveyTemplate && surveyPreview && surveyPreview.selected === 0) {
+      toast.error("Seçilen anket alıcı filtresine uyan kimse yok");
+      return;
+    }
     setPreviewOpen(true);
   };
 
@@ -384,6 +471,7 @@ export default function EmailNotificationsPage() {
         smmmChamberIds: selectedSmmmIds,
         includeSmmmSecondaryEmail,
         ...(appliedTemplateId && { template: appliedTemplateId }),
+        ...(isSurveyTemplate && { surveyAudience }),
         allowWithoutProtocol: Boolean(options?.allowWithoutProtocol),
       };
 
@@ -430,6 +518,7 @@ export default function EmailNotificationsPage() {
           : "Email başarıyla gönderildi.",
       );
       setAppliedTemplateId(null);
+      setSurveyAudience("not_sent");
       void loadSmmmTracking();
       setFormData((prev) => ({
         ...prev,
@@ -711,6 +800,36 @@ export default function EmailNotificationsPage() {
                   {customParsed && customParsed.valid.length > 0 ? (
                     <p className={styles.hint}>
                       Geçerli: {customParsed.valid.length} · Kara listede: {blacklistedEmails.length}
+                    </p>
+                  ) : null}
+                </FormField>
+              ) : null}
+
+              {isSurveyTemplate ? (
+                <FormField
+                  label="Anket Alıcı Filtresi"
+                  hint="Aynı e-postalı demo ve ücretli hesaplar tek kişi sayılır; başarısız gönderimler tekrar denenebilir."
+                >
+                  <select
+                    value={surveyAudience}
+                    onChange={(e) => setSurveyAudience(e.target.value as SurveyAudience)}
+                  >
+                    {SURVEY_AUDIENCE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {surveyPreviewLoading ? (
+                    <p className={styles.hint}>Alıcı sayıları hesaplanıyor…</p>
+                  ) : surveyPreview ? (
+                    <p className={styles.hint}>
+                      Seçilen: {surveyPreview.selected} kişi · Elenen: {surveyPreview.excluded} kişi (
+                      {surveyExcludedLabel(surveyPreview.audience)})
+                      {surveyPreview.duplicatesMerged > 0
+                        ? ` · Aynı e-posta birleştirilen: ${surveyPreview.duplicatesMerged}`
+                        : ""}
+                      {surveyPreview.unsubscribed > 0 ? ` · Abonelikten çıkmış: ${surveyPreview.unsubscribed}` : ""}
                     </p>
                   ) : null}
                 </FormField>
@@ -1431,7 +1550,11 @@ export default function EmailNotificationsPage() {
       <ConfirmDialog
         open={previewOpen}
         title="Gönderimi onayla"
-        description={`"${formData.subject}" konusuyla e-posta gönderilecek. Devam edilsin mi?`}
+        description={
+          isSurveyTemplate && surveyPreview
+            ? `"${formData.subject}" konulu anket ${surveyPreview.selected} kişiye gönderilecek; ${surveyPreview.excluded} kişi elendi (${surveyExcludedLabel(surveyPreview.audience)}). Devam edilsin mi?`
+            : `"${formData.subject}" konusuyla e-posta gönderilecek. Devam edilsin mi?`
+        }
         confirmLabel="Gönder"
         loading={loading}
         onCancel={() => setPreviewOpen(false)}
