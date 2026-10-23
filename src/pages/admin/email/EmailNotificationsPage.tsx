@@ -38,12 +38,13 @@ import {
   postSendBulk,
 } from "./emailHelpers";
 import styles from "./EmailNotificationsPage.module.css";
+import { SurveyResultsPanel } from "./SurveyResultsPanel";
 import {
   ACTIVE_SMMM_CHAMBERS,
   collectSmmmRecipientEmails,
 } from "./smmmChambersData";
 
-type TabId = "compose" | "baro" | "smmm" | "unsubscribes";
+type TabId = "compose" | "baro" | "smmm" | "survey" | "unsubscribes";
 
 type UnsubscribeRow = {
   id: number;
@@ -652,6 +653,7 @@ export default function EmailNotificationsPage() {
     { id: "compose", label: "Compose" },
     { id: "baro", label: "Baro Tracking" },
     { id: "smmm", label: "SMMM Tracking" },
+    { id: "survey", label: "Anket Sonuçları" },
     { id: "unsubscribes", label: "Unsubscribes" },
   ];
 
@@ -1359,6 +1361,8 @@ export default function EmailNotificationsPage() {
           ) : null}
         </section>
       ) : null}
+
+      {tab === "survey" ? <SurveyResultsPanel /> : null}
 
       {tab === "unsubscribes" ? (
         <section className={shared.panel}>

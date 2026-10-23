@@ -149,6 +149,15 @@ Demo erişim bilgileri e-postada otomatik yer alacaktır.
 Saygılarımızla,
 Bilirkişi Hesaplama Araçları`,
   },
+  {
+    name: "Müşteri Memnuniyet Anketi",
+    templateId: "satisfaction_survey",
+    description: "Logolu, 5–1 yıldızlı memnuniyet anketi",
+    subject: "Hizmetimizi değerlendirir misiniz?",
+    message: `Bilirkişi Hesaplama Araçları'nı tercih ettiğiniz için teşekkür ederiz.
+
+Hizmetimizi geliştirebilmemiz için deneyiminizi değerlendirmenizi rica ederiz. Aşağıdaki seçeneklerden size uygun olana tıklamanız yeterlidir.`,
+  },
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
