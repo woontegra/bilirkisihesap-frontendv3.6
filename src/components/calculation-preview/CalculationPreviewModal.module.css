@@ -100,6 +100,20 @@
   cursor: wait;
 }
 
+.btnUdf {
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.btnUdf:hover {
+  background: #fffbeb;
+}
+
+.btnUdf:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
 .btnClose {
   border-color: #9ca3af;
   color: #374151;

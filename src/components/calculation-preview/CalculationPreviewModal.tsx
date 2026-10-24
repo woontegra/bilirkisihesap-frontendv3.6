@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Copy, FileDown, Printer, X } from "lucide-react";
+import { Copy, FileDown, FileText, Printer, X } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { trackUsageEvent } from "@/telemetry/trackUsageEvent";
 import { downloadPreviewPdf } from "./pdfExport";
+import { udfFileNameFromTitle } from "./udfFileName";
+import { downloadPreviewUdf } from "./udf/downloadPreviewUdf";
 import {
   buildPrintHtmlFromSections,
   copyAllTablesForWord,
@@ -38,6 +40,7 @@ export function CalculationPreviewModal({
   const toast = useToast();
   const previewRef = useRef<HTMLDivElement>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [udfBusy, setUdfBusy] = useState(false);
   const trackedOpenRef = useRef(false);
 
   useEffect(() => {
@@ -86,6 +89,18 @@ export function CalculationPreviewModal({
     }
   };
 
+  const handleUdf = async () => {
+    if (udfBusy) return;
+    setUdfBusy(true);
+    try {
+      await downloadPreviewUdf(sections, udfFileNameFromTitle(title));
+    } catch {
+      toast.error("UDF dosyası oluşturulamadı. Lütfen tekrar deneyin.");
+    } finally {
+      setUdfBusy(false);
+    }
+  };
+
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
       <div
@@ -109,6 +124,16 @@ export function CalculationPreviewModal({
             <button type="button" className={styles.btnPdf} onClick={() => void handlePdf()} disabled={pdfBusy}>
               <FileDown size={13} />
               {pdfBusy ? "Oluşturuluyor…" : "PDF İndir"}
+            </button>
+            <button
+              type="button"
+              className={styles.btnUdf}
+              onClick={() => void handleUdf()}
+              disabled={udfBusy}
+              title="Önizlemedeki bölüm ve tabloları UDF dosyası olarak indirir."
+            >
+              <FileText size={13} />
+              {udfBusy ? "Oluşturuluyor…" : "UDF İndir"}
             </button>
             <button type="button" className={styles.btnClose} onClick={onClose}>
               <X size={13} />
