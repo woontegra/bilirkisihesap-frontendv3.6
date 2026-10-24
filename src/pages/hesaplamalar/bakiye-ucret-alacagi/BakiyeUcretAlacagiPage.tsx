@@ -81,6 +81,9 @@ import {
   type SavedCase,
 } from "./model";
 import { clearCorruptCases, deleteCase } from "./storage";
+import { EklentiHesaplamaModal } from "../shared/EklentiHesaplamaModal";
+import { eklentiDokumuYaz } from "../shared/eklentiDokumu";
+import { useEklentiPenceresi } from "../shared/useEklentiPenceresi";
 import styles from "./BakiyeUcretAlacagiPage.module.css";
 
 const PAGE_TITLE = "Bakiye Ücret Alacağı";
@@ -275,8 +278,13 @@ export default function BakiyeUcretAlacagiPage() {
   const lastSyncedTotal = useRef<number | null>(null);
   const [editingGross, setEditingGross] = useState<Record<number, string>>({});
   const [rowOverrides, setRowOverrides] = useState<Record<number, { gross: number; net: number }>>({});
-  const [eklentiFor, setEklentiFor] = useState<string | null>(null);
-  const [eklentiMonths, setEklentiMonths] = useState<Record<string, string[]>>({});
+  const eklenti = useEklentiPenceresi<string>({
+    dokumler: form.eklentiDokumleri,
+    varsayilanGunEsasi: form.eklentiGunEsasi,
+    hesapla: computeEklentiResult,
+  });
+  const eklentiFor = eklenti.hedef;
+  const eklentiKapat = eklenti.kapat;
   const [cases, setCases] = useState<SavedCase[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -493,10 +501,6 @@ export default function BakiyeUcretAlacagiPage() {
     return computeGrossFromNetSingle(netVal, selectedYear);
   }, [netVal, selectedYear, netPanel]);
 
-  const eklentiPreview = eklentiFor
-    ? computeEklentiResult(eklentiMonths[eklentiFor] ?? Array(12).fill(""))
-    : 0;
-
   const reloadCases = useCallback(async () => {
     try {
       const items = await listBakiyeUcretCasesFromBackend();
@@ -584,14 +588,13 @@ export default function BakiyeUcretAlacagiPage() {
     lastSyncedTotal.current = null;
     setRowOverrides({});
     setEditingGross({});
-    setEklentiFor(null);
-    setEklentiMonths({});
+    eklentiKapat();
     setActiveId(null);
     setActiveName(null);
     setCalculatedResult(null);
     setBaseline(snapshotKey(empty));
     setDateError(null);
-  }, []);
+  }, [eklentiKapat]);
 
   const applyCase = useCallback(
     (c: SavedCase) => {
@@ -695,20 +698,19 @@ export default function BakiyeUcretAlacagiPage() {
     }
   }, [activeId, confirmDeleteId, reloadCases, resetForm, showError, success]);
 
-  const openEklenti = (itemId: string) => {
-    setEklentiMonths((prev) => (prev[itemId] ? prev : { ...prev, [itemId]: Array(12).fill("") }));
-    setEklentiFor(itemId);
-  };
+  const openEklenti = (itemId: string) => eklenti.ac(itemId, `extra:${itemId}`);
 
   const applyEklenti = () => {
-    if (!eklentiFor) return;
-    const months = eklentiMonths[eklentiFor] ?? Array(12).fill("");
-    const value = computeEklentiResult(months) || 0;
+    const taslak = eklenti.taslak;
+    if (!taslak) return;
+    const value = computeEklentiResult(taslak.aylar, taslak.gunEsasi) || 0;
     setForm((f) => ({
       ...f,
-      extras: f.extras.map((e) => (e.id === eklentiFor ? { ...e, value: formatMoney(value) } : e)),
+      extras: f.extras.map((e) => (e.id === taslak.target ? { ...e, value: formatMoney(value) } : e)),
+      eklentiGunEsasi: taslak.gunEsasi,
+      eklentiDokumleri: eklentiDokumuYaz(f.eklentiDokumleri, taslak.key, taslak),
     }));
-    setEklentiFor(null);
+    eklenti.kapat();
   };
 
   const handleMonthGrossBlur = (index: number) => {
@@ -1242,51 +1244,16 @@ export default function BakiyeUcretAlacagiPage() {
         </div>
       ) : null}
 
-      {eklentiFor ? (
-        <div className={styles.modalOverlay} role="presentation" onClick={() => setEklentiFor(null)}>
-          <div className={styles.modalCard} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Eklenti hesaplama</h3>
-            <p className={styles.helper}>Son 12 aylık bordro tutarlarını girin. Formül: (toplam / 360) × 30</p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(7rem, 1fr))",
-                gap: "0.5rem",
-                marginTop: "0.75rem",
-              }}
-            >
-              {(eklentiMonths[eklentiFor] ?? Array(12).fill("")).map((value, index) => (
-                <label key={index} className={styles.label}>
-                  {index + 1}. ay
-                  <input
-                    className={styles.input}
-                    inputMode="decimal"
-                    value={value}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setEklentiMonths((prev) => ({
-                        ...prev,
-                        [eklentiFor]: (prev[eklentiFor] ?? Array(12).fill("")).map((m, i) => (i === index ? v : m)),
-                      }));
-                    }}
-                    placeholder="1.250,00"
-                  />
-                </label>
-              ))}
-            </div>
-            <p className={styles.helper} style={{ marginTop: "0.5rem" }}>
-              Sonuç: <strong>{formatMoney(eklentiPreview)} ₺</strong>
-            </p>
-            <div className={styles.modalActions}>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setEklentiFor(null)}>
-                İptal
-              </Button>
-              <Button type="button" variant="primary" size="sm" onClick={applyEklenti}>
-                Uygula
-              </Button>
-            </div>
-          </div>
-        </div>
+      {eklenti.taslak ? (
+        <EklentiHesaplamaModal
+          aylar={eklenti.taslak.aylar}
+          gunEsasi={eklenti.taslak.gunEsasi}
+          sonucMetni={`${formatMoney(eklenti.sonuc)} ₺`}
+          onAyDegistir={eklenti.ayDegistir}
+          onGunEsasiDegistir={eklenti.gunEsasiDegistir}
+          onKapat={eklenti.kapat}
+          onUygula={applyEklenti}
+        />
       ) : null}
 
       {listOpen ? (

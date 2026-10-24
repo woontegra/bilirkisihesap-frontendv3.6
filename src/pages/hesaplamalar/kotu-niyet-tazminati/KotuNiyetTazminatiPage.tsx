@@ -49,6 +49,9 @@ import {
   mapKotuNiyetFormFromBackend,
   resolveSavedCaseDisplayName,
 } from "./backendCase";
+import { EklentiHesaplamaModal } from "../shared/EklentiHesaplamaModal";
+import { eklentiDokumuYaz } from "../shared/eklentiDokumu";
+import { useEklentiPenceresi } from "../shared/useEklentiPenceresi";
 import {
   clampYear,
   computeEklentiResult,
@@ -85,10 +88,6 @@ const WAGE_LABELS: Record<WageFieldKey, string> = {
 
 function eklentiKeyOf(t: EklentiTarget): string {
   return t.kind === "field" ? `field:${t.field}` : `extra:${t.id}`;
-}
-
-function emptyMonths(): string[] {
-  return Array.from({ length: 12 }, () => "");
 }
 
 function FlashValue({ value, className }: { value: string; className?: string }) {
@@ -207,8 +206,12 @@ export default function KotuNiyetTazminatiPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmNew, setConfirmNew] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [eklentiFor, setEklentiFor] = useState<EklentiTarget | null>(null);
-  const [eklentiMonths, setEklentiMonths] = useState<Record<string, string[]>>({});
+  const eklenti = useEklentiPenceresi<EklentiTarget>({
+    dokumler: form.eklentiDokumleri,
+    varsayilanGunEsasi: form.eklentiGunEsasi,
+    hesapla: computeEklentiResult,
+  });
+  const eklentiFor = eklenti.hedef;
   const [extraSaveOpen, setExtraSaveOpen] = useState(false);
   const [extraImportOpen, setExtraImportOpen] = useState(false);
   const [savedExtraSets, setSavedExtraSets] = useState<LocalExtraSet[]>([]);
@@ -302,30 +305,23 @@ export default function KotuNiyetTazminatiPage() {
     );
   };
 
-  const openEklenti = (target: EklentiTarget) => {
-    const key = eklentiKeyOf(target);
-    setEklentiMonths((prev) => (prev[key] ? prev : { ...prev, [key]: emptyMonths() }));
-    setEklentiFor(target);
-  };
+  const openEklenti = (target: EklentiTarget) => eklenti.ac(target, eklentiKeyOf(target));
 
   const applyEklenti = () => {
-    if (!eklentiFor) return;
-    const key = eklentiKeyOf(eklentiFor);
-    const months = eklentiMonths[key] ?? emptyMonths();
-    const formatted = formatMoney(computeEklentiResult(months) || 0);
-    if (eklentiFor.kind === "field") {
-      setForm((prev) => ({ ...prev, [eklentiFor.field]: formatted }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        extras: prev.extras.map((e) => (e.id === eklentiFor.id ? { ...e, value: formatted } : e)),
-      }));
-    }
-    setEklentiFor(null);
+    const taslak = eklenti.taslak;
+    if (!taslak) return;
+    const formatted = formatMoney(computeEklentiResult(taslak.aylar, taslak.gunEsasi) || 0);
+    const target = taslak.target;
+    setForm((prev) => ({
+      ...prev,
+      ...(target.kind === "field"
+        ? { [target.field]: formatted }
+        : { extras: prev.extras.map((e) => (e.id === target.id ? { ...e, value: formatted } : e)) }),
+      eklentiGunEsasi: taslak.gunEsasi,
+      eklentiDokumleri: eklentiDokumuYaz(prev.eklentiDokumleri, taslak.key, taslak),
+    }));
+    eklenti.kapat();
   };
-
-  const eklentiKey = eklentiFor ? eklentiKeyOf(eklentiFor) : null;
-  const eklentiPreview = eklentiKey ? computeEklentiResult(eklentiMonths[eklentiKey] ?? emptyMonths()) : 0;
 
   const reloadCases = useCallback(async () => {
     try {
@@ -1012,49 +1008,16 @@ export default function KotuNiyetTazminatiPage() {
         onCancel={() => setConfirmDeleteId(null)}
       />
 
-      {eklentiFor && eklentiKey ? (
-        <div className={styles.modalOverlay} role="presentation" onClick={() => setEklentiFor(null)}>
-          <div
-            className={`${styles.modalCard} ${styles.modalWide}`}
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className={styles.modalTitle}>Eklenti hesaplama</h3>
-            <p className={styles.helper}>Son 12 aylık bordro tutarlarını girin. Formül: (toplam / 360) × 30</p>
-            <div className={styles.monthGrid}>
-              {(eklentiMonths[eklentiKey] ?? emptyMonths()).map((value, index) => (
-                <label key={index} className={styles.monthField}>
-                  <span>{index + 1}. ay</span>
-                  <input
-                    className={styles.input}
-                    inputMode="decimal"
-                    value={value}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setEklentiMonths((prev) => ({
-                        ...prev,
-                        [eklentiKey]: (prev[eklentiKey] ?? emptyMonths()).map((m, i) => (i === index ? v : m)),
-                      }));
-                    }}
-                    placeholder="1.250,00"
-                  />
-                </label>
-              ))}
-            </div>
-            <p className={styles.helper} style={{ marginTop: "0.5rem" }}>
-              Sonuç: <strong>{formatMoney(eklentiPreview)} ₺</strong>
-            </p>
-            <div className={styles.modalActions}>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setEklentiFor(null)}>
-                İptal
-              </Button>
-              <Button type="button" variant="primary" size="sm" onClick={applyEklenti}>
-                Uygula
-              </Button>
-            </div>
-          </div>
-        </div>
+      {eklenti.taslak ? (
+        <EklentiHesaplamaModal
+          aylar={eklenti.taslak.aylar}
+          gunEsasi={eklenti.taslak.gunEsasi}
+          sonucMetni={`${formatMoney(eklenti.sonuc)} ₺`}
+          onAyDegistir={eklenti.ayDegistir}
+          onGunEsasiDegistir={eklenti.gunEsasiDegistir}
+          onKapat={eklenti.kapat}
+          onUygula={applyEklenti}
+        />
       ) : null}
 
       <CalculationPreviewModal

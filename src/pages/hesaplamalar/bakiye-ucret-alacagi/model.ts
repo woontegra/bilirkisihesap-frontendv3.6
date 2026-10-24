@@ -1,4 +1,6 @@
 import type { MonthRow, SummaryRow } from "./engine";
+import type { EklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { eklentiDokumleriAnahtari, type EklentiDokumleri } from "../shared/eklentiDokumu";
 
 export const STORAGE_KEY = "bilirkisi-hesap-v35:bakiye-ucret-alacagi:cases:v1" as const;
 
@@ -14,6 +16,10 @@ export type BakiyeForm = {
   resignDate: string;
   brut: string;
   extras: ExtraItem[];
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: EklentiGunEsasi;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type BakiyeResults = {
@@ -43,10 +49,14 @@ export function createEmptyForm(): BakiyeForm {
       { id: newLocalId("extra"), label: "Yol", value: "" },
       { id: newLocalId("extra"), label: "Yemek", value: "" },
     ],
+    eklentiGunEsasi: 360,
   };
 }
 
 export const NOTE_TEXT =
   "Belirli süreli iş sözleşmelerinde iş akdi süresinden önce sonlandırılır ise sözleşme sonuna kadar kararlaştırılan ücret bakiye ücret olarak talep edilebilir.";
 
-export const snapshotKey = (form: BakiyeForm) => JSON.stringify(form);
+export const snapshotKey = (form: BakiyeForm) => {
+  const { eklentiDokumleri, ...rest } = form;
+  return JSON.stringify({ ...rest, eklentiDokumleri: eklentiDokumleriAnahtari(eklentiDokumleri, form.extras) });
+};

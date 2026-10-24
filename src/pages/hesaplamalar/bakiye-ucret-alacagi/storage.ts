@@ -10,6 +10,8 @@ import {
   type BakiyeResults,
   type SavedCase,
 } from "./model";
+import { normalizeEklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { normalizeEklentiDokumleri } from "../shared/eklentiDokumu";
 
 type CasesPayload = { version: 1; cases: SavedCase[] };
 export type LoadResult<T> = { ok: true; items: T[] } | { ok: false; items: T[]; reason: string };
@@ -29,6 +31,8 @@ function normalizeForm(raw: Partial<BakiyeForm> | undefined | null): BakiyeForm 
           value: String(e?.value ?? ""),
         }))
       : empty.extras,
+    eklentiGunEsasi: normalizeEklentiGunEsasi(raw.eklentiGunEsasi),
+    eklentiDokumleri: normalizeEklentiDokumleri(raw.eklentiDokumleri),
   };
 }
 

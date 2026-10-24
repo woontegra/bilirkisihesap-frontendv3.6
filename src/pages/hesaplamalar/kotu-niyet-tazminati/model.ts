@@ -3,6 +3,9 @@
  * %100 lokal ve diğer hesaplama sayfalarından izole.
  */
 
+import type { EklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { eklentiDokumleriAnahtari, type EklentiDokumleri } from "../shared/eklentiDokumu";
+
 export type ExtraItem = { id: string; label: string; value: string };
 
 export type WorkPeriod = {
@@ -21,6 +24,10 @@ export type KotuNiyetForm = {
   yol: string;
   yemek: string;
   extras: ExtraItem[];
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi: EklentiGunEsasi;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type KotuNiyetResult = {
@@ -65,6 +72,7 @@ export function createEmptyForm(): KotuNiyetForm {
     yol: "",
     yemek: "",
     extras: [],
+    eklentiGunEsasi: 360,
   };
 }
 
@@ -78,6 +86,8 @@ export function snapshotKey(form: KotuNiyetForm): string {
     y: form.yol,
     m: form.yemek,
     e: form.extras.map((x) => [x.label, x.value]),
+    g: form.eklentiGunEsasi,
+    d: eklentiDokumleriAnahtari(form.eklentiDokumleri, form.extras),
   });
 }
 

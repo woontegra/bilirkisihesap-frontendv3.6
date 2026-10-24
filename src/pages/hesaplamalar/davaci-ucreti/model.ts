@@ -4,6 +4,9 @@
  * Kaydedilmiş ekstra setler backend'de tenant kapsamında tutulur.
  */
 
+import type { EklentiDokumleri } from "../shared/eklentiDokumu";
+import type { EklentiGunEsasi } from "../shared/eklentiGunEsasi";
+
 export type ExtraItem = {
   id: string;
   name: string;
@@ -32,6 +35,10 @@ export type DavaciFormSnapshot = {
   selectedYear: number;
   selectedPeriod: Period;
   notes: string;
+  /** 12 aylık eklenti hesabının gün esası; eski kayıtlarda yoksa 360 */
+  eklentiGunEsasi?: EklentiGunEsasi;
+  /** Kalem başına uygulanmış 12 aylık eklenti dökümü; eski kayıtlarda yok */
+  eklentiDokumleri?: EklentiDokumleri;
 };
 
 export type SavedCase = {

@@ -12,6 +12,8 @@ import {
 } from "@/api/savedCases";
 import { createDefaultExtraItems, newLocalId, type DavaciFormSnapshot, type ExtraItem, type NetFromGrossData, type Period, type SavedCase } from "./model";
 import { hasTwoPeriods } from "./engine";
+import { normalizeEklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { eklentiDokumleriniBuda, normalizeEklentiDokumleri } from "../shared/eklentiDokumu";
 
 export const DAVACI_UCRETI_TYPE = "davaci_ucreti" as const;
 
@@ -82,12 +84,16 @@ export function buildDavaciSavePayload(
   totalBrut: number,
   netFromGross: NetFromGrossData,
 ): Record<string, unknown> {
+  const extraItems = normalizeExtraItemsForSave(form.extraItems);
+  const eklentiDokumleri = eklentiDokumleriniBuda(normalizeEklentiDokumleri(form.eklentiDokumleri), extraItems);
   const normalizedForm = {
     ciplakBrut: String(form.ciplakBrut ?? ""),
-    extraItems: normalizeExtraItemsForSave(form.extraItems),
+    extraItems,
     selectedYear: form.selectedYear,
     selectedPeriod: form.selectedPeriod,
     notes: String(form.notes ?? ""),
+    eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+    ...(Object.keys(eklentiDokumleri).length ? { eklentiDokumleri } : {}),
   };
 
   return {
@@ -225,6 +231,8 @@ export function mapDavaciFormFromBackend(data: unknown, fallbackYear: number): D
       selectedYear,
       selectedPeriod,
       notes: str(form.notes),
+      eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+      eklentiDokumleri: normalizeEklentiDokumleri(form.eklentiDokumleri),
     };
   } catch {
     return null;

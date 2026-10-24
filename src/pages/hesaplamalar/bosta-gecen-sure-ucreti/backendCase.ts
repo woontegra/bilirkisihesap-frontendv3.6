@@ -11,6 +11,8 @@ import {
   unwrapCalcData,
   type CalcSaveResult,
 } from "../shared/calcBackendCrud";
+import { normalizeEklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { eklentiDokumleriniFormaYerlestir, normalizeEklentiDokumleri } from "../shared/eklentiDokumu";
 import type { BostaForm, ExtraItem, SavedCase } from "./model";
 import { createEmptyForm, newLocalId } from "./model";
 
@@ -74,11 +76,11 @@ function mapExtras(raw: unknown): ExtraItem[] {
 }
 
 function buildFormPayload(form: BostaForm): Record<string, unknown> {
-  return {
+  return eklentiDokumleriniFormaYerlestir({
     ...form,
     istenCikis: form.endDate,
     extraItems: form.extras.map((e) => ({ id: e.id, name: e.label, value: e.value })),
-  };
+  });
 }
 
 export function mapBostaFormFromBackend(data: unknown): BostaForm | null {
@@ -95,6 +97,8 @@ export function mapBostaFormFromBackend(data: unknown): BostaForm | null {
       yol: str(form.yol) || empty.yol,
       yemek: str(form.yemek) || empty.yemek,
       extras,
+      eklentiGunEsasi: normalizeEklentiGunEsasi(form.eklentiGunEsasi),
+      eklentiDokumleri: normalizeEklentiDokumleri(form.eklentiDokumleri),
     };
   } catch {
     return null;

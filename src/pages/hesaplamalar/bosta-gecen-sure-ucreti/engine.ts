@@ -69,10 +69,10 @@ export function calculateToplamBrut(input: {
   return brutValue + primValue + ikramiyeValue + yemekValue + extrasSum;
 }
 
-/** Eklenti: 12 aylık toplam / 360 × 30 (inline — başka modülden import yok). */
-export function computeEklentiResult(months: string[]): number {
+/** Eklenti: 12 aylık toplam / gün esası × 30 — gün esası 360 (varsayılan) veya 365 (inline — başka modülden import yok). */
+export function computeEklentiResult(months: string[], gunEsasi: 360 | 365 = 360): number {
   const sum = months.reduce((acc, v) => acc + parseNum(v), 0);
-  return (sum / 360) * 30;
+  return (sum / gunEsasi) * 30;
 }
 
 const EMPTY_RESULT: BostaResult = {

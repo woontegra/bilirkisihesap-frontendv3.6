@@ -64,12 +64,25 @@ import {
   upsertExtraSet,
 } from "./extraSetsApi";
 import { YEAR_MIN } from "./taxData";
+import { EklentiHesaplamaModal } from "../shared/EklentiHesaplamaModal";
+import {
+  eklentiDokumleriAnahtari,
+  eklentiDokumuYaz,
+  normalizeEklentiDokumleri,
+  type EklentiDokumleri,
+} from "../shared/eklentiDokumu";
+import {
+  normalizeEklentiGunEsasi,
+  VARSAYILAN_EKLENTI_GUN_ESASI,
+  type EklentiGunEsasi,
+} from "../shared/eklentiGunEsasi";
+import { useEklentiPenceresi } from "../shared/useEklentiPenceresi";
 import styles from "./DavaciUcretiPage.module.css";
 
 const PAGE_TITLE = "Davacı Ücreti Hesaplama";
 const NOTE_INFO_LINES = [
   "Çıplak brüt ücret, işçinin ücret ekleri hariç brüt temel ücretidir.",
-  "Prim, ikramiye ve benzeri dönemsel ücret eklerinin aylık ortalaması; son 12 aylık dönemde yapılan ödemelerin toplamının 360'a bölünüp 30 ile çarpılması suretiyle hesaplanır.",
+  "Prim, ikramiye ve benzeri dönemsel ücret eklerinin aylık ortalaması; son 12 aylık dönemde yapılan ödemelerin toplamının 360'a (Eklenti penceresinde 365 gün esası seçilirse 365'e) bölünüp 30 ile çarpılması suretiyle hesaplanır.",
 ] as const;
 
 /* ── Değer değişince kısa vurgu animasyonu ── */
@@ -245,6 +258,8 @@ export default function DavaciUcretiPage() {
   const [ciplakBrut, setCiplakBrut] = useState("");
   const [extraItems, setExtraItems] = useState<ExtraItem[]>(createDefaultExtraItems);
   const [netForGross, setNetForGross] = useState("");
+  const [eklentiGunEsasi, setEklentiGunEsasi] = useState<EklentiGunEsasi>(VARSAYILAN_EKLENTI_GUN_ESASI);
+  const [eklentiDokumleri, setEklentiDokumleri] = useState<EklentiDokumleri>({});
 
   /* kayıt state */
   const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
@@ -265,8 +280,13 @@ export default function DavaciUcretiPage() {
 
   /* ui state */
   const [removingIds, setRemovingIds] = useState<string[]>([]);
-  const [eklentiFor, setEklentiFor] = useState<string | null>(null);
-  const [eklentiMonths, setEklentiMonths] = useState<Record<string, string[]>>({});
+  const eklenti = useEklentiPenceresi<string>({
+    dokumler: eklentiDokumleri,
+    varsayilanGunEsasi: eklentiGunEsasi,
+    hesapla: computeEklentiResult,
+  });
+  const eklentiFor = eklenti.hedef;
+  const eklentiKapat = eklenti.kapat;
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSetSaveModal, setShowSetSaveModal] = useState(false);
   const [showCaseSaveModal, setShowCaseSaveModal] = useState(false);
@@ -303,8 +323,10 @@ export default function DavaciUcretiPage() {
       selectedYear,
       selectedPeriod,
       notes: "",
+      eklentiGunEsasi,
+      eklentiDokumleri,
     }),
-    [ciplakBrut, extraItems, selectedYear, selectedPeriod],
+    [ciplakBrut, extraItems, selectedYear, selectedPeriod, eklentiGunEsasi, eklentiDokumleri],
   );
 
   const snapshotKey = (s: DavaciFormSnapshot) =>
@@ -313,6 +335,8 @@ export default function DavaciUcretiPage() {
       e: s.extraItems.map((i) => [i.name, i.value]),
       y: s.selectedYear,
       p: s.selectedPeriod,
+      g: normalizeEklentiGunEsasi(s.eklentiGunEsasi),
+      d: eklentiDokumleriAnahtari(s.eklentiDokumleri, s.extraItems),
     });
 
   const reloadCases = useCallback(async () => {
@@ -407,7 +431,9 @@ export default function DavaciUcretiPage() {
     setNetForGross("");
     setCurrentRecordId(null);
     setCurrentRecordName(null);
-    setEklentiMonths({});
+    setEklentiGunEsasi(VARSAYILAN_EKLENTI_GUN_ESASI);
+    setEklentiDokumleri({});
+    eklentiKapat();
     setBaseline(
       snapshotKey({
         ciplakBrut: "",
@@ -417,7 +443,7 @@ export default function DavaciUcretiPage() {
         notes: "",
       }),
     );
-  }, [currentYear]);
+  }, [currentYear, eklentiKapat]);
 
   const applyNewForm = useCallback(() => {
     backendLoadedCaseIdRef.current = null;
@@ -440,11 +466,16 @@ export default function DavaciUcretiPage() {
         value: String(i.value ?? ""),
       }));
       const year = Number(c.form.selectedYear) || currentYear;
+      const gunEsasi = normalizeEklentiGunEsasi(c.form.eklentiGunEsasi);
+      const dokumler = normalizeEklentiDokumleri(c.form.eklentiDokumleri);
       setCiplakBrut(String(c.form.ciplakBrut ?? ""));
       setExtraItems(items);
       setSelectedYear(year);
       setSelectedPeriod(!hasTwoPeriods(year) ? 2 : ((Number(c.form.selectedPeriod) as Period) || 2));
       setNetForGross("");
+      setEklentiGunEsasi(gunEsasi);
+      setEklentiDokumleri(dokumler);
+      eklentiKapat();
       setCurrentRecordId(c.id);
       setCurrentRecordName(c.name);
       setBaseline(
@@ -454,13 +485,15 @@ export default function DavaciUcretiPage() {
           selectedYear: year,
           selectedPeriod: !hasTwoPeriods(year) ? 2 : ((Number(c.form.selectedPeriod) as Period) || 2),
           notes: "",
+          eklentiGunEsasi: gunEsasi,
+          eklentiDokumleri: dokumler,
         }),
       );
       setShowRecordsModal(false);
       triggerFormSwap();
       toast.success("Kayıt yüklendi");
     },
-    [clearCaseIdParam, currentYear, setCaseIdParam, toast],
+    [clearCaseIdParam, currentYear, eklentiKapat, setCaseIdParam, toast],
   );
 
   const applyBackendForm = useCallback(
@@ -472,6 +505,8 @@ export default function DavaciUcretiPage() {
       }));
       const year = Number(form.selectedYear) || currentYear;
       const period: Period = !hasTwoPeriods(year) ? 2 : ((Number(form.selectedPeriod) as Period) || 2);
+      const gunEsasi = normalizeEklentiGunEsasi(form.eklentiGunEsasi);
+      const dokumler = normalizeEklentiDokumleri(form.eklentiDokumleri);
       setCiplakBrut(String(form.ciplakBrut ?? ""));
       setExtraItems(items);
       setSelectedYear(year);
@@ -479,7 +514,9 @@ export default function DavaciUcretiPage() {
       setNetForGross("");
       setCurrentRecordId(recordId);
       setCurrentRecordName(recordName);
-      setEklentiMonths({});
+      setEklentiGunEsasi(gunEsasi);
+      setEklentiDokumleri(dokumler);
+      eklentiKapat();
       setBaseline(
         snapshotKey({
           ciplakBrut: String(form.ciplakBrut ?? ""),
@@ -487,11 +524,13 @@ export default function DavaciUcretiPage() {
           selectedYear: year,
           selectedPeriod: period,
           notes: "",
+          eklentiGunEsasi: gunEsasi,
+          eklentiDokumleri: dokumler,
         }),
       );
       triggerFormSwap();
     },
-    [currentYear],
+    [currentYear, eklentiKapat],
   );
 
   useEffect(() => {
@@ -588,17 +627,16 @@ export default function DavaciUcretiPage() {
   };
 
   /* eklenti */
-  const openEklenti = (itemId: string) => {
-    setEklentiMonths((prev) => (prev[itemId] ? prev : { ...prev, [itemId]: Array(12).fill("") }));
-    setEklentiFor(itemId);
-  };
+  const openEklenti = (itemId: string) => eklenti.ac(itemId, `extra:${itemId}`);
 
   const applyEklenti = () => {
-    if (!eklentiFor) return;
-    const months = eklentiMonths[eklentiFor] ?? Array(12).fill("");
-    const value = computeEklentiResult(months) || 0;
-    updateItem(eklentiFor, { value: value.toFixed(2).replace(".", ",") });
-    setEklentiFor(null);
+    const taslak = eklenti.taslak;
+    if (!taslak) return;
+    const value = computeEklentiResult(taslak.aylar, taslak.gunEsasi) || 0;
+    updateItem(taslak.target, { value: value.toFixed(2).replace(".", ",") });
+    setEklentiGunEsasi(taslak.gunEsasi);
+    setEklentiDokumleri((prev) => eklentiDokumuYaz(prev, taslak.key, taslak));
+    eklenti.kapat();
   };
 
   /* set işlemleri — backend CRUD; başarı yalnızca sunucu cevabıyla */
@@ -838,11 +876,6 @@ export default function DavaciUcretiPage() {
 
     return sections;
   }, [selectedYear, ciplakBrut, extraItems, totalBrut, netFromGross, grossFromNet]);
-
-  const eklentiResult = eklentiFor
-    ? computeEklentiResult(eklentiMonths[eklentiFor] ?? Array(12).fill(""))
-    : 0;
-
   return (
     <div className={styles.page} aria-busy={caseLoading || undefined}>
       {caseLoading ? (
@@ -1183,51 +1216,16 @@ export default function DavaciUcretiPage() {
       </div>
 
       {/* ── Eklenti modalı ── */}
-      {eklentiFor ? (
-        <div className={styles.modalOverlay} role="presentation" onClick={() => setEklentiFor(null)}>
-          <div
-            className={`${styles.modalCard} ${styles.modalWide}`}
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className={styles.modalTitle}>Eklenti hesaplama</h2>
-            <p className={styles.modalDesc}>Son 12 aylık bordro tutarlarını girin.</p>
-            <div className={styles.monthGrid}>
-              {(eklentiMonths[eklentiFor] ?? Array(12).fill("")).map((value, index) => (
-                <label key={index} className={styles.monthField}>
-                  <span>{index + 1}. ay</span>
-                  <input
-                    inputMode="decimal"
-                    value={value}
-                    onChange={(e) => {
-                      const v = sanitizeMoneyTyping(e.target.value);
-                      setEklentiMonths((prev) => ({
-                        ...prev,
-                        [eklentiFor]: (prev[eklentiFor] ?? Array(12).fill("")).map((m, i) =>
-                          i === index ? v : m,
-                        ),
-                      }));
-                    }}
-                    placeholder="1.250,00"
-                  />
-                </label>
-              ))}
-            </div>
-            <p className={styles.formulaText}>Formül: (aylık toplam / 360) × 30</p>
-            <p className={styles.formulaResult}>
-              Sonuç: <strong>{fmtCurrency(eklentiResult)} ₺</strong>
-            </p>
-            <div className={styles.modalActions}>
-              <Button variant="soft" onClick={() => setEklentiFor(null)}>
-                İptal
-              </Button>
-              <Button variant="primary" onClick={applyEklenti}>
-                Uygula
-              </Button>
-            </div>
-          </div>
-        </div>
+      {eklenti.taslak ? (
+        <EklentiHesaplamaModal
+          aylar={eklenti.taslak.aylar}
+          gunEsasi={eklenti.taslak.gunEsasi}
+          sonucMetni={`${fmtCurrency(eklenti.sonuc)} ₺`}
+          onAyDegistir={(index, value) => eklenti.ayDegistir(index, sanitizeMoneyTyping(value))}
+          onGunEsasiDegistir={eklenti.gunEsasiDegistir}
+          onKapat={eklenti.kapat}
+          onUygula={applyEklenti}
+        />
       ) : null}
 
       {/* ── İçe aktar modalı (backend setleri) ── */}

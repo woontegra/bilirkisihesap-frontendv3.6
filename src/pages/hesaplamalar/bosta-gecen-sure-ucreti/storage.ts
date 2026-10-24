@@ -4,6 +4,8 @@
 
 import type { BostaForm, ExtraItem, SavedCase } from "./model";
 import { createEmptyForm, newLocalId } from "./model";
+import { normalizeEklentiGunEsasi } from "../shared/eklentiGunEsasi";
+import { normalizeEklentiDokumleri } from "../shared/eklentiDokumu";
 
 export const STORAGE_KEY = "bilirkisi-hesap-v35:bosta-gecen-sure-ucreti:cases:v1" as const;
 
@@ -36,6 +38,8 @@ function normalizeForm(raw: Partial<BostaForm> | undefined | null): BostaForm {
     yol: String(raw.yol ?? empty.yol),
     yemek: String(raw.yemek ?? empty.yemek),
     extras: normalizeExtras(raw.extras),
+    eklentiGunEsasi: normalizeEklentiGunEsasi(raw.eklentiGunEsasi),
+    eklentiDokumleri: normalizeEklentiDokumleri(raw.eklentiDokumleri),
   };
 }
 
