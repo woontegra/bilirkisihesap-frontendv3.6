@@ -50,6 +50,7 @@ import {
   earliestPeriodStartISO,
   fmtCurrency,
   formatYilAyGun,
+  isKalanGunSinirDurumu,
   latestPeriodEndISO,
   parseNum,
   sanitizeMoneyTyping,
@@ -72,7 +73,7 @@ import tourStyles from "@/components/guided-tour/GuidedTour.module.css";
 
 const PAGE_TITLE = "Mevsimlik İşçi Kıdem Tazminatı";
 const NOTE_INFO =
-  "Çalışma süresi toplam gün üzerinden yıl/ay/gün'e çevrilir; günlük kıdem payı 360 günlük yıla göre hesaplanır. Net kıdem, brüt tutardan yalnızca damga vergisi (binde 7,59) düşülerek bulunur.";
+  "Çalışma süresi toplam gün üzerinden yıl/ay/gün'e çevrilir (365 gün = 1 yıl, 30 gün = 1 ay). Brüt kıdem tazminatı, kullanılacak brüt ücret × toplam gün / 365 formülüyle hesaplanır; ay ve gün payları da 365 günlük yıla göre bulunur. Net kıdem, brüt tutardan yalnızca damga vergisi (binde 7,59) düşülerek bulunur.";
 const EXTRA_HINT = "Ekstra Hesaplamalar (Prim, İkramiye, Yemek vb.)";
 const FIXED_EXTRA_IDS = ["prim", "ikramiye", "yol", "yemek", "diger"] as const;
 const FIXED_EXTRA_ROWS: Array<{ id: (typeof FIXED_EXTRA_IDS)[number]; label: string }> = [
@@ -770,7 +771,13 @@ export default function MevsimlikKidemPage() {
       id: "tarih",
       title: "Tarih Bilgileri",
       headers: ["İşe Giriş", "İşten Çıkış", "Çalışma Süresi"],
-      rows: [[formatIsoTR(iseGiris), formatIsoTR(istenCikis), durationLabel]],
+      rows: [
+        [
+          formatIsoTR(iseGiris),
+          formatIsoTR(istenCikis),
+          isKalanGunSinirDurumu(result) ? `${durationLabel} (toplam ${result.toplamGun} gün)` : durationLabel,
+        ],
+      ],
     });
 
     const wageRows: string[][] = [
@@ -807,10 +814,13 @@ export default function MevsimlikKidemPage() {
       kidemRows.push([`${fmtCurrency(result.kullanilacakBrut)} × ${result.yil} yıl`, money(result.yilTutar)]);
     }
     if (result.ay > 0) {
-      kidemRows.push([`${fmtCurrency(result.kullanilacakBrut)} / 12 × ${result.ay} ay`, money(result.ayTutar)]);
+      kidemRows.push([
+        `${fmtCurrency(result.kullanilacakBrut)} / 365 × ${result.ay * 30} gün (${result.ay} ay)`,
+        money(result.ayTutar),
+      ]);
     }
     if (result.gun > 0) {
-      kidemRows.push([`${fmtCurrency(result.kullanilacakBrut)} / 360 × ${result.gun} gün`, money(result.gunTutar)]);
+      kidemRows.push([`${fmtCurrency(result.kullanilacakBrut)} / 365 × ${result.gun} gün`, money(result.gunTutar)]);
     }
     kidemRows.push(["Toplam Brüt Kıdem Tazminatı", money(result.brutKidem)]);
     sections.push({
@@ -853,8 +863,8 @@ export default function MevsimlikKidemPage() {
           <div>
             <h1 className={styles.title}>{PAGE_TITLE}</h1>
             <p className={styles.desc}>
-              Birden fazla mevsimlik çalışma dönemini ekleyin; toplam gün 360 gün payıyla Yıl/Ay/Gün'e
-              çevrilir, tavan ve damga vergisi ile net kıdem tazminatı hesaplanır.
+              Birden fazla mevsimlik çalışma dönemini ekleyin; toplam gün 365 günlük yıl esasıyla Yıl/Ay/Gün'e
+              çevrilir, kıdem tazminatı toplam gün / 365 üzerinden, tavan ve damga vergisi ile net olarak hesaplanır.
             </p>
             <div className={styles.privacyBadge}>
               <ShieldCheck size={14} />
@@ -1211,7 +1221,7 @@ export default function MevsimlikKidemPage() {
               {result.ay > 0 ? (
                 <div className={styles.line}>
                   <span>
-                    {fmtCurrency(result.kullanilacakBrut)} / 12 × {result.ay} ay
+                    {fmtCurrency(result.kullanilacakBrut)} / 365 × {result.ay * 30} gün ({result.ay} ay)
                   </span>
                   <span>{fmtCurrency(result.ayTutar)} ₺</span>
                 </div>
@@ -1219,7 +1229,7 @@ export default function MevsimlikKidemPage() {
               {result.gun > 0 ? (
                 <div className={styles.line}>
                   <span>
-                    {fmtCurrency(result.kullanilacakBrut)} / 360 × {result.gun} gün
+                    {fmtCurrency(result.kullanilacakBrut)} / 365 × {result.gun} gün
                   </span>
                   <span>{fmtCurrency(result.gunTutar)} ₺</span>
                 </div>

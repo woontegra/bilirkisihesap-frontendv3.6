@@ -1,7 +1,8 @@
 /**
  * Mevsimlik İşçi kıdem tazminatı hesaplama motoru — %100 lokal, ağ isteği yok.
  * Birden fazla çalışma dönemi toplam gün üzerinden Yıl/Ay/Gün'e çevrilir
- * (365 gün = 1 yıl, kalan 30 günlük dilim = 1 ay).
+ * (365 gün = 1 yıl, kalan 30 günlük dilim = 1 ay; ay en fazla 11).
+ * Brüt kıdem = kullanılacak brüt × toplam gün / 365.
  */
 
 import type { ExtraItem, MevsimlikFormSnapshot, MevsimlikResultSummary, WorkPeriod } from "./model";
@@ -93,17 +94,29 @@ export function latestPeriodEndDate(periods: WorkPeriod[]): Date | null {
   return latest;
 }
 
-/** Toplam takvim gününden Yıl/Ay/Gün: 365 gün = 1 yıl, kalan 30 günlük dilim = 1 ay. */
+export const KIDEM_YIL_GUN = 365;
+
+/**
+ * Toplam takvim gününden Yıl/Ay/Gün: 365 gün = 1 yıl, kalan 30 günlük dilim = 1 ay.
+ * 365 günlük yılda 12 × 30 = 360 olduğundan 360–364 günlük kalan aya bölünmez; ay 0, gün = kalan gün olur.
+ */
 export function convertDaysToYilAyGun(totalDays: number): { yil: number; ay: number; gun: number } {
   const d = Math.max(0, Math.floor(totalDays));
-  const yil = Math.floor(d / 365);
-  const kalanGun = d % 365;
-  const ay = Math.floor(kalanGun / 30);
-  const gun = kalanGun % 30;
-  return { yil, ay, gun };
+  const yil = Math.floor(d / KIDEM_YIL_GUN);
+  const kalanGun = d % KIDEM_YIL_GUN;
+  if (kalanGun >= 360) return { yil, ay: 0, gun: kalanGun };
+  return { yil, ay: Math.floor(kalanGun / 30), gun: kalanGun % 30 };
+}
+
+/** Kalan sürenin 360–364 gün olduğu, aya bölünmeden gün olarak gösterilen sınır durumu. */
+export function isKalanGunSinirDurumu(totals: { gun: number }): boolean {
+  return totals.gun >= 30;
 }
 
 export function formatYilAyGun(totals: { yil: number; ay: number; gun: number }): string {
+  if (isKalanGunSinirDurumu(totals)) {
+    return totals.yil > 0 ? `${totals.yil} Yıl ${totals.gun} Gün` : `${totals.gun} Gün`;
+  }
   return `${totals.yil} Yıl ${totals.ay} Ay ${totals.gun} Gün`;
 }
 
@@ -147,13 +160,22 @@ export function resolveKullanilacakBrut(
 
 /* ── Brüt kıdem, damga, net ── */
 
-/** Brüt = brüt×yıl + (brüt/12)×ay + (brüt/360)×gün (gün payı 360'tır) */
+/** Yıl payı: brüt × yıl; ay payı: brüt / 365 × (ay × 30); gün payı: brüt / 365 × gün. */
+export function calculateKidemPaylari(
+  kullanilacakBrut: number,
+  totals: { yil: number; ay: number; gun: number },
+): { yilTutar: number; ayTutar: number; gunTutar: number } {
+  return {
+    yilTutar: kullanilacakBrut * totals.yil,
+    ayTutar: (kullanilacakBrut / KIDEM_YIL_GUN) * totals.ay * 30,
+    gunTutar: (kullanilacakBrut / KIDEM_YIL_GUN) * totals.gun,
+  };
+}
+
+/** Brüt = brüt × toplam gün / 365 (yıl, ay ve gün paylarının toplamı) */
 export function calculateBrutKidem(kullanilacakBrut: number, totals: { yil: number; ay: number; gun: number }): number {
-  return (
-    kullanilacakBrut * totals.yil +
-    (kullanilacakBrut / 12) * totals.ay +
-    (kullanilacakBrut / 360) * totals.gun
-  );
+  const toplamGun = totals.yil * KIDEM_YIL_GUN + totals.ay * 30 + totals.gun;
+  return (kullanilacakBrut * toplamGun) / KIDEM_YIL_GUN;
 }
 
 export const MEVSIMLIK_DAMGA_ORANI = 0.00759;
@@ -182,9 +204,7 @@ export function deriveMevsimlikResult(form: MevsimlikFormSnapshot): MevsimlikRes
   const toplamAylikBrut = calculateToplamAylikBrut(form);
   const exitDate = latestPeriodEndDate(form.periods);
   const { kullanilacakBrut, tavan, tavanUygulandi } = resolveKullanilacakBrut(toplamAylikBrut, exitDate);
-  const yilTutar = kullanilacakBrut * totals.yil;
-  const ayTutar = (kullanilacakBrut / 12) * totals.ay;
-  const gunTutar = (kullanilacakBrut / 360) * totals.gun;
+  const { yilTutar, ayTutar, gunTutar } = calculateKidemPaylari(kullanilacakBrut, totals);
   const brutKidem = round2(calculateBrutKidem(kullanilacakBrut, totals));
   const damgaVergisi = round2(calculateDamgaVergisi(brutKidem));
   const netKidem = round2(calculateNetKidem(brutKidem, damgaVergisi));
@@ -208,7 +228,7 @@ export function deriveMevsimlikResult(form: MevsimlikFormSnapshot): MevsimlikRes
   };
 }
 
-/** Form düzeyindeki uyarılar (dönem tarihi / manuel gün). Kıdem tavan/360 uyarıları sayfada üretilir. */
+/** Form düzeyindeki uyarılar (dönem tarihi / manuel gün). Kıdem tavanı ve hak eşiği uyarıları sayfada üretilir. */
 export function deriveWarnings(form: MevsimlikFormSnapshot): string[] {
   const warnings: string[] = [];
   for (const p of form.periods) {

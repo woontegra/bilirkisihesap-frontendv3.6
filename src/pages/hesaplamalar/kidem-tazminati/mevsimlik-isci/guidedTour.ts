@@ -18,7 +18,7 @@ export const KIDEM_MEVSIMLIK_TOUR: GuidedTourDefinition = {
       id: "donemler",
       target: "mevsimlik-donemler",
       title: "Çalışma dönemleri",
-      body: "Mevsimlik çalışma dönemlerinin başlangıç ve bitiş tarihlerini girin. Birden fazla dönem ekleyebilirsiniz; toplam günler 360’lık payda ile kıdeme yansır.",
+      body: "Mevsimlik çalışma dönemlerinin başlangıç ve bitiş tarihlerini girin. Birden fazla dönem ekleyebilirsiniz; kıdem tazminatı toplam gün / 365 esasıyla hesaplanır.",
       mode: "optional",
       placement: "bottom",
       optionalHideSkip: true,
