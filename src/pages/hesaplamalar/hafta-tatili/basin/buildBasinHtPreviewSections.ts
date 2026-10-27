@@ -1,6 +1,8 @@
 import type { PreviewSection } from "@/components/calculation-preview";
 import { hakkaniyetOraniEtiketi } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import { formatDateTR, formatMoney } from "../lib/money";
+import { calculateNetFromBrut } from "../lib/net";
+import { equityNetPreviewRows } from "../../shared/EquityNetLines";
 import type { ExcludedDay } from "../lib/types";
 import type { HaftaTatiliComputeResult } from "../lib/HaftaTatiliCalcPage";
 import type { BasinForm } from "./model";
@@ -114,6 +116,7 @@ export function buildBasinHtPreviewSections(opts: {
 
   const mahsupNum = parseSettleNum(form.settleAmount);
   const mahsupSonuc = Math.max(0, result.totalBrut - result.hakkaniyet - mahsupNum);
+  const equityRaw = calculateNetFromBrut(Math.max(0, result.mahsupSonuc), result.year);
   sections.push({
     id: "mahsuplasma",
     title: "Mahsuplaşma",
@@ -126,6 +129,21 @@ export function buildBasinHtPreviewSections(opts: {
         mahsupNum > 0 ? `−${formatMoney(mahsupNum)} ₺` : `${formatMoney(0)} ₺`,
       ],
       ["Mahsuplaşma Sonucu", `${formatMoney(mahsupSonuc)} ₺`],
+      ...equityNetPreviewRows({
+        format: (n) => `${formatMoney(n)} ₺`,
+        kesinti: {
+          sgk: equityRaw.ssk,
+          issizlik: equityRaw.issizlik,
+          gelirVergisi: equityRaw.gelirVergisi,
+          gelirVergisiDilimleri: equityRaw.gelirVergisiDilimleri,
+          damgaVergisi: equityRaw.damgaVergisi,
+          net: equityRaw.netAmount,
+        },
+        sgkLabel: "SGK (%14)",
+        issizlikLabel: "İşsizlik (%1)",
+        damgaLabel: "Damga vergisi (‰7,59)",
+        gelirPrefix: "Gelir vergisi",
+      }),
     ],
     lastRowTone: "green",
   });

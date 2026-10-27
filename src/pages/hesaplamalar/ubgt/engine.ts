@@ -94,6 +94,12 @@ export function calcMahsupSonucuBilirkisi(brut: number, hakkaniyet: number, sett
   return Math.max(0, brut - hakkaniyet - settle);
 }
 
+/** Hakkaniyet ve mahsuplaşma sonrası kalan brüt. 0'ın altına düşmez. */
+export function calcSonBrutAlacak(brut: number, hakkaniyet: number, settle: number): number {
+  const mahsup = Number.isFinite(settle) ? settle : 0;
+  return Math.max(0, (brut || 0) - (hakkaniyet || 0) - mahsup);
+}
+
 /**
  * V3 UbgtNetConversion selectedYear: latest non-empty dateRanges end (2010–2100),
  * else current calendar year.

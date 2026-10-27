@@ -141,6 +141,15 @@ export type HaftalikKarmaResult = {
   hakkaniyetOneri: number;
   mahsupTutari: number;
   mahsupSonrasiNet: number;
+  /** Son Brüt Alacak üzerinden; toplam netle aynı vergi yılı ve kesinti formülü. */
+  sonNetKesinti?: {
+    sgk: number;
+    issizlik: number;
+    gelirVergisi: number;
+    gelirVergisiDilimleri: string;
+    damgaVergisi: number;
+    net: number;
+  };
   warnings: string[];
 };
 

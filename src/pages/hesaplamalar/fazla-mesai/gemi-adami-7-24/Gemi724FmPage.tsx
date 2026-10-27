@@ -78,9 +78,10 @@ import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./Gemi724FmPage.module.css";
 
-const PAGE_TITLE = "Fazla Mesai — Gemi Adamı (7/24 Tam Mürettebat)";
+const PAGE_TITLE = "Fazla Mesai — Gemi Adamı (7/24)";
 
 type PendingAction = { kind: "new" } | { kind: "open"; caseId: string } | null;
 
@@ -226,6 +227,7 @@ export default function Gemi724FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeGemi724Result);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum !== 1;
 
@@ -566,7 +568,14 @@ export default function Gemi724FmPage() {
         ...(result.mahsupTutari > 0
           ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][])
           : []),
-        ["Son Net Alacak", money(result.sonNet)],
+        ["Son Brüt Alacak", money(result.sonNet)],
+        ...equityNetPreviewRows({
+          format: money,
+          kesinti: equityNet,
+          sgkLabel: "SGK (%14)",
+          issizlikLabel: "İşsizlik (%1)",
+          damgaLabel: "Damga Vergisi",
+        }),
       ],
       lastRowTone: "green",
     });
@@ -883,9 +892,19 @@ export default function Gemi724FmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Net Alacak</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} className={styles.sonNet} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass=""
+              netClass={styles.totalsHighlight}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga Vergisi (Binde 7,59)"
+              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
+            />
           </div>
         </article>
 

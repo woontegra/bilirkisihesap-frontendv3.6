@@ -123,6 +123,15 @@ export type StandartResult = {
   mahsupTutari: number;
   /** Son net alacak: max(0, toplamFm - hakkaniyetIndirimi - mahsupTutari). Brüt bazlı; vergi düşülmez. */
   sonNet: number;
+  /** Son Brüt Alacak üzerinden; toplam netle aynı vergi yılı ve kesinti formülü. */
+  sonNetKesinti?: {
+    sgk: number;
+    issizlik: number;
+    gelirVergisi: number;
+    gelirVergisiDilimleri: string;
+    damgaVergisi: number;
+    net: number;
+  };
   warnings: string[];
 };
 

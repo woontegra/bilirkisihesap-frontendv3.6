@@ -21,6 +21,8 @@ export type StandartUbgtSaveExtras = {
   };
   excludedWeekdayHolidays: unknown[];
   katsayi: number;
+  sonBrutAlacak?: number;
+  sonNetAlacak?: number;
 };
 
 function mapPeriodRow(row: CetvelDisplayRow) {
@@ -64,6 +66,9 @@ export function buildStandartUbgtSaveData(
     hakkaniyet: netConversion?.hakkaniyet ?? 0,
     settleAmount: netConversion?.settleAmount ?? 0,
     sonuc: Math.max(0, totalNet - (netConversion?.hakkaniyet ?? 0)),
+    ...(result.sonBrutAlacak != null
+      ? { sonBrutAlacak: result.sonBrutAlacak, sonNetAlacak: result.sonNetAlacak }
+      : {}),
     mahsuplasamaData: form.mahsuplasamaData,
   };
 

@@ -79,6 +79,7 @@ import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./DonemselFmPage.module.css";
 
 const PAGE_TITLE = "Dönemsel Fazla Mesai Hesaplama";
@@ -384,6 +385,7 @@ export default function DonemselFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.dateIn, form.dateOut), [form.dateIn, form.dateOut]);
   const result = useDeferredFormMemo(form, computeDonemselResultV3);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -771,7 +773,14 @@ export default function DonemselFmPage() {
           ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
           [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetOneri)}`],
           ["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`],
-          ["Son Net Alacak", money(result.mahsupSonrasiNet)],
+          ["Son Brüt Alacak", money(result.mahsupSonrasiNet)],
+          ...equityNetPreviewRows({
+            format: money,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: "İşsizlik (%1)",
+            damgaLabel: "Damga Vergisi (Binde 7,59)",
+          }),
         ],
         lastRowTone: "green",
       },
@@ -1132,9 +1141,20 @@ export default function DonemselFmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son Net Alacak</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.mahsupSonrasiNet)} ₺`} className={styles.sonNet} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga Vergisi (Binde 7,59)"
+              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
+            />
           </div>
         </article>
       </div>

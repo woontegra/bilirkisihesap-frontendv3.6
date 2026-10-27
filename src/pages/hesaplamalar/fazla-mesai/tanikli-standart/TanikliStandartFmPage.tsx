@@ -74,6 +74,7 @@ import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./TanikliStandartFmPage.module.css";
 
 const PAGE_TITLE = "Tanıklı Standart Fazla Mesai Hesaplama";
@@ -232,6 +233,7 @@ export default function TanikliStandartFmPage() {
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
 
   const result = useDeferredFormMemo(form, computeTanikliFmResultV3);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -646,7 +648,14 @@ export default function TanikliStandartFmPage() {
           `-${money(result.hakkaniyetOneri)}`,
         ],
         ...(result.mahsupTutari > 0 ? ([["Mahsup Tutarı", `-${money(result.mahsupTutari)}`]] as string[][]) : []),
-        ["Son Net Alacak", money(result.mahsupSonrasiNet)],
+        ["Son Brüt Alacak", money(result.mahsupSonrasiNet)],
+        ...equityNetPreviewRows({
+          format: money,
+          kesinti: equityNet,
+          sgkLabel: "SGK İşçi Payı (%14)",
+          issizlikLabel: "İşsizlik Sigortası (%1)",
+          damgaLabel: "Damga Vergisi (Binde 7,59)",
+        }),
       ],
       lastRowTone: "green",
     });
@@ -1122,9 +1131,20 @@ export default function TanikliStandartFmPage() {
               </div>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son Net Alacak</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.mahsupSonrasiNet)} ₺`} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga Vergisi (Binde 7,59)"
+              renderNet={(text) => <FlashValue value={text} />}
+            />
           </div>
         </article>
 

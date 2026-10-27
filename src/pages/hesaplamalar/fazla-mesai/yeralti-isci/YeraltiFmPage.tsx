@@ -79,6 +79,7 @@ import {
 import { isCetvelRowVisible } from "../cetvelDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./YeraltiFmPage.module.css";
 
 const PAGE_TITLE = "Yeraltı İşçileri Fazla Mesai Hesaplama";
@@ -249,6 +250,7 @@ export default function YeraltiFmPage() {
   }, [form.davaciDateIn, form.davaciDateOut]);
 
   const result = useDeferredFormMemo(form, computeYeraltiResultV3);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -603,7 +605,14 @@ export default function YeraltiFmPage() {
         ["Toplam Fazla Mesai (Brüt)", money(result.totalFm)],
         [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
         ...(result.mahsupTutari > 0 ? ([["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] as string[][]) : []),
-        ["Son Net Alacak", money(result.sonNet)],
+        ["Son Brüt Alacak", money(result.sonNet)],
+        ...equityNetPreviewRows({
+          format: money,
+          kesinti: equityNet,
+          sgkLabel: "SGK (%14)",
+          issizlikLabel: "İşsizlik (%1)",
+          damgaLabel: "Damga Vergisi (Binde 7,59)",
+        }),
       ],
       lastRowTone: "green",
     });
@@ -1018,9 +1027,20 @@ export default function YeraltiFmPage() {
               </div>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son Net</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga Vergisi (Binde 7,59)"
+              renderNet={(text) => <FlashValue value={text} />}
+            />
           </div>
         </article>
 

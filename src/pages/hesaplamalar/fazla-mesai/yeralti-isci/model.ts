@@ -131,6 +131,15 @@ export type YeraltiResult = {
   mahsupTutari: number;
   /** Son net alacak: max(0, totalFm − hakkaniyet − mahsup). */
   sonNet: number;
+  /** Son Brüt Alacak üzerinden; toplam netle aynı vergi yılı ve kesinti formülü. */
+  sonNetKesinti?: {
+    sgk: number;
+    issizlik: number;
+    gelirVergisi: number;
+    gelirVergisiDilimleri: string;
+    damgaVergisi: number;
+    net: number;
+  };
 };
 
 export type SavedCase = {

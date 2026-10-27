@@ -1,6 +1,7 @@
 import type { PreviewSection } from "@/components/calculation-preview";
 import { hakkaniyetOraniEtiketi } from "../../fazla-mesai/shared/hakkaniyetOrani";
-import { calcMahsupSonucuBilirkisi, formatDateTR, formatMoney } from "../engine";
+import { equityNetPreviewRows, EMPTY_GROSS_NET, type GrossNetBreakdown } from "../../shared/EquityNetLines";
+import { calcSonBrutAlacak, formatDateTR, formatMoney } from "../engine";
 import type { UbgtForm } from "../model";
 import type { CetvelDisplayRow } from "../ubgtCetvelRows";
 import type { UbgtNetResult } from "../engine";
@@ -13,6 +14,8 @@ export function buildBilirkisiUbgtPreviewSections(opts: {
   effectiveNet: UbgtNetResult;
   hakkaniyet: number;
   settleNum: number;
+  sonBrutAlacak?: number;
+  equityNet?: GrossNetBreakdown;
 }): PreviewSection[] {
   const {
     form,
@@ -21,9 +24,10 @@ export function buildBilirkisiUbgtPreviewSections(opts: {
     displayBrutForNet,
     effectiveNet,
     hakkaniyet,
-    settleNum,
   } = opts;
-  const mahsupSonucu = calcMahsupSonucuBilirkisi(displayBrutForNet, hakkaniyet, settleNum);
+  const settleNum = Number.isFinite(opts.settleNum) ? opts.settleNum : 0;
+  const sonBrutAlacak = opts.sonBrutAlacak ?? calcSonBrutAlacak(displayBrutForNet, hakkaniyet, settleNum);
+  const equityNet = opts.equityNet ?? EMPTY_GROSS_NET;
   const sgkCombined = (effectiveNet.ssk || 0) + (effectiveNet.issizlik || 0);
 
   const davaciSummary =
@@ -95,16 +99,21 @@ export function buildBilirkisiUbgtPreviewSections(opts: {
     },
     {
       id: "mahsuplasma",
-      title: "Mahsuplaşma",
+      title: "Hakkaniyet İndirimi / Mahsuplaşma",
       headers: ["Kalem", "Tutar"],
       rows: [
-        ["Brüt UBGT alacağı", `${formatMoney(displayBrutForNet)} ₺`],
+        ["Toplam Brüt Alacak", `${formatMoney(displayBrutForNet)} ₺`],
         [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi`, `−${formatMoney(hakkaniyet)} ₺`],
-        [
-          "Mahsuplaşma miktarı",
-          settleNum > 0 ? `−${formatMoney(settleNum)} ₺` : `${formatMoney(0)} ₺`,
-        ],
-        ["Mahsuplaşma sonucu", `${formatMoney(mahsupSonucu)} ₺`],
+        ["Mahsuplaşma Tutarı", `−${formatMoney(settleNum)} ₺`],
+        ["Son Brüt Alacak", `${formatMoney(sonBrutAlacak)} ₺`],
+        ...equityNetPreviewRows({
+          format: (n) => `${formatMoney(n)} ₺`,
+          kesinti: equityNet,
+          sgkLabel: "SGK primi (%14)",
+          issizlikLabel: "İşsizlik primi (%1)",
+          damgaLabel: "Damga vergisi (binde 7,59)",
+          gelirPrefix: "Gelir vergisi",
+        }),
       ],
       lastRowTone: "green",
     },

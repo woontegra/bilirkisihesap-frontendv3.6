@@ -76,6 +76,7 @@ import {
 } from "./model";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./GemiGunlukFmPage.module.css";
 
 const PAGE_TITLE = "Gemi Adamı — Günlük Çalışan Fazla Mesai";
@@ -230,6 +231,7 @@ export default function GemiGunlukFmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeGemiGunlukResult);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum > 0 && katSayiNum !== 1;
 
@@ -578,7 +580,14 @@ export default function GemiGunlukFmPage() {
           ...(result.mahsupTutari > 0
             ? [["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`] as [string, string]]
             : []),
-          ["Son Net Alacak", money(result.sonNet)],
+          ["Son Brüt Alacak", money(result.sonNet)],
+          ...equityNetPreviewRows({
+            format: money,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: "İşsizlik (%1)",
+            damgaLabel: "Damga Vergisi",
+          }),
         ],
         lastRowTone: "green",
       },
@@ -993,9 +1002,19 @@ export default function GemiGunlukFmPage() {
               <span className={styles.deduction}>-{formatMoney(result.mahsupTutari)} ₺</span>
             </div>
             <div className={`${styles.line} ${styles.netLine}`}>
-              <span>Son net</span>
+              <span>Son Brüt Alacak</span>
               <span>{formatMoney(result.sonNet)} ₺</span>
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass={styles.line}
+              deductClass={styles.deduction}
+              netClass={styles.netLine}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga"
+            />
           </div>
         </article>
 

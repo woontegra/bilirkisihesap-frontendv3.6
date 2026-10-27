@@ -113,6 +113,30 @@ function parseMahsup(value: string): number {
  * Standart FM hesabı — V3 StandartFazlaMesaiPage motor zinciri (taşınmış kopya).
  * Eski `engine.ts` içindeki `computeStandartFmResult` yerine kullanılır.
  */
+export type FmGrossNet = {
+  sgk: number;
+  issizlik: number;
+  gelirVergisi: number;
+  gelirVergisiDilimleri: string;
+  damgaVergisi: number;
+  net: number;
+};
+
+/** Toplam brüt ve Son Brüt Alacak için aynı brütten-nete formülü ve vergi yılı. */
+export function netFromGrossFm(brut: number, exitYear: number): FmGrossNet {
+  if (!(brut > 0)) {
+    return { sgk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, net: 0 };
+  }
+  const sgk = Math.round(brut * SSK_ORAN * 100) / 100;
+  const issizlik = Math.round(brut * ISSIZLIK_ORAN * 100) / 100;
+  const matrah = Math.max(0, brut - sgk - issizlik);
+  const gv = calculateIncomeTaxWithBrackets(exitYear, matrah);
+  const gelirVergisi = Math.round(gv.tax * 100) / 100;
+  const damgaVergisi = Math.round(brut * DAMGA_VERGISI_ORANI * 100) / 100;
+  const net = Math.round((brut - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri: gv.brackets, damgaVergisi, net };
+}
+
 export function computeStandartFmResultV3(form: StandartFormSnapshot): StandartResult {
   const warnings: string[] = [];
   const dateError = validateDateRange(form.iseGiris, form.istenCikis);
@@ -200,6 +224,7 @@ export function computeStandartFmResultV3(form: StandartFormSnapshot): StandartR
     hakkaniyetIndirimi,
     mahsupTutari,
     sonNet,
+    sonNetKesinti: netFromGrossFm(sonNet, exitYear),
     warnings,
   };
 }

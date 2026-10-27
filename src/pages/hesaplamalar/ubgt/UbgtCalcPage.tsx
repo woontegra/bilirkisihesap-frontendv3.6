@@ -13,6 +13,7 @@ import { useToast } from "@/context/ToastContext";
 import { useCalculationCaseBinding } from "@/hooks/useCalculationCaseBinding";
 import { hakkaniyetOraniEtiketi } from "../fazla-mesai/shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../fazla-mesai/shared/HakkaniyetOraniSecimi";
+import { EquityNetLines } from "../shared/EquityNetLines";
 import {
   ManualBrutWageApplyControls,
   clearManualWageFromPeriodOverrides,
@@ -22,8 +23,7 @@ import {
 import {
   buildTanikRanges,
   calcHakkaniyet,
-  calcMahsupSonucuBilirkisi,
-  calcMahsupSonucuStandart,
+  calcSonBrutAlacak,
   calculateNet,
   collectDavaciHolidayIds,
   computeUbgt,
@@ -474,14 +474,21 @@ export default function UbgtCalcPage({ mode, title }: Props) {
     [displayBrutForNet, form.hakkaniyetOrani],
   );
   const settleNum = parseNum(form.settleAmount);
-  /** Mahsup sonucu kartı yalnız gerçek mahsup > 0 iken (standart + bilirkişi). */
-  const showMahsupResultCard = Number.isFinite(settleNum) && settleNum > 0;
-  const mahsupSonucu = useMemo(() => {
-    if (mode === "bilirkisi") {
-      return calcMahsupSonucuBilirkisi(displayBrutForNet, hakkaniyet, settleNum);
-    }
-    return calcMahsupSonucuStandart(effectiveNet?.netAmount ?? 0, hakkaniyet);
-  }, [mode, displayBrutForNet, hakkaniyet, settleNum, effectiveNet]);
+  const sonBrutAlacak = useMemo(
+    () => calcSonBrutAlacak(displayBrutForNet, hakkaniyet, settleNum),
+    [displayBrutForNet, hakkaniyet, settleNum],
+  );
+  const equityNet = useMemo(() => {
+    const raw = calculateNet(sonBrutAlacak, taxYear);
+    return {
+      sgk: raw.ssk,
+      issizlik: raw.issizlik,
+      gelirVergisi: raw.gelirVergisi,
+      gelirVergisiDilimleri: raw.gelirVergisiDilimleri,
+      damgaVergisi: raw.damgaVergisi,
+      net: raw.netAmount,
+    };
+  }, [sonBrutAlacak, taxYear]);
 
   const handleBrutInputChange = (value: string) => {
     setBrutInputValue(value);
@@ -689,6 +696,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
         net: effectiveNet.netAmount,
         ssk: effectiveNet.ssk + effectiveNet.issizlik,
       },
+      sonBrutAlacak,
+      sonNetAlacak: equityNet.net,
     };
     const savePayload = mode === "standart" || mode === "bilirkisi" ? enrichedSave : baseSave;
     try {
@@ -893,6 +902,9 @@ export default function UbgtCalcPage({ mode, title }: Props) {
         displayBrutForNet,
         effectiveNet,
         hakkaniyet,
+        settleNum,
+        sonBrutAlacak,
+        equityNet,
       });
     }
     return buildBilirkisiUbgtPreviewSections({
@@ -903,6 +915,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
       effectiveNet,
       hakkaniyet,
       settleNum,
+      sonBrutAlacak,
+      equityNet,
     });
   }, [
     result,
@@ -912,6 +926,8 @@ export default function UbgtCalcPage({ mode, title }: Props) {
     effectiveNet,
     hakkaniyet,
     settleNum,
+    sonBrutAlacak,
+    equityNet,
     mode,
     form,
   ]);
@@ -1741,35 +1757,39 @@ export default function UbgtCalcPage({ mode, title }: Props) {
                     </Button>
                   </div>
                 </label>
-                {showMahsupResultCard ? (
-                  <>
-                    <div className={`${styles.line} ${styles.netLine}`}>
-                      <span>{mode === "bilirkisi" ? "Mahsuplaşma sonucu" : "Mahsuplaşma Sonucu"}</span>
-                      <FlashValue value={`${formatMoney(mahsupSonucu)} ₺`} />
-                    </div>
-                    <p className={styles.helper}>
-                      {mode === "bilirkisi"
-                        ? "Brüt − hakkaniyet − mahsup (min 0)"
-                        : "Net − hakkaniyet (mahsup rapor sonucuna dahil edilmez)"}
-                    </p>
-                  </>
-                ) : null}
+                <div className={styles.line}>
+                  <span>Mahsuplaşma Tutarı</span>
+                  <span className={styles.deduction}>-{formatMoney(Number.isFinite(settleNum) ? settleNum : 0)}₺</span>
+                </div>
+                <div className={`${styles.line} ${styles.netLine}`}>
+                  <span>Son Brüt Alacak</span>
+                  <FlashValue value={`${formatMoney(sonBrutAlacak)}₺`} />
+                </div>
+                <p className={styles.helper}>Brüt − hakkaniyet − mahsup (min 0)</p>
+                <EquityNetLines
+                  kesinti={equityNet}
+                  formatMoney={formatMoney}
+                  lineClass={styles.line}
+                  deductClass={styles.deduction}
+                  netClass={styles.netLine}
+                  sgkLabel="SGK primi (%14)"
+                  issizlikLabel="İşsizlik primi (%1)"
+                  damgaLabel="Damga vergisi (binde 7,59)"
+                  gelirPrefix="Gelir vergisi"
+                  renderNet={(text) => <FlashValue value={text} />}
+                />
               </div>
             </article>
 
-            {showMahsupResultCard ? (
-              <div className={styles.finalNetCard} style={{ animationDelay: "300ms" }}>
-                <p className={styles.finalNetLabel}>
-                  {mode === "bilirkisi" ? "Mahsuplaşma sonucu" : "Mahsuplaşma Sonucu"}
-                </p>
-                <p className={styles.finalNetValue}>
-                  <FlashValue value={`${formatMoney(mahsupSonucu)} ₺`} />
-                </p>
-                <p className={styles.helper}>
-                  {mode === "bilirkisi" ? "Toplam UBGT günü" : "Toplam UBGT Günü"}: {displayTotalDays}
-                </p>
-              </div>
-            ) : null}
+            <div className={styles.finalNetCard} style={{ animationDelay: "300ms" }}>
+              <p className={styles.finalNetLabel}>Hakkaniyet İndirimi ve Mahsuplaşma Sonrası Net Alacak</p>
+              <p className={styles.finalNetValue}>
+                <FlashValue value={`${formatMoney(equityNet.net)} ₺`} />
+              </p>
+              <p className={styles.helper}>
+                {mode === "bilirkisi" ? "Toplam UBGT günü" : "Toplam UBGT Günü"}: {displayTotalDays}
+              </p>
+            </div>
           </>
         ) : null}
 

@@ -76,6 +76,7 @@ import { formatIsoDateRangeTR, formatIsoDateTR } from "@/utils/dateDisplay";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./Vardiya48FmPage.module.css";
 
 const PAGE_TITLE = "48 Saat Çalışma Hesaplama";
@@ -227,6 +228,7 @@ export default function Vardiya48FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeVardiya48Result);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
 
   const displayRows = useMemo(
     () =>
@@ -569,7 +571,14 @@ export default function Vardiya48FmPage() {
           ...(result.mahsupTutari > 0
             ? [["Mahsuplaşma Miktarı", `-${formatMoney(result.mahsupTutari)}`]]
             : []),
-          ["Son Net Alacak", formatMoney(result.sonNet)],
+          ["Son Brüt Alacak", formatMoney(result.sonNet)],
+          ...equityNetPreviewRows({
+            format: formatMoney,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: "İşsizlik (%1)",
+            damgaLabel: "Damga Vergisi",
+          }),
         ],
       },
       ],
@@ -848,9 +857,8 @@ export default function Vardiya48FmPage() {
             <h3>Hakkaniyet indirimi / mahsuplaşma</h3>
           </header>
           <p className={styles.panelHint}>
-            Son net alacak, brüt fazla mesai üzerinden {hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi
-            ve (varsa) mahsuplaşma düşülerek
-            hesaplanır. Brütten nete bölümündeki vergi kesintileri ayrıdır.
+            {hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi ve (varsa) mahsuplaşma brütten düşülür. Kalan son
+            brüt, bu sayfanın brütten nete kesintileriyle nete çevrilir.
           </p>
           <div className={styles.totalsGrid}>
             <div>
@@ -887,9 +895,19 @@ export default function Vardiya48FmPage() {
               </div>
             </div>
             <div className={styles.totalsHighlight}>
-              <span>Son net alacak</span>
+              <span>Son Brüt Alacak</span>
               <FlashValue value={`${formatMoney(result.sonNet)} ₺`} className={styles.sonNet} />
             </div>
+            <EquityNetLines
+              kesinti={equityNet}
+              formatMoney={formatMoney}
+              lineClass=""
+              netClass={styles.totalsHighlight}
+              sgkLabel="SGK (%14)"
+              issizlikLabel="İşsizlik (%1)"
+              damgaLabel="Damga"
+              renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
+            />
           </div>
         </article>
 

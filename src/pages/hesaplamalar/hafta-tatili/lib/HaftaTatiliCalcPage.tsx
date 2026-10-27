@@ -28,6 +28,8 @@ import { useCalculationCaseBinding } from "@/hooks/useCalculationCaseBinding";
 import type { CalcSaveResult } from "../../shared/calcBackendCrud";
 import { hakkaniyetOraniEtiketi, type HakkaniyetOrani } from "../../fazla-mesai/shared/hakkaniyetOrani";
 import { HakkaniyetOraniSecimi } from "../../fazla-mesai/shared/HakkaniyetOraniSecimi";
+import { EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
+import { calculateNetFromBrut } from "./net";
 import HaftaTatiliExpiryBox from "./HaftaTatiliExpiryBox";
 import {
   createHaftaTatiliGuidedTour,
@@ -267,6 +269,17 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
 
   const dirty = config.snapshotKey(form) !== baseline;
   const result = useDeferredFormMemo(form, config.compute);
+  const equityNet = useMemo(() => {
+    const raw = calculateNetFromBrut(Math.max(0, result.mahsupSonuc), result.year);
+    return {
+      sgk: raw.ssk,
+      issizlik: raw.issizlik,
+      gelirVergisi: raw.gelirVergisi,
+      gelirVergisiDilimleri: raw.gelirVergisiDilimleri,
+      damgaVergisi: raw.damgaVergisi,
+      net: raw.netAmount,
+    };
+  }, [result.mahsupSonuc, result.year]);
   const manualBrutActive = useMemo(
     () => result.rows.some((r) => r.brutManual === true && r.wage > 0),
     [result.rows],
@@ -514,11 +527,19 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
         ["Net", `${formatMoney(result.net.netAmount)} ₺`],
         [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet`, `-${formatMoney(result.hakkaniyet)} ₺`],
         ["Mahsuplaşma Sonucu", `${formatMoney(result.mahsupSonuc)} ₺`],
+        ...equityNetPreviewRows({
+          format: (n) => `${formatMoney(n)} ₺`,
+          kesinti: equityNet,
+          sgkLabel: "SGK (%14)",
+          issizlikLabel: "İşsizlik (%1)",
+          damgaLabel: "Damga vergisi (‰7,59)",
+          gelirPrefix: "Gelir vergisi",
+        }),
       ],
       lastRowTone: "green",
     });
     return secs;
-  }, [form, result, config.showGeceCalisan, daily50Header, backend]);
+  }, [form, result, config.showGeceCalisan, daily50Header, backend, equityNet]);
 
   const defaultSaveGate = useCallback(
     (f: TForm, r: HaftaTatiliComputeResult): { ok: true } | { ok: false; message: string } => {
@@ -989,6 +1010,16 @@ export function HaftaTatiliCalcPage<TForm extends HaftaTatiliBaseForm>({ config 
                   <AnimatedMoney value={result.mahsupSonuc} /> ₺
                 </div>
               </div>
+              <EquityNetLines
+                kesinti={equityNet}
+                formatMoney={formatMoney}
+                lineClass={styles.line}
+                deductClass={styles.deduction}
+                sgkLabel="SGK (%14)"
+                issizlikLabel="İşsizlik (%1)"
+                damgaLabel="Damga vergisi (‰7,59)"
+                gelirPrefix="Gelir vergisi"
+              />
             </div>
           </section>
 

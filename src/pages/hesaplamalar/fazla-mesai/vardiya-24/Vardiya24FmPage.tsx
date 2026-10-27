@@ -75,6 +75,7 @@ import { NotlarAccordion } from "../standart/NotlarAccordion";
 import { hakkaniyetOraniEtiketi } from "../shared/hakkaniyetOrani";
 import { formatKatsayiForForm } from "../shared/katsayiForm";
 import { HakkaniyetOraniSecimi } from "../shared/HakkaniyetOraniSecimi";
+import { EMPTY_GROSS_NET, EquityNetLines, equityNetPreviewRows } from "../../shared/EquityNetLines";
 import styles from "./Vardiya24FmPage.module.css";
 
 const PAGE_TITLE = "24 Saat Çalışma Hesaplama";
@@ -231,6 +232,7 @@ export default function Vardiya24FmPage() {
   const isDirty = useMemo(() => snapshotKey(form) !== baseline, [form, baseline]);
   const dateError = useMemo(() => validateDateRange(form.iseGiris, form.istenCikis), [form.iseGiris, form.istenCikis]);
   const result = useDeferredFormMemo(form, computeVardiya24Result);
+  const equityNet = result.sonNetKesinti ?? EMPTY_GROSS_NET;
 
   const katSayiNum = parseKatsayi(form.katSayi);
   const hasCustomKatsayi = katSayiNum > 0 && katSayiNum !== 1;
@@ -618,7 +620,14 @@ export default function Vardiya24FmPage() {
           ["Toplam Fazla Mesai (Brüt)", money(result.toplamFm)],
           [`${hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} Hakkaniyet İndirimi`, `-${money(result.hakkaniyetIndirimi)}`],
           ...(result.mahsupTutari > 0 ? [["Mahsuplaşma Miktarı", `-${money(result.mahsupTutari)}`]] : []),
-          ["Son Net Alacak", money(result.sonNet)],
+          ["Son Brüt Alacak", money(result.sonNet)],
+          ...equityNetPreviewRows({
+            format: money,
+            kesinti: equityNet,
+            sgkLabel: "SGK (%14)",
+            issizlikLabel: "İşsizlik (%1)",
+            damgaLabel: "Damga Vergisi",
+          }),
         ],
         lastRowTone: "green",
       },
@@ -868,9 +877,8 @@ export default function Vardiya24FmPage() {
       <section className={`${styles.card} ${styles.hakkaniyetCard}`} style={{ animationDelay: "220ms" }}>
         <h2 className={styles.cardTitle}>Hakkaniyet indirimi / mahsuplaşma</h2>
         <p className={styles.panelHint}>
-          Son net alacak, brüt fazla mesai üzerinden {hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi ve
-          (varsa) mahsuplaşma düşülerek
-          hesaplanır. Brütten nete bölümündeki vergi kesintileri ayrıdır.
+          {hakkaniyetOraniEtiketi(form.hakkaniyetOrani)} hakkaniyet indirimi ve (varsa) mahsuplaşma brütten düşülür. Kalan son
+          brüt, bu sayfanın brütten nete kesintileriyle nete çevrilir.
         </p>
         <div className={styles.totalsList}>
           <div className={styles.totalRow}>
@@ -907,9 +915,20 @@ export default function Vardiya24FmPage() {
             </Button>
           </div>
           <div className={`${styles.totalRow} ${styles.netRow}`}>
-            <span>Son net alacak</span>
+            <span>Son Brüt Alacak</span>
             <FlashValue value={formatMoney(result.sonNet)} className={styles.sonNet} />
           </div>
+          <EquityNetLines
+            kesinti={equityNet}
+            formatMoney={formatMoney}
+            lineClass={styles.totalRow}
+            deductRowClass={styles.deduct}
+            netClass={styles.netRow}
+            sgkLabel="SGK (%14)"
+            issizlikLabel="İşsizlik (%1)"
+            damgaLabel="Damga"
+            renderNet={(text) => <FlashValue value={text} className={styles.sonNet} />}
+          />
         </div>
       </section>
 

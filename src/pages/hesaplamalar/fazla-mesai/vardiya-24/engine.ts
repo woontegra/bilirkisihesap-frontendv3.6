@@ -553,6 +553,30 @@ export function createManualPeriodRow(afterId: string, katsayi: number): PeriodR
   };
 }
 
+export type FmGrossNet = {
+  sgk: number;
+  issizlik: number;
+  gelirVergisi: number;
+  gelirVergisiDilimleri: string;
+  damgaVergisi: number;
+  net: number;
+};
+
+/** Toplam brüt ve Son Brüt Alacak için aynı brütten-nete formülü ve vergi yılı. */
+export function netFromGrossFm(brut: number, exitYear: number): FmGrossNet {
+  if (!(brut > 0)) {
+    return { sgk: 0, issizlik: 0, gelirVergisi: 0, gelirVergisiDilimleri: "", damgaVergisi: 0, net: 0 };
+  }
+  const sgk = Math.round(brut * SGK_ORANI * 100) / 100;
+  const issizlik = Math.round(brut * ISSIZLIK_ORANI * 100) / 100;
+  const matrah = Math.max(0, brut - sgk - issizlik);
+  const gv = calculateIncomeTaxWithBrackets(exitYear, matrah);
+  const gelirVergisi = Math.round(gv.tax * 100) / 100;
+  const damgaVergisi = Math.round(brut * DAMGA_ORAN * 100) / 100;
+  const net = Math.round((brut - sgk - issizlik - gelirVergisi - damgaVergisi) * 100) / 100;
+  return { sgk, issizlik, gelirVergisi, gelirVergisiDilimleri: gv.summary, damgaVergisi, net };
+}
+
 export function computeTotalsFromRows(
   rows: { fm: number }[],
   exitYear: number,
@@ -581,6 +605,7 @@ export function computeTotalsFromRows(
     hakkaniyetIndirimi,
     mahsupTutari,
     sonNet,
+    sonNetKesinti: netFromGrossFm(sonNet, exitYear),
   };
 }
 
