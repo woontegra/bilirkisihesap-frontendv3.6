@@ -3,10 +3,6 @@
  * dayanan sabit tablo. Dönemler ISO (YYYY-MM-DD) tarih aralıklarıyla
  * tanımlanır; bu biçimde string karşılaştırması doğrudan kronolojik sırayla
  * çalışır, ekstra tarih ayrıştırmasına gerek kalmaz.
- *
- * Not: 2011-07-01 → 2011-12-31 aralığı için ayrı bir dönem kaydı yoktur
- * (referans tabloda bilinçli olarak boş bırakılmıştır); bu aralığa denk gelen
- * çıkış tarihleri için tavan tutarı null döner.
  */
 
 export type KidemTavanPeriod = {
@@ -31,6 +27,7 @@ export const KIDEM_TAVAN_PERIODS: readonly KidemTavanPeriod[] = [
   { start: "2010-01-01", end: "2010-06-30", tavan: 2427.04 },
   { start: "2010-07-01", end: "2010-12-31", tavan: 2517.01 },
   { start: "2011-01-01", end: "2011-06-30", tavan: 2623.23 },
+  { start: "2011-07-01", end: "2011-12-31", tavan: 2731.85 },
   { start: "2012-01-01", end: "2012-06-30", tavan: 2917.27 },
   { start: "2012-07-01", end: "2012-12-31", tavan: 3033.98 },
   { start: "2013-01-01", end: "2013-06-30", tavan: 3129.25 },

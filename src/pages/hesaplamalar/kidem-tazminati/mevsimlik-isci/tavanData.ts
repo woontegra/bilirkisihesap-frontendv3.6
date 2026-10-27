@@ -29,6 +29,7 @@ export const MEVSIMLIK_KIDEM_TAVAN_DONEMLERI: TavanDonemi[] = [
   { start: "01.01.2010", end: "30.06.2010", tavan: 2427.04 },
   { start: "01.07.2010", end: "31.12.2010", tavan: 2517.01 },
   { start: "01.01.2011", end: "30.06.2011", tavan: 2623.23 },
+  { start: "01.07.2011", end: "31.12.2011", tavan: 2731.85 },
   { start: "01.01.2012", end: "30.06.2012", tavan: 2917.27 },
   { start: "01.07.2012", end: "31.12.2012", tavan: 3033.98 },
   { start: "01.01.2013", end: "30.06.2013", tavan: 3129.25 },
