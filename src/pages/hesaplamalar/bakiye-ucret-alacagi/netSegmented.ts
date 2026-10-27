@@ -51,14 +51,15 @@ const incomeTaxRates: Record<number, Bracket[]> = {
     { limit: 330000, rate: 0.2, baseTax: 23700, baseLimit: 158000 },
     { limit: 1200000, rate: 0.27, baseTax: 58100, baseLimit: 330000 },
     { limit: 4300000, rate: 0.35, baseTax: 293000, baseLimit: 1200000 },
-    { limit: null, rate: 0.4, baseTax: 1410000, baseLimit: 4300000 },
+    { limit: null, rate: 0.4, baseTax: 1378000, baseLimit: 4300000 },
   ],
+  // 2026: GİB 332 Seri No.lu GVK Genel Tebliği ücret tarifesi.
   2026: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
 };
 

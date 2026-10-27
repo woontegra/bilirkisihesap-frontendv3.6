@@ -12,47 +12,49 @@ export type IncomeTaxBracket = {
 };
 
 export const INCOME_TAX_BRACKETS: Record<number, IncomeTaxBracket[]> = {
+  // 2027–2030: resmî tarife yayımlanmadı; tahmin kullanılmaz, 2026 resmî ücret tarifesi uygulanır.
   2030: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
   2029: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
   2028: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
   2027: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
+  // 2026: GİB 332 Seri No.lu GVK Genel Tebliği ücret tarifesi.
   2026: [
-    { limit: 198274, rate: 0.15, baseTax: 0, baseLimit: 0 },
-    { limit: 414117, rate: 0.2, baseTax: 29741, baseLimit: 198274 },
-    { limit: 1505880, rate: 0.27, baseTax: 71909, baseLimit: 414117 },
-    { limit: 5396070, rate: 0.35, baseTax: 366685, baseLimit: 1505880 },
-    { limit: null, rate: 0.4, baseTax: 1731252, baseLimit: 5396070 },
+    { limit: 190000, rate: 0.15, baseTax: 0, baseLimit: 0 },
+    { limit: 400000, rate: 0.2, baseTax: 28500, baseLimit: 190000 },
+    { limit: 1500000, rate: 0.27, baseTax: 70500, baseLimit: 400000 },
+    { limit: 5300000, rate: 0.35, baseTax: 367500, baseLimit: 1500000 },
+    { limit: null, rate: 0.4, baseTax: 1697500, baseLimit: 5300000 },
   ],
   2025: [
     { limit: 158000, rate: 0.15, baseTax: 0, baseLimit: 0 },
     { limit: 330000, rate: 0.2, baseTax: 23700, baseLimit: 158000 },
     { limit: 1200000, rate: 0.27, baseTax: 58100, baseLimit: 330000 },
     { limit: 4300000, rate: 0.35, baseTax: 293000, baseLimit: 1200000 },
-    { limit: null, rate: 0.4, baseTax: 1410000, baseLimit: 4300000 },
+    { limit: null, rate: 0.4, baseTax: 1378000, baseLimit: 4300000 },
   ],
   2024: [
     { limit: 110000, rate: 0.15, baseTax: 0, baseLimit: 0 },
@@ -64,8 +66,8 @@ export const INCOME_TAX_BRACKETS: Record<number, IncomeTaxBracket[]> = {
   2023: [
     { limit: 70000, rate: 0.15, baseTax: 0, baseLimit: 0 },
     { limit: 150000, rate: 0.2, baseTax: 10500, baseLimit: 70000 },
-    { limit: 370000, rate: 0.27, baseTax: 26500, baseLimit: 150000 },
-    { limit: 1900000, rate: 0.35, baseTax: 85900, baseLimit: 370000 },
+    { limit: 550000, rate: 0.27, baseTax: 26500, baseLimit: 150000 },
+    { limit: 1900000, rate: 0.35, baseTax: 134500, baseLimit: 550000 },
     { limit: null, rate: 0.4, baseTax: 607000, baseLimit: 1900000 },
   ],
   2022: [
@@ -85,8 +87,8 @@ export const INCOME_TAX_BRACKETS: Record<number, IncomeTaxBracket[]> = {
   2020: [
     { limit: 22000, rate: 0.15, baseTax: 0, baseLimit: 0 },
     { limit: 49000, rate: 0.2, baseTax: 3300, baseLimit: 22000 },
-    { limit: 120000, rate: 0.27, baseTax: 8700, baseLimit: 49000 },
-    { limit: 600000, rate: 0.35, baseTax: 27870, baseLimit: 120000 },
+    { limit: 180000, rate: 0.27, baseTax: 8700, baseLimit: 49000 },
+    { limit: 600000, rate: 0.35, baseTax: 44070, baseLimit: 180000 },
     { limit: null, rate: 0.4, baseTax: 191070, baseLimit: 600000 },
   ],
   2019: [
